@@ -1,0 +1,4 @@
+[submodule "august21-event/godot-cpp"]
+	path = august21-event/godot-cpp
+	url = https://github.com/godotengine/godot-cpp
+	branch = 4.2

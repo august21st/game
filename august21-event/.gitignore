@@ -1,0 +1,54 @@
+# Godot project specific ignores
+.godot/
+*.kra~
+*blend1
+project/export/*
+
+# Ignore library files in project but not the gdextension file
+project/bin/*
+!project/bin/android
+project/bin/android/*
+!project/bin/android/.gitkeep
+!project/bin/linux
+project/bin/linux/*
+!project/bin/linux/.gitkeep
+!project/bin/macos
+project/bin/macos/*
+!project/bin/macos/.gitkeep
+!project/bin/windows
+project/bin/windows/*
+!project/bin/windows/.gitkeep
+!project/bin/*.gdextension
+.sconsign*.dblite
+
+# Ignore custom.py
+custom.py
+
+# Ignore generated compile_commands.json
+compile_commands.json
+
+# Binaries
+*.o
+*.os
+*.so
+*.obj
+*.bc
+*.pyc
+*.dblite
+*.pdb
+*.lib
+*.config
+*.creator
+*.creator.user
+*.files
+*.includes
+*.idb
+*.exp
+
+# Other stuff
+*.log
+
+# VSCode
+.vscode/*
+!.vscode/extensions.json
+.DS_Store

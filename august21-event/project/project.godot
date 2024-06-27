@@ -1,0 +1,28 @@
+; Engine configuration file.
+; It's best edited using the editor UI and not directly,
+; since the parameters that go here are not all obvious.
+;
+; Format:
+;   [section] ; section goes between []
+;   param=value ; assign values to parameters
+
+config_version=5
+
+[application]
+
+config/name="August21Event"
+run/main_scene="res://loading_screen.tscn"
+config/features=PackedStringArray("4.2", "GL Compatibility")
+boot_splash/bg_color=Color(0, 0, 0, 1)
+boot_splash/show_image=false
+config/icon="res://assets/rplace_gold.svg"
+
+[dotnet]
+
+project/assembly_name="August21Event"
+
+[rendering]
+
+renderer/rendering_method="gl_compatibility"
+renderer/rendering_method.mobile="gl_compatibility"
+textures/vram_compression/import_etc2_astc=true

@@ -1,0 +1,19 @@
+{
+    "configurations": [
+        {
+            "name": "Linux",
+            "includePath": [
+                "/usr/include",
+                "${workspaceFolder}/august21-event/godot-cpp/gen/include",
+                "${workspaceFolder}/august21-event/godot-cpp/gdextension",
+                "${workspaceFolder}/august21-event/godot-cpp/include"
+            ],
+            "defines": [],
+            "compilerPath": "/usr/bin/gcc",
+            "cStandard": "c11",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "linux-gcc-x64"
+        }
+    ],
+    "version": 4
+}

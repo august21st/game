@@ -1,0 +1,47 @@
+[gd_scene load_steps=7 format=3 uid="uid://c2xy8asjsovia"]
+
+[ext_resource type="PackedScene" uid="uid://ca7n3vrq5gy37" path="res://assets/rplace_logo.glb" id="1_mjyb7"]
+[ext_resource type="Animation" uid="uid://be7cw5f7uji4t" path="res://intro.anim" id="2_17fm8"]
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_whumy"]
+
+[sub_resource type="Sky" id="Sky_83hny"]
+sky_material = SubResource("ProceduralSkyMaterial_whumy")
+
+[sub_resource type="Environment" id="Environment_cqgab"]
+background_mode = 2
+sky = SubResource("Sky_83hny")
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_hmlhu"]
+_data = {
+"intro": ExtResource("2_17fm8")
+}
+
+[node name="Intro" type="Node3D"]
+
+[node name="CSGBox3D" type="CSGBox3D" parent="."]
+transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 0, 0, 0)
+size = Vector3(512, 0.1, 512)
+
+[node name="CSGBox3D2" type="CSGBox3D" parent="."]
+transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 0, 90, 0)
+size = Vector3(90, 180, 90)
+
+[node name="RplaceLogo" parent="." instance=ExtResource("1_mjyb7")]
+transform = Transform3D(3, 0, 0, 0, -1.31134e-07, 3, 0, -3, -1.31134e-07, 0, 140, 45)
+
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(0.642788, -0.492404, -0.586824, 1.49012e-08, 0.766044, -0.642788, 0.766044, 0.413176, 0.492404, -50, 70, 66)
+current = true
+fov = 50.0
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_cqgab")
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
+libraries = {
+"": SubResource("AnimationLibrary_hmlhu")
+}
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(1, 1.74846e-07, 0, -8.74228e-08, 0.5, 0.866025, 1.51421e-07, -0.866025, 0.5, 0, 198, 0)
