@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg viewBox="0 0 64 64" width="64px" height="64px" xmlns="http://www.w3.org/2000/svg" xmlns:bx="https://boxy-svg.com">
+  <defs>
+    <bx:grid x="0" y="0" width="1" height="1"/>
+  </defs>
+  <ellipse style="stroke-width: 4px; paint-order: fill; fill: rgb(255, 255, 255); stroke: rgb(205, 205, 205);" cx="32" cy="32" rx="30" ry="30"/>
+</svg>

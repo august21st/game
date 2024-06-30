@@ -1,0 +1,140 @@
+[gd_scene load_steps=9 format=3 uid="uid://dh3f0fyoo6ibo"]
+
+[ext_resource type="Material" uid="uid://dljrrbxeltcq1" path="res://assets/prototype/protype_material_template.tres" id="1_cipye"]
+[ext_resource type="Texture2D" uid="uid://cfs32uakg8los" path="res://assets/cursor.svg" id="2_2ljoc"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_gql42"]
+size = Vector3(64, 140, 64)
+
+[sub_resource type="WorldBoundaryShape3D" id="WorldBoundaryShape3D_jfeql"]
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_qt5gi"]
+
+[sub_resource type="Sky" id="Sky_kh0wj"]
+sky_material = SubResource("ProceduralSkyMaterial_qt5gi")
+
+[sub_resource type="Environment" id="Environment_qa8cm"]
+background_mode = 2
+sky = SubResource("Sky_kh0wj")
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_qw2ey"]
+
+[node name="Roof" type="Node3D"]
+metadata/_edit_vertical_guides_ = [416.0]
+
+[node name="Gui" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="CursorTexture" type="TextureRect" parent="Gui"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.493
+anchor_top = 0.488
+anchor_right = 0.507
+anchor_bottom = 0.512
+offset_left = 0.0639648
+offset_top = -0.22403
+offset_right = -0.0640259
+offset_bottom = 0.223999
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("2_2ljoc")
+expand_mode = 1
+
+[node name="GrabButton" type="Button" parent="Gui"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.41
+anchor_top = 0.926
+anchor_right = 0.59
+anchor_bottom = 1.0
+offset_left = -0.320038
+offset_top = -0.0480347
+offset_right = 0.319946
+grow_horizontal = 2
+grow_vertical = 0
+text = "Grab"
+
+[node name="Panel" type="Panel" parent="Gui"]
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 0.704
+anchor_right = 0.167
+anchor_bottom = 1.0
+offset_top = -0.192047
+offset_right = -0.384018
+grow_vertical = 0
+
+[node name="Button" type="Button" parent="Gui/Panel"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.375
+anchor_top = 0.375
+anchor_right = 0.625
+anchor_bottom = 0.625
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Building" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -70, 0)
+size = Vector3(64, 140, 64)
+material = ExtResource("1_cipye")
+
+[node name="StaticBody3D" type="StaticBody3D" parent="Building"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Building/StaticBody3D"]
+shape = SubResource("BoxShape3D_gql42")
+
+[node name="Border" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 31.5, 0.5, 0)
+size = Vector3(1, 1, 64)
+material = ExtResource("1_cipye")
+
+[node name="Border2" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -31.5, 0.5, 0)
+size = Vector3(1, 1, 64)
+material = ExtResource("1_cipye")
+
+[node name="Border3" type="CSGBox3D" parent="."]
+transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 0, 0.5, -31.5)
+size = Vector3(1, 1, 64)
+material = ExtResource("1_cipye")
+
+[node name="Border4" type="CSGBox3D" parent="."]
+transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 0, 0.5, 31.5)
+size = Vector3(1, 1, 64)
+material = ExtResource("1_cipye")
+
+[node name="StaticBody3D" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -140, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D"]
+shape = SubResource("WorldBoundaryShape3D_jfeql")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_qa8cm")
+
+[node name="PlayerBody" type="PlayerBody" parent="."]
+_import_path = NodePath("")
+unique_name_in_owner = false
+process_mode = 0
+process_priority = 0
+process_physics_priority = 0
+process_thread_group = 0
+editor_description = ""
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+script = null
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="PlayerBody"]
+shape = SubResource("CapsuleShape3D_qw2ey")
+
+[node name="Camera3D" type="Camera3D" parent="PlayerBody"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6, 0)
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.258819, 0.965926, 0, -0.965926, 0.258819, 0, 10, 0)

@@ -4,6 +4,7 @@
         "-I/usr/include",
         "-I${workspaceFolder}/august21-event/godot-cpp/gen/include",
         "-I${workspaceFolder}/august21-event/godot-cpp/gdextension",
-        "-I${workspaceFolder}/august21-event/godot-cpp/include"
+        "-I${workspaceFolder}/august21-event/godot-cpp/include", 
+        "-I${workspaceFolder}/august21-event/dataproto-cpp/include"
     ]
 }

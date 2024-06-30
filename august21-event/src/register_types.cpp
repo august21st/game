@@ -1,10 +1,12 @@
-#include "register_types.h"
 #include <gdextension_interface.h>
 #include <godot_cpp/core/class_db.hpp>
 #include <godot_cpp/core/defs.hpp>
 #include <godot_cpp/godot.hpp>
 
-#include "loading_screen.h"
+#include "register_types.hpp"
+#include "loading_screen.hpp"
+#include "player_body.hpp"
+#include "intro.hpp"
 
 using namespace godot;
 
@@ -14,6 +16,8 @@ void initialize_gdextension_types(ModuleInitializationLevel p_level)
 		return;
 	}
 	GDREGISTER_CLASS(LoadingScreen);
+	GDREGISTER_CLASS(PlayerBody);
+	GDREGISTER_CLASS(Intro);
 }
 
 void uninitialize_gdextension_types(ModuleInitializationLevel p_level)

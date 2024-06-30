@@ -18,6 +18,8 @@ project/bin/macos/*
 !project/bin/windows
 project/bin/windows/*
 !project/bin/windows/.gitkeep
+project/bin/web/*
+!project/bin/web/.gitkeep
 !project/bin/*.gdextension
 .sconsign*.dblite
 

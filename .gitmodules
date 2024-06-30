@@ -2,3 +2,6 @@
 	path = august21-event/godot-cpp
 	url = https://github.com/godotengine/godot-cpp
 	branch = 4.2
+[submodule "august21-event/dataproto-cpp"]
+	path = august21-event/dataproto-cpp
+	url = https://github.com/Zekiah-A/dataproto-cpp.git

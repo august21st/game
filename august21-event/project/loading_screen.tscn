@@ -35,9 +35,17 @@ transparency = 1
 shading_mode = 0
 albedo_color = Color(0, 0, 0, 1)
 
-[node name="LoadingScreen" type="Node3D"]
+[node name="LoadingScreen" type="LoadingScreen"]
+_import_path = NodePath("")
+unique_name_in_owner = false
+process_mode = 0
+process_priority = 0
+process_physics_priority = 0
+process_thread_group = 0
+editor_description = ""
+script = null
 
-[node name="LoadingScreen" type="Control" parent="."]
+[node name="Gui" type="Control" parent="."]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -45,7 +53,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="TextureRect" type="TextureRect" parent="LoadingScreen"]
+[node name="LogoRect" type="TextureRect" parent="Gui"]
 material = SubResource("ShaderMaterial_3f3t6")
 layout_mode = 1
 anchors_preset = 8
@@ -61,7 +69,7 @@ grow_horizontal = 2
 grow_vertical = 2
 texture = ExtResource("2_bqd13")
 
-[node name="Label2" type="Label" parent="LoadingScreen"]
+[node name="DescriptionLabel" type="Label" parent="Gui"]
 layout_mode = 1
 anchors_preset = -1
 anchor_left = 0.333333
@@ -80,7 +88,33 @@ horizontal_alignment = 1
 vertical_alignment = 1
 metadata/_edit_use_anchors_ = true
 
-[node name="Label3" type="Label" parent="LoadingScreen"]
+[node name="PlayerCountLabel" type="Label" parent="Gui"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.826
+anchor_top = 0.951
+anchor_right = 0.993
+anchor_bottom = 0.988
+offset_left = 0.447937
+offset_top = -0.248047
+offset_right = 0.0639648
+offset_bottom = -0.223999
+grow_horizontal = 0
+grow_vertical = 0
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/shadow_offset_x = 0
+theme_override_constants/shadow_offset_y = 2
+theme_override_constants/outline_size = 2
+theme_override_fonts/font = ExtResource("3_bi7p0")
+theme_override_font_sizes/font_size = 16
+text = "Players waiting: 0"
+horizontal_alignment = 2
+vertical_alignment = 1
+text_overrun_behavior = 3
+
+[node name="StatusLabel" type="Label" parent="Gui"]
 layout_mode = 1
 anchors_preset = -1
 anchor_left = 0.333333
@@ -101,7 +135,7 @@ horizontal_alignment = 1
 vertical_alignment = 1
 metadata/_edit_use_anchors_ = true
 
-[node name="TextureRect2" type="TextureRect" parent="LoadingScreen"]
+[node name="TitleRect" type="TextureRect" parent="Gui"]
 layout_mode = 1
 anchors_preset = -1
 anchor_left = 0.278646
@@ -113,10 +147,10 @@ expand_mode = 1
 stretch_mode = 5
 metadata/_edit_use_anchors_ = true
 
-[node name="tube" parent="." instance=ExtResource("5_uxkte")]
+[node name="Tube" parent="." instance=ExtResource("5_uxkte")]
 transform = Transform3D(6, 0, 0, 0, 6, 0, 0, 0, 6, 0, 0, 0)
 
-[node name="Cylinder" parent="tube" index="0"]
+[node name="Cylinder" parent="Tube" index="0"]
 material_override = SubResource("ShaderMaterial_stf5h")
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
@@ -131,4 +165,4 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.01964, 9.53674e-07, -44.494
 size = Vector3(13, 13, 8)
 material = SubResource("StandardMaterial3D_enspf")
 
-[editable path="tube"]
+[editable path="Tube"]

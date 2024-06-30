@@ -1,20 +1,14 @@
 {
-    // Use IntelliSense to learn about possible attributes.
-    // Hover to view descriptions of existing attributes.
-    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
         {
             "name": "Launch Project",
-            "type": "lldb",
+            "type": "lldbg",
             "request": "launch",
-            // Change to godot.linuxbsd.editor.dev.x86_64.llvm for llvm-based builds.
-            "program": "${workspaceFolder}/bin/godot.linuxbsd.editor.dev.x86_64",
-            // Change the arguments below for the project you want to test with.
-            // To run the project instead of editing it, remove the "--editor" argument.
-            "args": [ "--editor", "--path", "${workspaceFolder}/august21-event/godot" ],
+            "program": "godot",
+            "args": [ "--editor", "--path", "${workspaceFolder}/august21-event/project/" ],
             "stopAtEntry": false,
-            "cwd": "${workspaceFolder}",
+            "cwd": "${workspaceFolder}/august21-event",
             "environment": [],
             "externalConsole": false,
             "preLaunchTask": "build"
