@@ -6,6 +6,8 @@
 #include <godot_cpp/classes/character_body3d.hpp>
 #include <godot_cpp/classes/project_settings.hpp>
 #include <godot_cpp/classes/camera3d.hpp>
+#include <godot_cpp/classes/control.hpp>
+#include <godot_cpp/classes/button.hpp>
 
 using namespace godot;
 
@@ -14,11 +16,15 @@ class PlayerBody : public CharacterBody3D {
 
 private:
 	Engine* _engine;
-	Input* _player_input;
 	ProjectSettings* _project_settings;
+	Input* _player_input;
 	float _gravity;
-	Camera3D* _camera;
 	Vector3 _velocity;
+	Camera3D* _camera;
+	Control* _death_panel;
+	Button* _grab_button;
+	Button* _revive_button;
+	Button* _thumbstick_button;
 
 protected:
 	static void _bind_methods();

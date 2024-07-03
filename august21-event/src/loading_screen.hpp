@@ -11,7 +11,6 @@ class LoadingScreen : public Node3D {
 
 protected:
 	Engine* _engine;
-	Ref<WebSocketPeer> _socket;
 	Label* _players_label;
 	static void _bind_methods();
 

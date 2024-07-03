@@ -7,6 +7,7 @@
 #include "loading_screen.hpp"
 #include "player_body.hpp"
 #include "intro.hpp"
+#include "roof.hpp"
 
 using namespace godot;
 
@@ -18,6 +19,7 @@ void initialize_gdextension_types(ModuleInitializationLevel p_level)
 	GDREGISTER_CLASS(LoadingScreen);
 	GDREGISTER_CLASS(PlayerBody);
 	GDREGISTER_CLASS(Intro);
+	GDREGISTER_CLASS(Roof);
 }
 
 void uninitialize_gdextension_types(ModuleInitializationLevel p_level)

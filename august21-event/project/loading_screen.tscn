@@ -36,14 +36,6 @@ shading_mode = 0
 albedo_color = Color(0, 0, 0, 1)
 
 [node name="LoadingScreen" type="LoadingScreen"]
-_import_path = NodePath("")
-unique_name_in_owner = false
-process_mode = 0
-process_priority = 0
-process_physics_priority = 0
-process_thread_group = 0
-editor_description = ""
-script = null
 
 [node name="Gui" type="Control" parent="."]
 layout_mode = 3

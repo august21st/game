@@ -1,84 +1,85 @@
-[gd_scene load_steps=9 format=3 uid="uid://dh3f0fyoo6ibo"]
+[gd_scene load_steps=24 format=3 uid="uid://dh3f0fyoo6ibo"]
 
 [ext_resource type="Material" uid="uid://dljrrbxeltcq1" path="res://assets/prototype/protype_material_template.tres" id="1_cipye"]
 [ext_resource type="Texture2D" uid="uid://cfs32uakg8los" path="res://assets/cursor.svg" id="2_2ljoc"]
+[ext_resource type="Texture2D" uid="uid://tpgj7natv128" path="res://assets/skybox/roof_sky.png" id="3_oboqe"]
+[ext_resource type="PackedScene" uid="uid://ca7n3vrq5gy37" path="res://assets/rplace_logo.glb" id="4_o0vqv"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_gql42"]
 size = Vector3(64, 140, 64)
 
 [sub_resource type="WorldBoundaryShape3D" id="WorldBoundaryShape3D_jfeql"]
 
-[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_qt5gi"]
+[sub_resource type="PanoramaSkyMaterial" id="PanoramaSkyMaterial_71yl5"]
+panorama = ExtResource("3_oboqe")
 
-[sub_resource type="Sky" id="Sky_kh0wj"]
-sky_material = SubResource("ProceduralSkyMaterial_qt5gi")
+[sub_resource type="Sky" id="Sky_ttrnk"]
+sky_material = SubResource("PanoramaSkyMaterial_71yl5")
 
 [sub_resource type="Environment" id="Environment_qa8cm"]
 background_mode = 2
-sky = SubResource("Sky_kh0wj")
+sky = SubResource("Sky_ttrnk")
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_qw2ey"]
 
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_djae4"]
+transparency = 1
+albedo_color = Color(0.176419, 0.176419, 0.176419, 0.45098)
+
+[sub_resource type="Gradient" id="Gradient_qg6dp"]
+
+[sub_resource type="GradientTexture1D" id="GradientTexture1D_tu3lb"]
+gradient = SubResource("Gradient_qg6dp")
+
+[sub_resource type="Curve" id="Curve_4p056"]
+_data = [Vector2(0.278388, 0.765414), 0.0, 0.0, 0, 0, Vector2(0.542125, 0.110526), 0.0, 0.0, 0, 0, Vector2(0.769231, 0.91203), 0.0, 0.0, 0, 0]
+point_count = 3
+
+[sub_resource type="Curve" id="Curve_ysg6o"]
+_data = [Vector2(0.128205, 1), 0.0, 0.0, 0, 0, Vector2(0.227106, 0.169173), 0.0, 0.0, 0, 0, Vector2(0.424908, 1), 0.0, 0.0, 0, 0, Vector2(0.725275, 0.501504), 0.0, 0.0, 0, 0, Vector2(0.941392, 0.677444), 0.0, 0.0, 0, 0]
+point_count = 5
+
+[sub_resource type="Curve" id="Curve_cvkcr"]
+_data = [Vector2(0.0805861, 0.354887), 0.0, 0.0, 0, 0, Vector2(0.355311, 0.970677), 0.0, 0.0, 0, 0, Vector2(0.446886, 0.863158), -2.28722, -2.28722, 0, 0, Vector2(0.527473, 0.393985), 0.0, 0.0, 0, 0, Vector2(0.846154, 0.403759), 0.0, 0.0, 0, 0, Vector2(0.934066, 1), 0.0, 0.0, 0, 0]
+point_count = 6
+
+[sub_resource type="CurveXYZTexture" id="CurveXYZTexture_dyfwm"]
+curve_x = SubResource("Curve_4p056")
+curve_y = SubResource("Curve_ysg6o")
+curve_z = SubResource("Curve_cvkcr")
+
+[sub_resource type="Curve" id="Curve_2545m"]
+_data = [Vector2(0, 1), 0.0, 0.0, 0, 0, Vector2(0.754579, 1), 0.0, 0.0, 0, 0, Vector2(1, 0), 0.0, 0.0, 0, 0]
+point_count = 3
+
+[sub_resource type="CurveTexture" id="CurveTexture_rwx25"]
+curve = SubResource("Curve_2545m")
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_13gme"]
+emission_shape_offset = Vector3(0, -16, 0)
+emission_shape = 3
+emission_box_extents = Vector3(64, 2, 64)
+directional_velocity_min = 5.0
+directional_velocity_max = 10.0
+directional_velocity_curve = SubResource("CurveXYZTexture_dyfwm")
+gravity = Vector3(0, 1, 0)
+scale_curve = SubResource("CurveTexture_rwx25")
+color_ramp = SubResource("GradientTexture1D_tu3lb")
+hue_variation_max = 0.5
+turbulence_enabled = true
+turbulence_noise_strength = 0.1
+turbulence_noise_scale = 2.0
+
+[sub_resource type="SphereMesh" id="SphereMesh_8nvlb"]
+radial_segments = 4
+rings = 2
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_6t5lx"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_2ltgs"]
+
 [node name="Roof" type="Node3D"]
 metadata/_edit_vertical_guides_ = [416.0]
-
-[node name="Gui" type="Control" parent="."]
-layout_mode = 3
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-
-[node name="CursorTexture" type="TextureRect" parent="Gui"]
-layout_mode = 1
-anchors_preset = -1
-anchor_left = 0.493
-anchor_top = 0.488
-anchor_right = 0.507
-anchor_bottom = 0.512
-offset_left = 0.0639648
-offset_top = -0.22403
-offset_right = -0.0640259
-offset_bottom = 0.223999
-grow_horizontal = 2
-grow_vertical = 2
-texture = ExtResource("2_2ljoc")
-expand_mode = 1
-
-[node name="GrabButton" type="Button" parent="Gui"]
-layout_mode = 1
-anchors_preset = -1
-anchor_left = 0.41
-anchor_top = 0.926
-anchor_right = 0.59
-anchor_bottom = 1.0
-offset_left = -0.320038
-offset_top = -0.0480347
-offset_right = 0.319946
-grow_horizontal = 2
-grow_vertical = 0
-text = "Grab"
-
-[node name="Panel" type="Panel" parent="Gui"]
-layout_mode = 1
-anchors_preset = -1
-anchor_top = 0.704
-anchor_right = 0.167
-anchor_bottom = 1.0
-offset_top = -0.192047
-offset_right = -0.384018
-grow_vertical = 0
-
-[node name="Button" type="Button" parent="Gui/Panel"]
-layout_mode = 1
-anchors_preset = -1
-anchor_left = 0.375
-anchor_top = 0.375
-anchor_right = 0.625
-anchor_bottom = 0.625
-grow_horizontal = 2
-grow_vertical = 2
 
 [node name="Building" type="CSGBox3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -70, 0)
@@ -110,31 +111,150 @@ transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 0, 0.5
 size = Vector3(1, 1, 64)
 material = ExtResource("1_cipye")
 
-[node name="StaticBody3D" type="StaticBody3D" parent="."]
+[node name="FloorBody" type="StaticBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -140, 0)
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D"]
+[node name="FloorCollisionShape" type="CollisionShape3D" parent="FloorBody"]
 shape = SubResource("WorldBoundaryShape3D_jfeql")
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource("Environment_qa8cm")
 
 [node name="PlayerBody" type="PlayerBody" parent="."]
-_import_path = NodePath("")
-unique_name_in_owner = false
-process_mode = 0
-process_priority = 0
-process_physics_priority = 0
-process_thread_group = 0
-editor_description = ""
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
-script = null
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="PlayerBody"]
 shape = SubResource("CapsuleShape3D_qw2ey")
 
-[node name="Camera3D" type="Camera3D" parent="PlayerBody"]
+[node name="PlayerCamera" type="Camera3D" parent="PlayerBody"]
+unique_name_in_owner = true
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6, 0)
 
+[node name="PlayerGui" type="Control" parent="PlayerBody"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="CursorTexture" type="TextureRect" parent="PlayerBody/PlayerGui"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.493
+anchor_top = 0.488
+anchor_right = 0.507
+anchor_bottom = 0.512
+offset_left = 0.0639648
+offset_top = -0.22403
+offset_right = -0.0640259
+offset_bottom = 0.223999
+grow_horizontal = 2
+grow_vertical = 2
+scale = Vector2(0.4, 0.4)
+pivot_offset = Vector2(8, 8)
+texture = ExtResource("2_2ljoc")
+expand_mode = 1
+
+[node name="GrabButton" type="Button" parent="PlayerBody/PlayerGui"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.41
+anchor_top = 0.926
+anchor_right = 0.59
+anchor_bottom = 1.0
+offset_left = -0.320038
+offset_top = -0.0480347
+offset_right = 0.319946
+grow_horizontal = 2
+grow_vertical = 0
+text = "Grab"
+
+[node name="ThumbstickPanel" type="Panel" parent="PlayerBody/PlayerGui"]
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 0.704
+anchor_right = 0.167
+anchor_bottom = 1.0
+offset_top = -0.192047
+offset_right = -0.384018
+grow_vertical = 0
+
+[node name="ThumbstickButton" type="Button" parent="PlayerBody/PlayerGui/ThumbstickPanel"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.375
+anchor_top = 0.375
+anchor_right = 0.625
+anchor_bottom = 0.625
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="DeathPanel" type="ColorRect" parent="PlayerBody/PlayerGui"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 1)
+
+[node name="DeathMessageLabel" type="Label" parent="PlayerBody/PlayerGui/DeathPanel"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -88.5
+offset_top = -11.5
+offset_right = 88.5
+offset_bottom = 11.5
+grow_horizontal = 2
+grow_vertical = 2
+text = "Death is not an option."
+
+[node name="ReviveButton" type="Button" parent="PlayerBody/PlayerGui/DeathPanel"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -192.0
+offset_top = 124.0
+offset_right = 192.0
+offset_bottom = 188.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "Revive"
+
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.258819, 0.965926, 0, -0.965926, 0.258819, 0, 10, 0)
+transform = Transform3D(0.984808, 0.167731, -0.0449435, 0, 0.258819, 0.965926, 0.173648, -0.951251, 0.254887, 0, 10, 0)
+
+[node name="RplaceLogo" parent="." instance=ExtResource("4_o0vqv")]
+transform = Transform3D(2, 0, 0, 0, -8.74228e-08, 2, 0, -2, -8.74228e-08, 0, -22, 32)
+
+[node name="RoofSmokeParticles" type="GPUParticles3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 12, 0)
+material_override = SubResource("StandardMaterial3D_djae4")
+cast_shadow = 0
+gi_mode = 0
+amount = 128
+lifetime = 10.0
+randomness = 0.3
+collision_base_size = 0.0
+visibility_aabb = AABB(-32, -12, -32, 64, 24, 64)
+process_material = SubResource("ParticleProcessMaterial_13gme")
+draw_pass_1 = SubResource("SphereMesh_8nvlb")
+
+[node name="CanvasMesh" type="CSGMesh3D" parent="."]
+transform = Transform3D(30, 0, 0, 0, 30, 0, 0, 0, 30, 0, 0.01, 0)
+mesh = SubResource("PlaneMesh_6t5lx")
+material = SubResource("ShaderMaterial_2ltgs")

@@ -31,7 +31,6 @@ const serverOptions:TLSWebSocketServeOptions<ClientData> = {
         async open(ws: ServerWebSocket<ClientData>) {
             ws.subscribe("all")
             wss.clients.add(ws)
-            console.log("aaa")
         },
         async message(ws:ServerWebSocket<ClientData>, data:string|Buffer) {
 

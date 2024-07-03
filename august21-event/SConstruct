@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import os
 import shutil
+from SCons.Script import *
 
 def normalize_path(val, env):
 	return val if os.path.isabs(val) else os.path.join(env.Dir("#").abspath, val)
@@ -52,7 +53,7 @@ opts.Update(localEnv)
 
 Help(opts.GenerateHelpText(localEnv))
 
-env = localEnv.Clone()
+env:Environment = localEnv.Clone()
 env["compiledb"] = False
 
 env.Tool("compilation_db")
@@ -62,7 +63,7 @@ compilation_db = env.CompilationDatabase(
 env.Alias("compiledb", compilation_db)
 
 env = SConscript("godot-cpp/SConstruct", {"env": env, "customs": customs})
-env, dataproto_library = SConscript("dataproto-cpp/SConstruct", {"env": env, "customs": customs})
+_, dataproto_library = SConscript("dataproto-cpp/SConstruct", {"env": env.Clone(), "customs": customs})
 source_dirs = find_directories("src/")
 env.Append(CPPPATH=source_dirs)
 dataproto_include_dirs = find_directories("#dataproto-cpp/include")
@@ -70,7 +71,8 @@ env.Append(CPPPATH=dataproto_include_dirs)
 
 # Dataproto
 dataproto_file = get_filename("dataproto", env)
-dataproto_installpath = "{}/bin/{}/lib{}".format(source_projectdir, env["platform"], dataproto_file)
+dataproto_installdir = "{}/bin/{}".format(source_projectdir, env["platform"])
+dataproto_installpath = "{}/lib{}".format(dataproto_installdir, dataproto_file)
 dataproto_copy = env.InstallAs(dataproto_installpath, dataproto_library)
 
 # Source
@@ -78,14 +80,16 @@ sources = []
 for source_dir in source_dirs:
 	sources.append(Glob(source_dir + "*.cpp"))
 
-all_sources = sources + [dataproto_library]
-
 source_file = get_filename(source_libname, env)
 # Build output from env.SharedLibrary to 'august21-event/bin/{platform}/...'
 source_libfile = "bin/{}/{}".format(env["platform"], source_file)
+
+env.Append(LIBS=[dataproto_file])
+env.Append(LIBPATH=[dataproto_installdir])
+
 source_library = env.SharedLibrary(
 	source_libfile,
-	source=all_sources,
+	source=sources
 )
 source_installpath = "{}/bin/{}/lib{}".format(source_projectdir, env["platform"], source_file)
 source_copy = env.InstallAs(source_installpath, source_library)

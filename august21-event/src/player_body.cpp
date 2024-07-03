@@ -5,9 +5,11 @@
 #include <godot_cpp/classes/input_event_mouse_button.hpp>
 #include <godot_cpp/classes/input_event_action.hpp>
 #include <godot_cpp/classes/project_settings.hpp>
-#include <godot_cpp/classes/camera3d.hpp>
-#include <godot_cpp/variant/utility_functions.hpp>
 #include <godot_cpp/variant/vector3.hpp>
+#include <godot_cpp/classes/camera3d.hpp>
+#include <godot_cpp/classes/control.hpp>
+#include <godot_cpp/classes/button.hpp>
+#include <godot_cpp/variant/utility_functions.hpp>
 
 #include "macros.hpp"
 #include "player_body.hpp"
@@ -20,7 +22,6 @@ using namespace godot;
 #define DECELERATION 10.0f
 #define MOUSE_SENSITIVITY 0.001f
 #define PI 3.14159265358979f
-
 
 
 PlayerBody::PlayerBody()
@@ -45,7 +46,11 @@ void PlayerBody::_ready()
 	_player_input = Input::get_singleton();
 	_project_settings = ProjectSettings::get_singleton();
 	_gravity = _project_settings->get_setting("physics/3d/default_gravity");
-	_camera = Object::cast_to<Camera3D>(find_child("Camera3D"));
+	_camera = get_node<Camera3D>("%PlayerCamera");
+	_death_panel = get_node<Control>("%DeathPanel");
+	_grab_button = get_node<Button>("%ReviveButton");
+	_revive_button = get_node<Button>("%ReviveButton");
+	_thumbstick_button = get_node<Button>("%ThumbstickButton");
 	_velocity = Vector3(0, 0, 0);
 	set_process_input(true);
 	set_process(true);
@@ -53,18 +58,15 @@ void PlayerBody::_ready()
 
 void PlayerBody::_input(const Ref<InputEvent> &event)
 {
-	if (_engine->is_editor_hint())
-	{
+	if (_engine->is_editor_hint()) {
 		return;
 	}
 
-	if (event->is_class(nameof(InputEventMouseButton)))
-	{
+	if (event->is_class(nameof(InputEventMouseButton))) {
 		const Ref<InputEventMouseButton> event_mouse_button = event;
 		_player_input->set_mouse_mode(godot::Input::MOUSE_MODE_CAPTURED);
 	}
-	else  if (event->is_class(nameof(InputEventMouseMotion)))
-	{
+	else  if (event->is_class(nameof(InputEventMouseMotion))) {
 		const Ref<InputEventMouseMotion> event_mouse_motion = event;
 		auto mouse_relative = event_mouse_motion->get_relative();
 
@@ -77,12 +79,10 @@ void PlayerBody::_input(const Ref<InputEvent> &event)
 		camera_rotation.x = Math::clamp(camera_rotation.x, -PI / 2.0f, PI / 2.0f);
 		_camera->set_rotation(camera_rotation);
 	}
-	else if (event->is_class(nameof(InputEventAction)))
-	{
+	else if (event->is_class(nameof(InputEventAction))) {
 		const Ref<InputEventAction> event_action = event;
 		// Release pointer lock
-		if (event_action->is_action("unfocus"))
-		{
+		if (event_action->is_action("unfocus")) {
 			_player_input->set_mouse_mode(godot::Input::MOUSE_MODE_VISIBLE);
 		}
 	}
@@ -90,8 +90,7 @@ void PlayerBody::_input(const Ref<InputEvent> &event)
 
 void PlayerBody::_physics_process(double delta)
 {
-	if (_engine->is_editor_hint())
-	{
+	if (_engine->is_editor_hint()) {
 		return;
 	}
 
