@@ -6,5 +6,6 @@
         "-I${workspaceFolder}/august21-event/godot-cpp/gdextension",
         "-I${workspaceFolder}/august21-event/godot-cpp/include", 
         "-I${workspaceFolder}/august21-event/dataproto-cpp/include"
-    ]
+    ],
+    "godotTools.editorPath.godot4": "/home/zekiah/Desktop/Godot_v4.2.2-stable_mono_linux_x86_64/Godot_v4.2.2-stable_linux.x86_64"
 }

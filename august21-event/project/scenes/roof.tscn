@@ -1,0 +1,394 @@
+[gd_scene load_steps=55 format=3 uid="uid://dh3f0fyoo6ibo"]
+
+[ext_resource type="Material" uid="uid://dhejphsc088k2" path="res://assets/concrete/concrete.tres" id="1_bacw7"]
+[ext_resource type="Material" uid="uid://ctnt7xy0u7gnj" path="res://assets/skybox/floor_lava.tres" id="3_0xcca"]
+[ext_resource type="PackedScene" uid="uid://c0bj2uusm1bfq" path="res://scenes/player_body.tscn" id="3_3xjkh"]
+[ext_resource type="Texture2D" uid="uid://tpgj7natv128" path="res://assets/skybox/roof_sky.png" id="3_oboqe"]
+[ext_resource type="PackedScene" uid="uid://ca7n3vrq5gy37" path="res://assets/rplace_logo.glb" id="4_o0vqv"]
+[ext_resource type="Shader" path="res://shaders/3d_canvas.gdshader" id="5_x3ytn"]
+[ext_resource type="PackedScene" uid="uid://cqs3omeen5ext" path="res://assets/clouds_cone.glb" id="7_k73ar"]
+[ext_resource type="Texture2D" uid="uid://cmt1bh1b0hrie" path="res://assets/signpost/leap_of_faith.png" id="7_rss4r"]
+[ext_resource type="Material" uid="uid://bfjx4pf6sb5q0" path="res://assets/circular_vortex/circular_vortex.tres" id="7_td0np"]
+[ext_resource type="PackedScene" uid="uid://xr8d7au3y4um" path="res://assets/distant_buildings.glb" id="8_vgi18"]
+[ext_resource type="PackedScene" uid="uid://b6u2gq168cs2c" path="res://assets/aeroplane/united_airlines_boeing_777.glb" id="10_6ytol"]
+[ext_resource type="PackedScene" uid="uid://m4hc42l78dri" path="res://assets/chair/wooden_chair.glb" id="11_2jt52"]
+[ext_resource type="Animation" uid="uid://bfdgkhni3jem7" path="res://animations/roof_sky_animation.tres" id="12_4kdpp"]
+[ext_resource type="PackedScene" uid="uid://djm1sm8xypjdg" path="res://assets/character/character_lowpoly.glb" id="14_sbqrr"]
+[ext_resource type="PackedScene" uid="uid://cwgp0q1aj5tli" path="res://assets/ataturk/ataturk_head.glb" id="15_uuxt7"]
+[ext_resource type="PackedScene" uid="uid://dtx7bvrf1lk6e" path="res://assets/canvas_frame.glb" id="16_uonlf"]
+[ext_resource type="PackedScene" uid="uid://bmqxjo7ithlk8" path="res://assets/eiffel/eiffel_lowpoly.glb" id="17_1m336"]
+[ext_resource type="Material" uid="uid://bydnt1xwreyo2" path="res://assets/near_visible_floor.tres" id="18_s8krs"]
+[ext_resource type="Texture2D" uid="uid://kgfd8cgtu6cq" path="res://assets/smoke_particle.png" id="18_ui233"]
+[ext_resource type="PackedScene" uid="uid://cld4tkf11mfmk" path="res://assets/signpost/signpost.glb" id="19_idya5"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_gql42"]
+size = Vector3(64, 140, 64)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_syoaj"]
+size = Vector3(1, 1, 64)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_djae4"]
+transparency = 1
+albedo_color = Color(0.176419, 0.176419, 0.176419, 0.45098)
+
+[sub_resource type="Gradient" id="Gradient_qg6dp"]
+
+[sub_resource type="GradientTexture1D" id="GradientTexture1D_tu3lb"]
+gradient = SubResource("Gradient_qg6dp")
+
+[sub_resource type="Curve" id="Curve_4p056"]
+_data = [Vector2(0.278388, 0.765414), 0.0, 0.0, 0, 0, Vector2(0.542125, 0.110526), 0.0, 0.0, 0, 0, Vector2(0.769231, 0.91203), 0.0, 0.0, 0, 0]
+point_count = 3
+
+[sub_resource type="Curve" id="Curve_ysg6o"]
+_data = [Vector2(0.128205, 1), 0.0, 0.0, 0, 0, Vector2(0.227106, 0.169173), 0.0, 0.0, 0, 0, Vector2(0.424908, 1), 0.0, 0.0, 0, 0, Vector2(0.725275, 0.501504), 0.0, 0.0, 0, 0, Vector2(0.941392, 0.677444), 0.0, 0.0, 0, 0]
+point_count = 5
+
+[sub_resource type="Curve" id="Curve_cvkcr"]
+_data = [Vector2(0.0805861, 0.354887), 0.0, 0.0, 0, 0, Vector2(0.355311, 0.970677), 0.0, 0.0, 0, 0, Vector2(0.446886, 0.863158), -2.28722, -2.28722, 0, 0, Vector2(0.527473, 0.393985), 0.0, 0.0, 0, 0, Vector2(0.846154, 0.403759), 0.0, 0.0, 0, 0, Vector2(0.934066, 1), 0.0, 0.0, 0, 0]
+point_count = 6
+
+[sub_resource type="CurveXYZTexture" id="CurveXYZTexture_dyfwm"]
+curve_x = SubResource("Curve_4p056")
+curve_y = SubResource("Curve_ysg6o")
+curve_z = SubResource("Curve_cvkcr")
+
+[sub_resource type="Curve" id="Curve_2545m"]
+_data = [Vector2(0, 1), 0.0, 0.0, 0, 0, Vector2(0.754579, 1), 0.0, 0.0, 0, 0, Vector2(1, 0), 0.0, 0.0, 0, 0]
+point_count = 3
+
+[sub_resource type="CurveTexture" id="CurveTexture_rwx25"]
+curve = SubResource("Curve_2545m")
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_13gme"]
+emission_shape_offset = Vector3(0, -16, 0)
+emission_shape = 3
+emission_box_extents = Vector3(64, 2, 64)
+directional_velocity_min = 5.0
+directional_velocity_max = 10.0
+directional_velocity_curve = SubResource("CurveXYZTexture_dyfwm")
+gravity = Vector3(0, 1, 0)
+scale_curve = SubResource("CurveTexture_rwx25")
+color_ramp = SubResource("GradientTexture1D_tu3lb")
+hue_variation_max = 0.5
+turbulence_enabled = true
+turbulence_noise_strength = 0.1
+turbulence_noise_scale = 2.0
+
+[sub_resource type="SphereMesh" id="SphereMesh_8nvlb"]
+radial_segments = 4
+rings = 2
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_6t5lx"]
+size = Vector2(48, 48)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_qqstb"]
+render_priority = 0
+shader = ExtResource("5_x3ytn")
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_6wnrb"]
+size = Vector3(16, 20, 2)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_35aqv"]
+size = Vector3(4, 16, 2)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_m8hv4"]
+transparency = 1
+albedo_texture = ExtResource("7_rss4r")
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_rrm7v"]
+size = Vector3(256, 16, 256)
+
+[sub_resource type="WorldBoundaryShape3D" id="WorldBoundaryShape3D_jfeql"]
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_db1we"]
+material = ExtResource("3_0xcca")
+size = Vector2(2048, 2048)
+
+[sub_resource type="PanoramaSkyMaterial" id="PanoramaSkyMaterial_71yl5"]
+panorama = ExtResource("3_oboqe")
+
+[sub_resource type="Sky" id="Sky_ttrnk"]
+sky_material = SubResource("PanoramaSkyMaterial_71yl5")
+
+[sub_resource type="Environment" id="Environment_qa8cm"]
+background_mode = 2
+sky = SubResource("Sky_ttrnk")
+ambient_light_source = 3
+tonemap_mode = 3
+tonemap_exposure = 0.7
+tonemap_white = 0.8
+fog_enabled = true
+fog_light_color = Color(0.971649, 0.498885, 0.0663957, 1)
+fog_light_energy = 0.3
+fog_density = 0.001
+fog_height = 140.0
+fog_height_density = 0.005
+adjustment_brightness = 0.83
+adjustment_contrast = 2.14
+adjustment_saturation = 0.49
+
+[sub_resource type="CameraAttributesPractical" id="CameraAttributesPractical_jqt5r"]
+exposure_multiplier = 1.01
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_68h7l"]
+size = Vector2(600, 600)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_8qhy6"]
+transparency = 1
+shading_mode = 0
+albedo_color = Color(1, 1, 1, 0)
+
+[sub_resource type="Curve" id="Curve_7jjhi"]
+_data = [Vector2(0, 0), 0.0, 0.0, 0, 0, Vector2(0.263158, 1), 0.0, 0.0, 0, 0, Vector2(0.675439, 1), 0.0, 0.0, 0, 0, Vector2(1, 0), 0.0, 0.0, 0, 0]
+point_count = 4
+
+[sub_resource type="CurveTexture" id="CurveTexture_biy68"]
+curve = SubResource("Curve_7jjhi")
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_370br"]
+emission_shape = 3
+emission_box_extents = Vector3(15, 10, 15)
+angle_min = -180.0
+angle_max = 180.0
+angular_velocity_min = -180.0
+angular_velocity_max = 180.0
+gravity = Vector3(0, 3, 0)
+linear_accel_max = 2.0
+scale_min = 0.5
+scale_max = 2.0
+scale_curve = SubResource("CurveTexture_biy68")
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_kidx6"]
+transparency = 1
+cull_mode = 2
+albedo_texture = ExtResource("18_ui233")
+billboard_mode = 3
+particles_anim_h_frames = 1
+particles_anim_v_frames = 1
+particles_anim_loop = false
+
+[sub_resource type="QuadMesh" id="QuadMesh_jspc6"]
+material = SubResource("StandardMaterial3D_kidx6")
+size = Vector2(8, 8)
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_f3ydx"]
+_data = {
+"roof_sky_animation": ExtResource("12_4kdpp")
+}
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_m5eaq"]
+size = Vector3(2, 1, 5)
+
+[node name="Roof" type="Roof"]
+
+[node name="RplaceHQ" type="Node3D" parent="."]
+
+[node name="Building" type="CSGBox3D" parent="RplaceHQ"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -70, 0)
+size = Vector3(64, 140, 64)
+material = ExtResource("1_bacw7")
+
+[node name="StaticBody3D" type="StaticBody3D" parent="RplaceHQ/Building"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="RplaceHQ/Building/StaticBody3D"]
+shape = SubResource("BoxShape3D_gql42")
+
+[node name="Border" type="CSGBox3D" parent="RplaceHQ"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 31.5, 0.5, 0)
+size = Vector3(1, 1, 64)
+material = ExtResource("1_bacw7")
+
+[node name="StaticBody3D" type="StaticBody3D" parent="RplaceHQ/Border"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="RplaceHQ/Border/StaticBody3D"]
+shape = SubResource("BoxShape3D_syoaj")
+
+[node name="Border2" type="CSGBox3D" parent="RplaceHQ"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -31.5, 0.5, 0)
+size = Vector3(1, 1, 64)
+material = ExtResource("1_bacw7")
+
+[node name="StaticBody3D" type="StaticBody3D" parent="RplaceHQ/Border2"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="RplaceHQ/Border2/StaticBody3D"]
+shape = SubResource("BoxShape3D_syoaj")
+
+[node name="Border3" type="CSGBox3D" parent="RplaceHQ"]
+transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 0, 0.5, -31.5)
+size = Vector3(1, 1, 64)
+material = ExtResource("1_bacw7")
+
+[node name="StaticBody3D" type="StaticBody3D" parent="RplaceHQ/Border3"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="RplaceHQ/Border3/StaticBody3D"]
+shape = SubResource("BoxShape3D_syoaj")
+
+[node name="Border4" type="CSGBox3D" parent="RplaceHQ"]
+transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 0, 0.5, 31.5)
+size = Vector3(1, 1, 64)
+material = ExtResource("1_bacw7")
+
+[node name="StaticBody3D" type="StaticBody3D" parent="RplaceHQ/Border4"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="RplaceHQ/Border4/StaticBody3D"]
+shape = SubResource("BoxShape3D_syoaj")
+
+[node name="RoofSmokeParticles" type="GPUParticles3D" parent="RplaceHQ"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 12, 0)
+material_override = SubResource("StandardMaterial3D_djae4")
+cast_shadow = 0
+gi_mode = 0
+amount = 128
+lifetime = 10.0
+randomness = 0.3
+collision_base_size = 0.0
+visibility_aabb = AABB(-32, -12, -32, 64, 24, 64)
+process_material = SubResource("ParticleProcessMaterial_13gme")
+draw_pass_1 = SubResource("SphereMesh_8nvlb")
+
+[node name="WoodenChair" parent="RplaceHQ" instance=ExtResource("11_2jt52")]
+transform = Transform3D(-0.5, 0, -0.866025, 0, 1, 0, 0.866025, 0, -0.5, -28.8807, 0, -28.1515)
+
+[node name="WoodenChair2" parent="RplaceHQ" instance=ExtResource("11_2jt52")]
+transform = Transform3D(-0.965926, 0, -0.258819, 0, 1, 0, 0.258819, 0, -0.965926, -27.4526, 0, -29.7765)
+
+[node name="RoofDoor" type="CSGPolygon3D" parent="RplaceHQ"]
+transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, -17, 0, -29)
+polygon = PackedVector2Array(5.2, 3.6, 5.2, 0.8, 5.6, 0.8, 5.6, 0.4, 6, 0.4, 6, 0, -1, 0, -0.2, 2.4)
+depth = 3.0
+material = ExtResource("1_bacw7")
+
+[node name="CanvasFloorBody" type="StaticBody3D" parent="RplaceHQ"]
+
+[node name="CanvasMesh" type="CSGMesh3D" parent="RplaceHQ/CanvasFloorBody"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, 0)
+mesh = SubResource("PlaneMesh_6t5lx")
+material = SubResource("ShaderMaterial_qqstb")
+
+[node name="CanvasFrame" parent="RplaceHQ/CanvasFloorBody" instance=ExtResource("16_uonlf")]
+
+[node name="CSGBox3D" type="CSGBox3D" parent="RplaceHQ"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, -28)
+size = Vector3(3, 1, 1)
+
+[node name="RplaceLogoBody" type="StaticBody3D" parent="RplaceHQ"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -22, 32)
+
+[node name="RplaceLogo" parent="RplaceHQ/RplaceLogoBody" instance=ExtResource("4_o0vqv")]
+transform = Transform3D(2, 0, 0, 0, -8.74228e-08, 2, 0, -2, -8.74228e-08, 0, 0, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="RplaceHQ/RplaceLogoBody"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 0, 1)
+shape = SubResource("BoxShape3D_6wnrb")
+
+[node name="CollisionShape3D2" type="CollisionShape3D" parent="RplaceHQ/RplaceLogoBody"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, -2, 1)
+shape = SubResource("BoxShape3D_35aqv")
+
+[node name="Signpost" parent="RplaceHQ" instance=ExtResource("19_idya5")]
+transform = Transform3D(0.258819, 0, -0.965926, 0, 1, 0, 0.965926, 0, 0.258819, 31.4, 1, -31.5)
+
+[node name="Front" parent="RplaceHQ/Signpost" index="2"]
+surface_material_override/0 = SubResource("StandardMaterial3D_m8hv4")
+
+[node name="FloorBody" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -140, 0)
+
+[node name="FloorArea" type="Area3D" parent="FloorBody"]
+unique_name_in_owner = true
+collision_layer = 0
+
+[node name="FloorAreaShape" type="CollisionShape3D" parent="FloorBody/FloorArea"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 8, 0)
+shape = SubResource("BoxShape3D_rrm7v")
+
+[node name="FloorCollisionShape" type="CollisionShape3D" parent="FloorBody"]
+shape = SubResource("WorldBoundaryShape3D_jfeql")
+
+[node name="FloorMesh" type="MeshInstance3D" parent="FloorBody"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0)
+mesh = SubResource("PlaneMesh_db1we")
+skeleton = NodePath("../../RplaceHQ")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_qa8cm")
+camera_attributes = SubResource("CameraAttributesPractical_jqt5r")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.906308, 0.408218, -0.109381, -1.39399e-07, 0.258819, 0.965926, 0.422618, -0.875426, 0.23457, 0, 10, 0)
+light_color = Color(0.883315, 0.378748, 0.336059, 1)
+light_energy = 0.5
+light_bake_mode = 1
+shadow_enabled = true
+directional_shadow_mode = 1
+
+[node name="PlayerBody" parent="." instance=ExtResource("3_3xjkh")]
+unique_name_in_owner = true
+
+[node name="SkyVortexMesh" type="CSGMesh3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, -1, 1.50996e-07, 0, -1.50996e-07, -1, 0, 512, 0)
+cast_shadow = 0
+calculate_tangents = false
+mesh = SubResource("PlaneMesh_68h7l")
+material = ExtResource("7_td0np")
+
+[node name="CloudsCone" parent="." instance=ExtResource("7_k73ar")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 83, 2)
+visible = false
+
+[node name="Cylinder" parent="CloudsCone" index="0"]
+material_override = SubResource("StandardMaterial3D_8qhy6")
+cast_shadow = 0
+
+[node name="DistantObjects" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -140, 0)
+
+[node name="DistantBuildings" parent="DistantObjects" instance=ExtResource("8_vgi18")]
+transform = Transform3D(2.29813, 0, 1.92837, 0, 3, 0, -1.92837, 0, 2.29813, -289, 19, -257)
+
+[node name="CrashedPlane" parent="DistantObjects" instance=ExtResource("10_6ytol")]
+transform = Transform3D(-0.692092, -0.649519, -0.314855, -0.416867, 0.715776, -0.560256, 0.589263, -0.256497, -0.766146, -461, 223, -480)
+
+[node name="EiffelLowpoly" parent="DistantObjects" instance=ExtResource("17_1m336")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -467, 15, -480)
+
+[node name="EiffelSmokeParticles" type="GPUParticles3D" parent="DistantObjects"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -464, 233, -477)
+gi_mode = 0
+amount = 32
+lifetime = 6.0
+preprocess = 6.0
+explosiveness = 0.1
+randomness = 1.0
+fixed_fps = 15
+visibility_aabb = AABB(-17, -20, -16, 34, 40, 32)
+process_material = SubResource("ParticleProcessMaterial_370br")
+draw_pass_1 = SubResource("QuadMesh_jspc6")
+
+[node name="SkyAnimationPlayer" type="AnimationPlayer" parent="."]
+unique_name_in_owner = true
+libraries = {
+"": SubResource("AnimationLibrary_f3ydx")
+}
+
+[node name="Character" parent="." instance=ExtResource("14_sbqrr")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -29)
+
+[node name="AtaturkHead" parent="." instance=ExtResource("15_uuxt7")]
+transform = Transform3D(-2.88853, -2.0425, -2.0425, -1.75365e-07, 2.88853, -2.88853, 2.88853, -2.0425, -2.0425, 143, 116, 114)
+
+[node name="InvisiblePlatform" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 30, 0, -36)
+
+[node name="CSGBox3D" type="CSGBox3D" parent="InvisiblePlatform"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -2.5)
+size = Vector3(2, 1, 5)
+material = ExtResource("18_s8krs")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="InvisiblePlatform"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -2.5)
+shape = SubResource("BoxShape3D_m5eaq")
+
+[editable path="RplaceHQ/Signpost"]
+[editable path="CloudsCone"]

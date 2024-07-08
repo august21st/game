@@ -1,0 +1,7 @@
+[gd_resource type="Theme" load_steps=2 format=3 uid="uid://dbwgna8gjqom8"]
+
+[ext_resource type="FontFile" uid="uid://vo3twycs6ve7" path="res://assets/reddit/reddit_sans_bold.woff2" id="1_iduiu"]
+
+[resource]
+default_font = ExtResource("1_iduiu")
+Button/fonts/font = ExtResource("1_iduiu")

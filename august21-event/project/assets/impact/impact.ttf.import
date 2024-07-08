@@ -13,7 +13,7 @@ dest_files=["res://.godot/imported/impact.ttf-cd592079af1d1e398a513733264fd854.f
 [params]
 
 Rendering=null
-antialiasing=1
+antialiasing=2
 generate_mipmaps=false
 multichannel_signed_distance_field=false
 msdf_pixel_range=8
@@ -27,7 +27,12 @@ Fallbacks=null
 fallbacks=[]
 Compress=null
 compress=true
-preload=[]
+preload=[{
+"chars": [],
+"glyphs": [],
+"name": "New Configuration",
+"size": Vector2i(16, 0)
+}]
 language_support={}
 script_support={}
 opentype_features={}

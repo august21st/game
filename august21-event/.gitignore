@@ -23,6 +23,7 @@ project/bin/windows/*
 project/bin/web/*
 !project/bin/web/.gitkeep
 !project/bin/*.gdextension
+project/android
 .sconsign*.dblite
 
 # Ignore custom.py
@@ -57,3 +58,5 @@ compile_commands.json
 .vscode/*
 !.vscode/extensions.json
 .DS_Store
+# Idea
+.idea/

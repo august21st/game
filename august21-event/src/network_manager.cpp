@@ -7,23 +7,30 @@ using namespace godot;
 using namespace dataproto;
 
 namespace NetworkManager {
+	bool _closed = true;
 	Ref<WebSocketPeer> _socket;
-	void instantiate()
+	void init_client(String url)
 	{
 		_socket = Ref<WebSocketPeer>();
 		_socket.instantiate();
-		_socket->connect_to_url("ws://localhost:8088");
+		_socket->connect_to_url(url);
 		set_fail_function([](const void *reason)
 		{
 			auto str_reason = static_cast<const char*>(reason);
-			UtilityFunctions::printerr(String("dataproto error: {0}").format(str_reason));
+			UtilityFunctions::printerr(String("dataproto error: {0}").format(Array::make(str_reason)));
 		});
+		_closed = false;
 	}
 
 	vector<BufReader> poll_next_packets()
 	{
-		_socket->poll();
 		auto packets = vector<BufReader>();
+		if (_closed)
+		{
+			return packets;
+		}
+
+		_socket->poll();
 		auto state = _socket->get_ready_state();
 		switch (state) {
 			case WebSocketPeer::STATE_CONNECTING:
@@ -43,6 +50,7 @@ namespace NetworkManager {
 				auto formatted_log = String("WebSocket closed with code: {0}, reason \"{1}\". Clean: {2}")
 					.format(Array::make(code, reason, code != -1));
 				UtilityFunctions::printerr(formatted_log);
+				_closed = true;
 				break;
 		}
 

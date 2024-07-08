@@ -8,6 +8,7 @@
 #include "player_body.hpp"
 #include "intro.hpp"
 #include "roof.hpp"
+#include "server.hpp"
 
 using namespace godot;
 
@@ -20,6 +21,8 @@ void initialize_gdextension_types(ModuleInitializationLevel p_level)
 	GDREGISTER_CLASS(PlayerBody);
 	GDREGISTER_CLASS(Intro);
 	GDREGISTER_CLASS(Roof);
+	GDREGISTER_CLASS(Server);
+	Engine::get_singleton()->register_singleton("Server", memnew(Server));
 }
 
 void uninitialize_gdextension_types(ModuleInitializationLevel p_level)

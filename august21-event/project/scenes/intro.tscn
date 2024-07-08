@@ -1,0 +1,127 @@
+[gd_scene load_steps=11 format=3 uid="uid://c2xy8asjsovia"]
+
+[ext_resource type="Material" uid="uid://dljrrbxeltcq1" path="res://assets/prototype/protype_material_template.tres" id="1_kkyvh"]
+[ext_resource type="PackedScene" uid="uid://ca7n3vrq5gy37" path="res://assets/rplace_logo.glb" id="1_mjyb7"]
+[ext_resource type="Animation" uid="uid://butjgk4p71n3g" path="res://animations/intro_animation.tres" id="3_rvdho"]
+[ext_resource type="PackedScene" uid="uid://216xcciqsui0" path="res://assets/building_ground.glb" id="4_rom83"]
+[ext_resource type="PackedScene" uid="uid://b6u2gq168cs2c" path="res://assets/aeroplane/united_airlines_boeing_777.glb" id="5_ua2td"]
+[ext_resource type="PackedScene" uid="uid://xr8d7au3y4um" path="res://assets/distant_buildings.glb" id="6_xwii3"]
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_etu56"]
+_data = {
+"intro_animation": ExtResource("3_rvdho")
+}
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_whumy"]
+
+[sub_resource type="Sky" id="Sky_83hny"]
+sky_material = SubResource("ProceduralSkyMaterial_whumy")
+
+[sub_resource type="Environment" id="Environment_cqgab"]
+background_mode = 2
+sky = SubResource("Sky_83hny")
+
+[node name="Intro" type="Intro"]
+
+[node name="Tower" type="CSGBox3D" parent="."]
+transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 0, 80, 0)
+size = Vector3(64, 160, 64)
+material = ExtResource("1_kkyvh")
+
+[node name="RplaceLogo" parent="." instance=ExtResource("1_mjyb7")]
+transform = Transform3D(2, 0, 0, 0, -8.74228e-08, 2, 0, -2, -8.74228e-08, 0, 140, 32)
+
+[node name="BuildingCamera" type="Camera3D" parent="."]
+transform = Transform3D(0.951056, -0.120743, -0.284452, 7.82311e-08, 0.920505, -0.390731, 0.309017, 0.371607, 0.875452, -8, 126, 54.61)
+current = true
+fov = 31.6
+
+[node name="BuildingCameraPlayer" type="AnimationPlayer" parent="."]
+libraries = {
+"": SubResource("AnimationLibrary_etu56")
+}
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_cqgab")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(1, 1.74846e-07, -1.82847e-13, -8.74228e-08, 0.5, 0.866025, 1.51421e-07, -0.866025, 0.5, 0, 198, 0)
+
+[node name="Tunnel" type="CSGCombiner3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -7, 0)
+
+[node name="CSGBox3D3" type="CSGBox3D" parent="Tunnel"]
+size = Vector3(5, 5, 42)
+
+[node name="CSGSphere3D" type="CSGSphere3D" parent="Tunnel"]
+transform = Transform3D(1.095, 0, 0, 0, 1.19, 0, 0, 0, 1.865, 0, 0, 6.37188)
+operation = 2
+radius = 2.0
+rings = 12
+
+[node name="CSGSphere3D2" type="CSGSphere3D" parent="Tunnel"]
+transform = Transform3D(1.095, 0, 0, 0, 1.19, 0, 0, 0, 1.865, 0, 0, 2.37188)
+operation = 2
+radius = 2.0
+rings = 12
+
+[node name="CSGSphere3D9" type="CSGSphere3D" parent="Tunnel"]
+transform = Transform3D(1.095, 0, 0, 0, 1.19, 0, 0, 0, 3.02, 0, 0, 18.3719)
+operation = 2
+radius = 2.0
+rings = 12
+
+[node name="CSGSphere3D10" type="CSGSphere3D" parent="Tunnel"]
+transform = Transform3D(1.095, 0, 0, 0, 1.19, 0, 0, 0, 3.02, 0, 0, 10.3719)
+operation = 2
+radius = 2.0
+rings = 12
+
+[node name="CSGSphere3D3" type="CSGSphere3D" parent="Tunnel"]
+transform = Transform3D(1.095, 0, 0, 0, 1.19, 0, 0, 0, 1.865, 0, 0, -2.62812)
+operation = 2
+radius = 2.0
+rings = 12
+
+[node name="CSGSphere3D4" type="CSGSphere3D" parent="Tunnel"]
+transform = Transform3D(1.095, 0, 0, 0, 1.19, 0, 0, 0, 1.865, 0, 0, -5.62812)
+operation = 2
+radius = 2.0
+rings = 12
+
+[node name="CSGSphere3D5" type="CSGSphere3D" parent="Tunnel"]
+transform = Transform3D(1.095, 0, 0, 0, 1.19, 0, 0, 0, 1.865, 0, 0, -21.6281)
+operation = 2
+radius = 2.0
+rings = 12
+
+[node name="CSGSphere3D6" type="CSGSphere3D" parent="Tunnel"]
+transform = Transform3D(1.095, 0, 0, 0, 1.19, 0, 0, 0, 3.185, 0, 0, -11.6281)
+operation = 2
+radius = 2.0
+rings = 12
+
+[node name="CSGSphere3D7" type="CSGSphere3D" parent="Tunnel"]
+transform = Transform3D(1.095, 0, 0, 0, 1.19, 0, 0, 0, 1.47, 0, 0, -15.7281)
+operation = 2
+radius = 2.1
+rings = 12
+
+[node name="CSGSphere3D8" type="CSGSphere3D" parent="Tunnel"]
+transform = Transform3D(1.095, 0, 0, 0, 1.19, 0, 0, 0, 1.47, 0, 0, -17.1281)
+operation = 2
+radius = 2.1
+rings = 12
+
+[node name="BuildingGround" parent="." instance=ExtResource("4_rom83")]
+
+[node name="Plane" parent="BuildingGround" index="0"]
+surface_material_override/0 = ExtResource("1_kkyvh")
+
+[node name="Plane" parent="." instance=ExtResource("5_ua2td")]
+transform = Transform3D(-0.866025, 0, -0.5, 0, 1, 0, 0.5, 0, -0.866025, 57, 120, 50)
+
+[node name="DistantBuildings" parent="." instance=ExtResource("6_xwii3")]
+transform = Transform3D(2.12132, 0, 2.12132, 0, 3, 0, -2.12132, 0, 2.12132, -289, 19, -257)
+
+[editable path="BuildingGround"]

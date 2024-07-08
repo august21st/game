@@ -1,0 +1,10 @@
+[gd_resource type="StandardMaterial3D" load_steps=2 format=3 uid="uid://dm4jnk5cim2va"]
+
+[ext_resource type="Texture2D" uid="uid://j4atscw5q5jn" path="res://assets/eiffel/eiffel_tower_reference.png" id="1_lhnqe"]
+
+[resource]
+transparency = 1
+cull_mode = 2
+albedo_texture = ExtResource("1_lhnqe")
+metallic = 0.8
+roughness = 0.3

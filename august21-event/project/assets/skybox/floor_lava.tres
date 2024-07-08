@@ -1,0 +1,14 @@
+[gd_resource type="StandardMaterial3D" load_steps=2 format=3 uid="uid://ctnt7xy0u7gnj"]
+
+[ext_resource type="Texture2D" uid="uid://drt1pwrtbfnm4" path="res://assets/skybox/floor_lava.png" id="1_4ww41"]
+
+[resource]
+shading_mode = 0
+disable_fog = true
+albedo_texture = ExtResource("1_4ww41")
+uv1_scale = Vector3(9.85, 9.85, 9.85)
+disable_receive_shadows = true
+proximity_fade_distance = 100.0
+distance_fade_mode = 1
+distance_fade_min_distance = 1200.0
+distance_fade_max_distance = 600.0
