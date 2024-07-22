@@ -1,7 +1,15 @@
-[gd_resource type="Theme" load_steps=2 format=3 uid="uid://dbwgna8gjqom8"]
+[gd_resource type="Theme" load_steps=4 format=3 uid="uid://dbwgna8gjqom8"]
 
 [ext_resource type="FontFile" uid="uid://vo3twycs6ve7" path="res://assets/reddit/reddit_sans_bold.woff2" id="1_iduiu"]
+[ext_resource type="StyleBox" uid="uid://cupxj4f1qn4oh" path="res://assets/ui/button_normal_style.tres" id="2_7r2se"]
+[ext_resource type="StyleBox" uid="uid://diw7iubo4674i" path="res://assets/ui/button_pressed_style.tres" id="3_eb574"]
 
 [resource]
 default_font = ExtResource("1_iduiu")
+Button/colors/font_color = Color(0, 0, 0, 1)
 Button/fonts/font = ExtResource("1_iduiu")
+Button/styles/disabled = ExtResource("2_7r2se")
+Button/styles/focus = ExtResource("2_7r2se")
+Button/styles/hover = ExtResource("3_eb574")
+Button/styles/normal = ExtResource("2_7r2se")
+Button/styles/pressed = ExtResource("3_eb574")

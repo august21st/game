@@ -28,7 +28,7 @@ void LoadingScreen::_bind_methods()
 
 void LoadingScreen::_ready()
 {
-	_engine = _engine->get_singleton();
+	_engine = Engine::get_singleton();
 	if (_engine->is_editor_hint()) {
 		return;
 	}

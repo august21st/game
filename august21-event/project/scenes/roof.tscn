@@ -1,19 +1,19 @@
-[gd_scene load_steps=55 format=3 uid="uid://dh3f0fyoo6ibo"]
+[gd_scene load_steps=62 format=3 uid="uid://dh3f0fyoo6ibo"]
 
 [ext_resource type="Material" uid="uid://dhejphsc088k2" path="res://assets/concrete/concrete.tres" id="1_bacw7"]
-[ext_resource type="Material" uid="uid://ctnt7xy0u7gnj" path="res://assets/skybox/floor_lava.tres" id="3_0xcca"]
 [ext_resource type="PackedScene" uid="uid://c0bj2uusm1bfq" path="res://scenes/player_body.tscn" id="3_3xjkh"]
 [ext_resource type="Texture2D" uid="uid://tpgj7natv128" path="res://assets/skybox/roof_sky.png" id="3_oboqe"]
 [ext_resource type="PackedScene" uid="uid://ca7n3vrq5gy37" path="res://assets/rplace_logo.glb" id="4_o0vqv"]
-[ext_resource type="Shader" path="res://shaders/3d_canvas.gdshader" id="5_x3ytn"]
+[ext_resource type="Texture2D" uid="uid://c5tmyq4qeg1gf" path="res://assets/concrete/concrete.png" id="4_sbhyi"]
 [ext_resource type="PackedScene" uid="uid://cqs3omeen5ext" path="res://assets/clouds_cone.glb" id="7_k73ar"]
 [ext_resource type="Texture2D" uid="uid://cmt1bh1b0hrie" path="res://assets/signpost/leap_of_faith.png" id="7_rss4r"]
 [ext_resource type="Material" uid="uid://bfjx4pf6sb5q0" path="res://assets/circular_vortex/circular_vortex.tres" id="7_td0np"]
+[ext_resource type="Shader" path="res://shaders/floor_lava.gdshader" id="8_5yos5"]
 [ext_resource type="PackedScene" uid="uid://xr8d7au3y4um" path="res://assets/distant_buildings.glb" id="8_vgi18"]
+[ext_resource type="Texture2D" uid="uid://drt1pwrtbfnm4" path="res://assets/skybox/floor_lava.png" id="9_6v2eb"]
 [ext_resource type="PackedScene" uid="uid://b6u2gq168cs2c" path="res://assets/aeroplane/united_airlines_boeing_777.glb" id="10_6ytol"]
 [ext_resource type="PackedScene" uid="uid://m4hc42l78dri" path="res://assets/chair/wooden_chair.glb" id="11_2jt52"]
 [ext_resource type="Animation" uid="uid://bfdgkhni3jem7" path="res://animations/roof_sky_animation.tres" id="12_4kdpp"]
-[ext_resource type="PackedScene" uid="uid://djm1sm8xypjdg" path="res://assets/character/character_lowpoly.glb" id="14_sbqrr"]
 [ext_resource type="PackedScene" uid="uid://cwgp0q1aj5tli" path="res://assets/ataturk/ataturk_head.glb" id="15_uuxt7"]
 [ext_resource type="PackedScene" uid="uid://dtx7bvrf1lk6e" path="res://assets/canvas_frame.glb" id="16_uonlf"]
 [ext_resource type="PackedScene" uid="uid://bmqxjo7ithlk8" path="res://assets/eiffel/eiffel_lowpoly.glb" id="17_1m336"]
@@ -79,12 +79,17 @@ turbulence_noise_scale = 2.0
 radial_segments = 4
 rings = 2
 
-[sub_resource type="PlaneMesh" id="PlaneMesh_6t5lx"]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_kvku4"]
+albedo_texture = ExtResource("4_sbhyi")
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_rmmtj"]
 size = Vector2(48, 48)
 
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_qqstb"]
-render_priority = 0
-shader = ExtResource("5_x3ytn")
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_sk8h7"]
+shading_mode = 0
+specular_mode = 2
+albedo_texture = ExtResource("4_sbhyi")
+texture_filter = 0
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_6wnrb"]
 size = Vector3(16, 20, 2)
@@ -101,9 +106,30 @@ size = Vector3(256, 16, 256)
 
 [sub_resource type="WorldBoundaryShape3D" id="WorldBoundaryShape3D_jfeql"]
 
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_uy34s"]
+noise_type = 5
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_ggyga"]
+generate_mipmaps = false
+seamless = true
+noise = SubResource("FastNoiseLite_uy34s")
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_3sv73"]
+render_priority = 0
+shader = ExtResource("8_5yos5")
+shader_parameter/speed = 0.01
+shader_parameter/disp = Vector2(0.89, 0.7)
+shader_parameter/uv_scale = Vector2(20, 20)
+shader_parameter/noise_weight = 0.02
+shader_parameter/fade_radius = 0.5
+shader_parameter/fade_softness = 0.2
+shader_parameter/add_colour = Color(0.114749, 0.0809426, 0.0541049, 1)
+shader_parameter/image_texture = ExtResource("9_6v2eb")
+shader_parameter/noise_texture = SubResource("NoiseTexture2D_ggyga")
+
 [sub_resource type="PlaneMesh" id="PlaneMesh_db1we"]
-material = ExtResource("3_0xcca")
-size = Vector2(2048, 2048)
+material = SubResource("ShaderMaterial_3sv73")
+size = Vector2(4096, 4096)
 
 [sub_resource type="PanoramaSkyMaterial" id="PanoramaSkyMaterial_71yl5"]
 panorama = ExtResource("3_oboqe")
@@ -179,6 +205,15 @@ _data = {
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_m5eaq"]
 size = Vector3(2, 1, 5)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_sm3d5"]
+size = Vector3(2, 1, 6)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_b8pfv"]
+size = Vector3(1, 15.5, 0.2)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_gu0ne"]
+size = Vector3(1, 8.5, 0.1)
 
 [node name="Roof" type="Roof"]
 
@@ -261,12 +296,16 @@ material = ExtResource("1_bacw7")
 
 [node name="CanvasFloorBody" type="StaticBody3D" parent="RplaceHQ"]
 
-[node name="CanvasMesh" type="CSGMesh3D" parent="RplaceHQ/CanvasFloorBody"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, 0)
-mesh = SubResource("PlaneMesh_6t5lx")
-material = SubResource("ShaderMaterial_qqstb")
-
 [node name="CanvasFrame" parent="RplaceHQ/CanvasFloorBody" instance=ExtResource("16_uonlf")]
+
+[node name="Cube" parent="RplaceHQ/CanvasFloorBody/CanvasFrame" index="0"]
+surface_material_override/0 = SubResource("StandardMaterial3D_kvku4")
+
+[node name="BoardMesh" type="BoardMesh" parent="RplaceHQ/CanvasFloorBody"]
+unique_name_in_owner = true
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, 0)
+mesh = SubResource("PlaneMesh_rmmtj")
+surface_material_override/0 = SubResource("StandardMaterial3D_sk8h7")
 
 [node name="CSGBox3D" type="CSGBox3D" parent="RplaceHQ"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, -28)
@@ -372,23 +411,59 @@ libraries = {
 "": SubResource("AnimationLibrary_f3ydx")
 }
 
-[node name="Character" parent="." instance=ExtResource("14_sbqrr")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -29)
-
 [node name="AtaturkHead" parent="." instance=ExtResource("15_uuxt7")]
 transform = Transform3D(-2.88853, -2.0425, -2.0425, -1.75365e-07, 2.88853, -2.88853, 2.88853, -2.0425, -2.0425, 143, 116, 114)
 
 [node name="InvisiblePlatform" type="StaticBody3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 30, 0, -36)
-
-[node name="CSGBox3D" type="CSGBox3D" parent="InvisiblePlatform"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -2.5)
-size = Vector3(2, 1, 5)
-material = ExtResource("18_s8krs")
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 30, -4, -40)
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="InvisiblePlatform"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -2.5)
 shape = SubResource("BoxShape3D_m5eaq")
 
+[node name="CSGBox3D" type="CSGBox3D" parent="InvisiblePlatform/CollisionShape3D"]
+size = Vector3(2, 1, 5)
+material = ExtResource("18_s8krs")
+
+[node name="CollisionShape3D2" type="CollisionShape3D" parent="InvisiblePlatform"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 15.5, -8.1)
+shape = SubResource("BoxShape3D_sm3d5")
+
+[node name="CSGBox3D2" type="CSGBox3D" parent="InvisiblePlatform/CollisionShape3D2"]
+size = Vector3(2, 1, 6)
+material = ExtResource("18_s8krs")
+
+[node name="WoodenChair" parent="InvisiblePlatform" instance=ExtResource("11_2jt52")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 16, -10)
+
+[node name="Chair" parent="InvisiblePlatform/WoodenChair" index="0"]
+transform = Transform3D(-2.2, 0, 1.9233e-07, 0, 2.2, 0, -1.9233e-07, 0, -2.2, 0, 0, 0)
+material_override = ExtResource("18_s8krs")
+
+[node name="ClimbableArea" type="ClimbableArea" parent="InvisiblePlatform"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, -5)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="InvisiblePlatform/ClimbableArea"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 7.75, 0)
+shape = SubResource("BoxShape3D_b8pfv")
+
+[node name="CSGBox3D" type="CSGBox3D" parent="InvisiblePlatform/ClimbableArea"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 7.75, 0)
+size = Vector3(1, 15.5, 0.2)
+material = ExtResource("18_s8krs")
+
+[node name="ClimbableArea" type="ClimbableArea" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 30, -4, -32)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="ClimbableArea"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.75, -0.0499992)
+shape = SubResource("BoxShape3D_gu0ne")
+
+[node name="CSGBox3D2" type="CSGBox3D" parent="ClimbableArea"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.75, -0.0499992)
+size = Vector3(1, 8.5, 0.1)
+
+[editable path="RplaceHQ/CanvasFloorBody/CanvasFrame"]
 [editable path="RplaceHQ/Signpost"]
 [editable path="CloudsCone"]
+[editable path="InvisiblePlatform/WoodenChair"]

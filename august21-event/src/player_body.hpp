@@ -9,8 +9,11 @@
 #include <godot_cpp/classes/camera3d.hpp>
 #include <godot_cpp/classes/control.hpp>
 #include <godot_cpp/classes/button.hpp>
+#include <godot_cpp/classes/panel.hpp>
 #include <godot_cpp/classes/label.hpp>
+#include <godot_cpp/classes/texture_rect.hpp>
 #include <godot_cpp/classes/rich_text_label.hpp>
+#include <godot_cpp/classes/animation_player.hpp>
 #include <godot_cpp/classes/performance.hpp>
 
 using namespace godot;
@@ -27,15 +30,22 @@ private:
 	int _health;
 	Vector3 _velocity;
 	Camera3D* _camera;
+	AnimationPlayer* _camera_animation_player;
 	Node3D* _camera_pivot;
 	Control* _death_panel;
 	Label* _death_title_label;
 	RichTextLabel* _death_message_label;
 	Button* _grab_button;
 	Button* _revive_button;
+	TextureRect* _thumbstick_panel;
 	Button* _thumbstick_button;
+	bool _dragging_thumbstick;
+	Vector2 _thumbstick_direction;
+	Button* _jump_button;
+	bool _jump_pressed;
 	Label * _stats_label;
 	bool _stats_enabled;
+	bool _climbing;
 
 protected:
 	static void _bind_methods();
@@ -52,7 +62,12 @@ public:
 	void _physics_process(double delta) override;
 	void _process(double delta) override;
 	void _on_revive_pressed();
+	void _on_thumbstick_button_down();
+	void _on_thumbstick_button_up();
+	void _on_jump_button_down();
+	void _on_jump_button_up();
 	void die(String death_title = "YOU DIED", String death_message = "[center]Press revive to respawn...[/center]");
 	void respawn(Vector3 position);
 	void take_damage(int damage);
+	void set_climbing(bool climbing);
 };

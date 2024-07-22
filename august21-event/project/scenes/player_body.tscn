@@ -1,16 +1,37 @@
-[gd_scene load_steps=10 format=3 uid="uid://c0bj2uusm1bfq"]
+[gd_scene load_steps=17 format=3 uid="uid://c0bj2uusm1bfq"]
 
 [ext_resource type="Theme" uid="uid://dbwgna8gjqom8" path="res://assets/default_theme.tres" id="1_d4n6o"]
-[ext_resource type="Texture2D" uid="uid://cfs32uakg8los" path="res://assets/cursor.svg" id="1_hyn0r"]
+[ext_resource type="Texture2D" uid="uid://cfs32uakg8los" path="res://assets/ui/cursor.svg" id="1_hyn0r"]
 [ext_resource type="Texture2D" uid="uid://djqnsus41bq1o" path="res://assets/august21-diagram.png" id="2_07xk3"]
 [ext_resource type="Texture2D" uid="uid://e88undo8tgp7" path="res://assets/vignette.png" id="2_tfkei"]
 [ext_resource type="FontFile" uid="uid://dud2oarn413ue" path="res://assets/impact/impacted.ttf" id="3_eyo4j"]
+[ext_resource type="Texture2D" uid="uid://ba8ol74y6ooqv" path="res://assets/ui/thumbstick_panel.png" id="4_e2urx"]
+[ext_resource type="Texture2D" uid="uid://dw4akatbfigh3" path="res://assets/ui/jump.png" id="4_er1p6"]
+[ext_resource type="Texture2D" uid="uid://ckm6dq07xpykp" path="res://assets/ui/action.png" id="4_jxuab"]
 [ext_resource type="FontFile" uid="uid://bw83ngkm3wrd" path="res://assets/reddit/reddit_sans_regular.woff2" id="4_oyio6"]
 [ext_resource type="PackedScene" uid="uid://djm1sm8xypjdg" path="res://assets/character/character_lowpoly.glb" id="6_ki0f4"]
+[ext_resource type="StyleBox" uid="uid://dic4l7mnvxfeu" path="res://assets/ui/thumbstick_normal_style.tres" id="7_1be6h"]
+[ext_resource type="StyleBox" uid="uid://by4tsy685cytp" path="res://assets/ui/thumbstick_pressed_style.tres" id="8_kdq0u"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_qw2ey"]
 radius = 0.2
 height = 1.8
+
+[sub_resource type="Animation" id="Animation_0xf1g"]
+resource_name = "player_camera_bob"
+length = 2.2
+tracks/0/type = "position_3d"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".")
+tracks/0/interp = 2
+tracks/0/loop_wrap = true
+tracks/0/keys = PackedFloat32Array(0, 1, 0, 0.6, 0, 0.1, 1, 0, 0.594812, 0, 0.3, 1, 0, 0.629081, 0, 0.5, 1, 0, 0.628651, 0, 0.7, 1, 0, 0.580068, 0, 0.844761, 1, 0, 0.61998, 0, 1, 1, 0, 0.612802, 0, 1.17762, 1, 0, 0.589776, 0, 1.35027, 1, 0, 0.630973, 0, 1.53286, 1, 0, 0.629392, 0, 1.71989, 1, 0, 0.583445, 0, 1.95952, 1, 0, 0.626452, 0, 2.1865, 1, 0, 0.6, 0)
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_c550x"]
+_data = {
+"player_camera_bob": SubResource("Animation_0xf1g")
+}
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_a54i1"]
 
@@ -29,6 +50,12 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6, 0)
 unique_name_in_owner = true
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.12, -0.1)
 fov = 70.0
+
+[node name="PlayerCameraAnimationPlayer" type="AnimationPlayer" parent="PlayerCameraPivot"]
+unique_name_in_owner = true
+libraries = {
+"": SubResource("AnimationLibrary_c550x")
+}
 
 [node name="PlayerGui" type="Control" parent="."]
 layout_mode = 3
@@ -72,10 +99,10 @@ expand_mode = 1
 [node name="ChatPanel" type="Panel" parent="PlayerGui"]
 layout_mode = 1
 anchors_preset = -1
-anchor_left = 0.777778
-anchor_top = 0.703704
-anchor_right = 1.0
-anchor_bottom = 1.0
+anchor_left = 0.770833
+anchor_top = 0.691358
+anchor_right = 0.993055
+anchor_bottom = 0.987654
 grow_horizontal = 0
 grow_vertical = 0
 theme_override_styles/panel = SubResource("StyleBoxEmpty_a54i1")
@@ -131,50 +158,105 @@ text = "Send"
 unique_name_in_owner = true
 layout_mode = 1
 anchors_preset = -1
-anchor_left = 0.41
-anchor_top = 0.926
-anchor_right = 0.59
-anchor_bottom = 1.0
-offset_left = -0.320038
-offset_top = -0.0480347
-offset_right = 0.319946
+anchor_left = 0.409722
+anchor_top = 0.901235
+anchor_right = 0.590278
+anchor_bottom = 0.987654
 grow_horizontal = 2
 grow_vertical = 0
-text = "Grab / Use  /  Shoot"
+metadata/_edit_use_anchors_ = true
+
+[node name="HBoxContainer" type="HBoxContainer" parent="PlayerGui/GrabButton"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+alignment = 1
+
+[node name="MarginContainer" type="MarginContainer" parent="PlayerGui/GrabButton/HBoxContainer"]
+layout_mode = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 8
+
+[node name="TextureRect" type="TextureRect" parent="PlayerGui/GrabButton/HBoxContainer/MarginContainer"]
+layout_mode = 2
+texture = ExtResource("4_jxuab")
+expand_mode = 2
 
 [node name="JumpButton" type="Button" parent="PlayerGui"]
 unique_name_in_owner = true
 layout_mode = 1
 anchors_preset = -1
-anchor_left = 0.840278
-anchor_top = 0.802469
-anchor_right = 0.9375
-anchor_bottom = 0.876543
+anchor_left = 0.833333
+anchor_top = 0.777778
+anchor_right = 0.930556
+anchor_bottom = 0.864198
 grow_horizontal = 2
 grow_vertical = 0
-text = "Jump"
 metadata/_edit_use_anchors_ = true
 
-[node name="ThumbstickPanel" type="Panel" parent="PlayerGui"]
+[node name="HBoxContainer" type="HBoxContainer" parent="PlayerGui/JumpButton"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+alignment = 1
+
+[node name="MarginContainer" type="MarginContainer" parent="PlayerGui/JumpButton/HBoxContainer"]
+layout_mode = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 8
+
+[node name="TextureRect" type="TextureRect" parent="PlayerGui/JumpButton/HBoxContainer/MarginContainer"]
+layout_mode = 2
+texture = ExtResource("4_er1p6")
+expand_mode = 2
+stretch_mode = 4
+metadata/_edit_use_anchors_ = true
+
+[node name="ThumbstickPanelContainer" type="AspectRatioContainer" parent="PlayerGui"]
 layout_mode = 1
 anchors_preset = -1
-anchor_top = 0.704
-anchor_right = 0.167
-anchor_bottom = 1.0
-offset_top = -0.192047
-offset_right = -0.384018
-grow_vertical = 0
+anchor_left = 0.00694444
+anchor_top = 0.691358
+anchor_right = 0.173611
+anchor_bottom = 0.987654
+alignment_horizontal = 0
+alignment_vertical = 2
+metadata/_edit_use_anchors_ = true
 
-[node name="ThumbstickButton" type="Button" parent="PlayerGui/ThumbstickPanel"]
+[node name="ThumbstickPanel" type="TextureRect" parent="PlayerGui/ThumbstickPanelContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+texture = ExtResource("4_e2urx")
+expand_mode = 1
+metadata/_edit_use_anchors_ = true
+
+[node name="ThumbstickButton" type="Button" parent="PlayerGui/ThumbstickPanelContainer/ThumbstickPanel"]
 unique_name_in_owner = true
 layout_mode = 1
 anchors_preset = -1
 anchor_left = 0.375
 anchor_top = 0.375
-anchor_right = 0.625
-anchor_bottom = 0.625
+anchor_right = 0.625001
+anchor_bottom = 0.625001
 grow_horizontal = 2
 grow_vertical = 2
+theme_override_styles/normal = ExtResource("7_1be6h")
+theme_override_styles/hover = ExtResource("8_kdq0u")
+theme_override_styles/pressed = ExtResource("8_kdq0u")
+theme_override_styles/focus = ExtResource("8_kdq0u")
+icon_alignment = 1
+expand_icon = true
+metadata/_edit_use_anchors_ = true
 
 [node name="DeathPanel" type="TextureRect" parent="PlayerGui"]
 unique_name_in_owner = true

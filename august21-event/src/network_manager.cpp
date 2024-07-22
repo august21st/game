@@ -25,8 +25,7 @@ namespace NetworkManager {
 	vector<BufReader> poll_next_packets()
 	{
 		auto packets = vector<BufReader>();
-		if (_closed)
-		{
+		if (_closed) {
 			return packets;
 		}
 

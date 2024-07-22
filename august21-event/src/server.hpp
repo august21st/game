@@ -16,10 +16,10 @@ protected:
 	Engine* _engine;
 	DisplayServer* _display_server;
 	map<int, Node*> _entities;
+	static void _bind_methods();
 
 public:
 	Server();
 	~Server();
 	void _ready() override;
-	//void _process(double delta) override;
 };

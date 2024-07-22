@@ -12,10 +12,9 @@
 #include <godot_cpp/core/class_db.hpp>
 #include <godot_cpp/core/method_bind.hpp>
 #include <dataproto_cpp/dataproto.hpp>
-#include <iterator>
-#include <map>
 
 #include "network_manager.hpp"
+//#include "board_mesh.hpp"
 #include "roof.hpp"
 
 using namespace godot;
@@ -38,7 +37,7 @@ void Roof::_bind_methods()
 
 void Roof::_ready()
 {
-	_engine = _engine->get_singleton();
+	_engine = Engine::get_singleton();
 	if (_engine->is_editor_hint()) {
 		return;
 	}
@@ -47,13 +46,16 @@ void Roof::_ready()
 	_floor_area->connect("body_entered", Callable(this, "_on_floor_area_body_entered"));
 
 	_player = get_node<PlayerBody>("%PlayerBody");
-	
+
 	_sky_animation_player = get_node<AnimationPlayer>("%SkyAnimationPlayer");
 	_sky_animation_player->set_current_animation("roof_sky_animation");
 
 	auto roof_sky_animation = _sky_animation_player->get_animation("roof_sky_animation");
 	roof_sky_animation->set_loop_mode(Animation::LoopMode::LOOP_LINEAR);
 	_sky_animation_player->play();
+
+	_board_mesh = get_node<BoardMesh>("%BoardMesh");
+	_board_mesh->load_canvas();
 
 	_random = Ref<RandomNumberGenerator>();
 	_random.instantiate();

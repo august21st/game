@@ -16,6 +16,10 @@ Server::~Server()
 {
 }
 
+void Server::_bind_methods()
+{
+}
+
 void Server::_ready()
 {
     _os = OS::get_singleton();
@@ -27,10 +31,4 @@ void Server::_ready()
     }
 
     _entities = { };
-    //set_process(true);
 }
-
-/*void Server::_process(double delta)
-{
-
-}*/

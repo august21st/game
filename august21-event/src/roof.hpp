@@ -7,6 +7,7 @@
 #include <godot_cpp/classes/random_number_generator.hpp>
 #include <map>
 
+#include "board_mesh.hpp"
 #include "player_body.hpp"
 
 using namespace std;
@@ -19,6 +20,7 @@ protected:
 	Engine* _engine;
 	Area3D* _floor_area;
 	AnimationPlayer* _sky_animation_player;
+	BoardMesh* _board_mesh;
 	Ref<RandomNumberGenerator> _random;
 	PlayerBody* _player;
 	static void _bind_methods();
