@@ -1,6 +1,6 @@
 [gd_resource type="StyleBoxTexture" load_steps=2 format=3 uid="uid://by4tsy685cytp"]
 
-[ext_resource type="Texture2D" uid="uid://rud6r2n3ykb3" path="res://assets/ui/thumbstick_pressed.png" id="1_fonxk"]
+[ext_resource type="Texture2D" uid="uid://csq5gftx5acty" path="res://assets/ui/thumbstick_pressed.svg" id="1_wenrd"]
 
 [resource]
-texture = ExtResource("1_fonxk")
+texture = ExtResource("1_wenrd")

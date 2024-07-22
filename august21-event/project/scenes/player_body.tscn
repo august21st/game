@@ -5,10 +5,10 @@
 [ext_resource type="Texture2D" uid="uid://djqnsus41bq1o" path="res://assets/august21-diagram.png" id="2_07xk3"]
 [ext_resource type="Texture2D" uid="uid://e88undo8tgp7" path="res://assets/vignette.png" id="2_tfkei"]
 [ext_resource type="FontFile" uid="uid://dud2oarn413ue" path="res://assets/impact/impacted.ttf" id="3_eyo4j"]
-[ext_resource type="Texture2D" uid="uid://ba8ol74y6ooqv" path="res://assets/ui/thumbstick_panel.png" id="4_e2urx"]
-[ext_resource type="Texture2D" uid="uid://dw4akatbfigh3" path="res://assets/ui/jump.png" id="4_er1p6"]
-[ext_resource type="Texture2D" uid="uid://ckm6dq07xpykp" path="res://assets/ui/action.png" id="4_jxuab"]
+[ext_resource type="Texture2D" uid="uid://dbqgtn24unsrk" path="res://assets/ui/action.svg" id="4_6pt55"]
 [ext_resource type="FontFile" uid="uid://bw83ngkm3wrd" path="res://assets/reddit/reddit_sans_regular.woff2" id="4_oyio6"]
+[ext_resource type="Texture2D" uid="uid://cs4ysy3e8sryy" path="res://assets/ui/jump.svg" id="5_88up6"]
+[ext_resource type="Texture2D" uid="uid://dwqtdnngtcwy8" path="res://assets/ui/thumbstick_panel.svg" id="6_666c8"]
 [ext_resource type="PackedScene" uid="uid://djm1sm8xypjdg" path="res://assets/character/character_lowpoly.glb" id="6_ki0f4"]
 [ext_resource type="StyleBox" uid="uid://dic4l7mnvxfeu" path="res://assets/ui/thumbstick_normal_style.tres" id="7_1be6h"]
 [ext_resource type="StyleBox" uid="uid://by4tsy685cytp" path="res://assets/ui/thumbstick_pressed_style.tres" id="8_kdq0u"]
@@ -158,9 +158,9 @@ text = "Send"
 unique_name_in_owner = true
 layout_mode = 1
 anchors_preset = -1
-anchor_left = 0.409722
+anchor_left = 0.4375
 anchor_top = 0.901235
-anchor_right = 0.590278
+anchor_right = 0.5625
 anchor_bottom = 0.987654
 grow_horizontal = 2
 grow_vertical = 0
@@ -184,7 +184,7 @@ theme_override_constants/margin_bottom = 8
 
 [node name="TextureRect" type="TextureRect" parent="PlayerGui/GrabButton/HBoxContainer/MarginContainer"]
 layout_mode = 2
-texture = ExtResource("4_jxuab")
+texture = ExtResource("4_6pt55")
 expand_mode = 2
 
 [node name="JumpButton" type="Button" parent="PlayerGui"]
@@ -217,7 +217,7 @@ theme_override_constants/margin_bottom = 8
 
 [node name="TextureRect" type="TextureRect" parent="PlayerGui/JumpButton/HBoxContainer/MarginContainer"]
 layout_mode = 2
-texture = ExtResource("4_er1p6")
+texture = ExtResource("5_88up6")
 expand_mode = 2
 stretch_mode = 4
 metadata/_edit_use_anchors_ = true
@@ -236,7 +236,7 @@ metadata/_edit_use_anchors_ = true
 [node name="ThumbstickPanel" type="TextureRect" parent="PlayerGui/ThumbstickPanelContainer"]
 unique_name_in_owner = true
 layout_mode = 2
-texture = ExtResource("4_e2urx")
+texture = ExtResource("6_666c8")
 expand_mode = 1
 metadata/_edit_use_anchors_ = true
 
