@@ -1,0 +1,3 @@
+[gd_scene format=3 uid="uid://ym7s5kjqo6ag"]
+
+[node name="Server" type="Server"]

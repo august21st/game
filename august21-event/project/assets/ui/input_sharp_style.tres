@@ -1,0 +1,14 @@
+[gd_resource type="StyleBoxTexture" load_steps=2 format=3 uid="uid://cehy8w0idxuml"]
+
+[ext_resource type="Texture2D" uid="uid://clolbagdtugs7" path="res://assets/ui/input_sharp.svg" id="1_883sj"]
+
+[resource]
+content_margin_left = 12.0
+content_margin_top = 12.0
+content_margin_right = 12.0
+content_margin_bottom = 12.0
+texture = ExtResource("1_883sj")
+texture_margin_left = 12.0
+texture_margin_top = 12.0
+texture_margin_right = 12.0
+texture_margin_bottom = 12.0

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg" xmlns:bx="https://boxy-svg.com">
+  <defs>
+    <bx:grid x="0" y="0" width="2" height="2"/>
+  </defs>
+  <rect x="16" width="224" height="8" style="stroke-width: 4px; fill: none;" y="2"/>
+  <rect width="8" height="224.28" style="stroke-width: 4px; fill: none;" y="16" x="2"/>
+  <ellipse style="stroke-width: 4px; fill: none;" cx="14" cy="14" rx="4" ry="4"/>
+  <ellipse style="stroke-width: 4px; fill: none;" cx="14" cy="14" rx="12" ry="12"/>
+  <path d="M 249.071 6.929 C 247.152 5.009 244.905 4 242 4 L 14 4 C 11.095 4 8.848 5.009 6.929 6.929 C 5.009 8.848 4 11.095 4 14 L 4 242 C 4 244.905 5.009 247.152 6.929 249.071 C 8.848 250.991 11.095 252 14 252 L 242 252 C 244.905 252 247.152 250.991 249.071 249.071 C 250.991 247.152 252 244.905 252 242 L 252 14 C 252 11.095 250.991 8.848 249.071 6.929 Z M 251.899 4.101 C 254.323 6.524 256 10.278 256 14 L 256 242 C 256 245.722 254.323 249.476 251.899 251.899 C 249.476 254.323 245.722 256 242 256 L 14 256 C 10.278 256 6.524 254.323 4.101 251.899 C 1.677 249.476 0 245.722 0 242 L 0 14 C 0 10.278 1.677 6.524 4.101 4.101 C 6.524 1.677 10.278 0 14 0 L 242 0 C 245.722 0 249.476 1.677 251.899 4.101 Z" style="fill: rgb(205, 205, 205);"/>
+  <rect x="-240" width="224" height="8" style="stroke-width: 4px; fill: none;" y="-254" transform="matrix(-1, 0, 0, -1, 0, 0)"/>
+  <ellipse style="stroke-width: 4px; fill: none;" cx="-242" cy="-242" rx="4" ry="4" transform="matrix(-1, 0, 0, -1, 0, 0)"/>
+  <ellipse style="stroke-width: 4px; fill: none;" cx="-242" cy="-242" rx="12" ry="12" transform="matrix(-1, 0, 0, -1, 0, 0)"/>
+</svg>
