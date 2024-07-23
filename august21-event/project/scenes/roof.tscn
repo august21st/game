@@ -1,10 +1,12 @@
-[gd_scene load_steps=62 format=3 uid="uid://dh3f0fyoo6ibo"]
+[gd_scene load_steps=68 format=3 uid="uid://dh3f0fyoo6ibo"]
 
 [ext_resource type="Material" uid="uid://dhejphsc088k2" path="res://assets/concrete/concrete.tres" id="1_bacw7"]
 [ext_resource type="PackedScene" uid="uid://c0bj2uusm1bfq" path="res://scenes/player_body.tscn" id="3_3xjkh"]
 [ext_resource type="Texture2D" uid="uid://tpgj7natv128" path="res://assets/skybox/roof_sky.png" id="3_oboqe"]
 [ext_resource type="PackedScene" uid="uid://ca7n3vrq5gy37" path="res://assets/rplace_logo.glb" id="4_o0vqv"]
 [ext_resource type="Texture2D" uid="uid://c5tmyq4qeg1gf" path="res://assets/concrete/concrete.png" id="4_sbhyi"]
+[ext_resource type="Material" uid="uid://7ob7uwp8gnn7" path="res://assets/chair/plywood.tres" id="5_vkl7b"]
+[ext_resource type="Texture2D" uid="uid://pqivc2xifl8u" path="res://assets/stall/free_pixels_sign.png" id="6_jap0l"]
 [ext_resource type="PackedScene" uid="uid://cqs3omeen5ext" path="res://assets/clouds_cone.glb" id="7_k73ar"]
 [ext_resource type="Texture2D" uid="uid://cmt1bh1b0hrie" path="res://assets/signpost/leap_of_faith.png" id="7_rss4r"]
 [ext_resource type="Material" uid="uid://bfjx4pf6sb5q0" path="res://assets/circular_vortex/circular_vortex.tres" id="7_td0np"]
@@ -83,13 +85,26 @@ rings = 2
 albedo_texture = ExtResource("4_sbhyi")
 
 [sub_resource type="PlaneMesh" id="PlaneMesh_rmmtj"]
-size = Vector2(48, 48)
+size = Vector2(60, 60)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_sk8h7"]
 shading_mode = 0
 specular_mode = 2
 albedo_texture = ExtResource("4_sbhyi")
 texture_filter = 0
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_gc2up"]
+size = Vector3(62, 0.2, 62)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_r4poq"]
+size = Vector3(3, 1, 1)
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_x87vj"]
+size = Vector2(2.6, 0.8)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ny3bq"]
+transparency = 1
+albedo_texture = ExtResource("6_jap0l")
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_6wnrb"]
 size = Vector3(16, 20, 2)
@@ -283,13 +298,13 @@ process_material = SubResource("ParticleProcessMaterial_13gme")
 draw_pass_1 = SubResource("SphereMesh_8nvlb")
 
 [node name="WoodenChair" parent="RplaceHQ" instance=ExtResource("11_2jt52")]
-transform = Transform3D(-0.5, 0, -0.866025, 0, 1, 0, 0.866025, 0, -0.5, -28.8807, 0, -28.1515)
+transform = Transform3D(-0.5, 0, -0.866025, 0, 1, 0, 0.866025, 0, -0.5, -28.8807, 0.1, -28.1515)
 
 [node name="WoodenChair2" parent="RplaceHQ" instance=ExtResource("11_2jt52")]
-transform = Transform3D(-0.965926, 0, -0.258819, 0, 1, 0, 0.258819, 0, -0.965926, -27.4526, 0, -29.7765)
+transform = Transform3D(-0.965926, 0, -0.258819, 0, 1, 0, 0.258819, 0, -0.965926, -27.4526, 0.1, -29.7765)
 
 [node name="RoofDoor" type="CSGPolygon3D" parent="RplaceHQ"]
-transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, -17, 0, -29)
+transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, -17, 0.1, -29)
 polygon = PackedVector2Array(5.2, 3.6, 5.2, 0.8, 5.6, 0.8, 5.6, 0.4, 6, 0.4, 6, 0, -1, 0, -0.2, 2.4)
 depth = 3.0
 material = ExtResource("1_bacw7")
@@ -307,9 +322,27 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, 0)
 mesh = SubResource("PlaneMesh_rmmtj")
 surface_material_override/0 = SubResource("StandardMaterial3D_sk8h7")
 
-[node name="CSGBox3D" type="CSGBox3D" parent="RplaceHQ"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, -28)
+[node name="CollisionShape3D" type="CollisionShape3D" parent="RplaceHQ/CanvasFloorBody"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, 0)
+shape = SubResource("BoxShape3D_gc2up")
+
+[node name="PixelStall2" type="StaticBody3D" parent="RplaceHQ"]
+transform = Transform3D(1, 0, 1.74846e-07, 0, 1, 0, -1.74846e-07, 0, 1, 0, 1.5, 31.5)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="RplaceHQ/PixelStall2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.98023e-08, 0, 0)
+shape = SubResource("BoxShape3D_r4poq")
+
+[node name="PixelsSignMesh" type="MeshInstance3D" parent="RplaceHQ/PixelStall2"]
+transform = Transform3D(-1, 1.74846e-07, -8.74228e-08, 8.74228e-08, -4.37114e-08, -1, -1.74846e-07, -1, 4.37114e-08, 4.45852e-08, 0, -0.51)
+mesh = SubResource("PlaneMesh_x87vj")
+skeleton = NodePath("")
+surface_material_override/0 = SubResource("StandardMaterial3D_ny3bq")
+
+[node name="StallModel" type="CSGBox3D" parent="RplaceHQ/PixelStall2"]
+transform = Transform3D(-1, 0, 2.62269e-07, 0, 1, 0, -2.62269e-07, 0, -1, 0, 0, 0)
 size = Vector3(3, 1, 1)
+material = ExtResource("5_vkl7b")
 
 [node name="RplaceLogoBody" type="StaticBody3D" parent="RplaceHQ"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -22, 32)

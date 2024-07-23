@@ -23,6 +23,11 @@
 #include <godot_cpp/classes/texture_rect.hpp>
 #include <godot_cpp/core/class_db.hpp>
 #include <godot_cpp/variant/vector2.hpp>
+#include <godot_cpp/classes/tween.hpp>
+#include <godot_cpp/classes/property_tweener.hpp>
+#include <godot_cpp/classes/callback_tweener.hpp>
+#include <godot_cpp/classes/viewport.hpp>
+#include <godot_cpp/classes/window.hpp>
 
 #include "player_body.hpp"
 
@@ -34,7 +39,8 @@ const float ACCELERATION = 12.0f;
 const float DECELERATION = 10.0f;
 const float JUMP_SPEED = 5.0f;
 const float MOUSE_SENSITIVITY = 0.001f;
-const float FALL_DAMAGE_THRESHOLD = 1.0f;
+const float FALL_DAMAGE_THRESHOLD = 5.2f;
+const float FALL_DAMAGE_MIN = 4.0f;
 const int DEFAULT_HEALTH = 100;
 const float STILL_THRESHOLD  = 0.1;
 const float PI = 3.14159265358979f;
@@ -94,6 +100,12 @@ void PlayerBody::update_stats()
 	_stats_label->set_text(stats_string);
 }
 
+void PlayerBody::update_hotbar()
+{
+	auto health_label = String("Health: {0} / Holding: {1}").format(Array::make(_health, "Nothing"));
+	_health_label->set_text(health_label);
+}
+
 void PlayerBody::_bind_methods()
 {
 	ClassDB::bind_method(D_METHOD("_on_revive_pressed"),
@@ -106,6 +118,12 @@ void PlayerBody::_bind_methods()
 		&PlayerBody::_on_jump_button_down);
 	ClassDB::bind_method(D_METHOD("_on_jump_button_up"),
 		&PlayerBody::_on_jump_button_up);
+	ClassDB::bind_method(D_METHOD("_on_chat_button_pressed"),
+		&PlayerBody::_on_chat_button_pressed);
+	ClassDB::bind_method(D_METHOD("_on_chat_close_button_pressed"),
+		&PlayerBody::_on_chat_close_button_pressed);
+	ClassDB::bind_method(D_METHOD("_on_chat_close_tween_completed"),
+			&PlayerBody::_on_chat_close_tween_completed);
 }
 
 void PlayerBody::_ready()
@@ -126,6 +144,7 @@ void PlayerBody::_ready()
 	_death_title_label = get_node<Label>("%DeathTitleLabel");
 	_death_message_label = get_node<RichTextLabel>("%DeathMessageLabel");
 	_stats_label = get_node<Label>("%StatsLabel");
+	_health_label = get_node<Label>("%HealthLabel");
 	_grab_button = get_node<Button>("%ReviveButton");
 	_revive_button = get_node<Button>("%ReviveButton");
 	_revive_button->connect("pressed", Callable(this, "_on_revive_pressed"));
@@ -139,8 +158,15 @@ void PlayerBody::_ready()
 	_jump_button->connect("button_down", Callable(this, "_on_jump_button_down"));
 	_jump_button->connect("button_up", Callable(this, "_on_jump_button_up"));
 	_jump_pressed = false;
+	_chat_button = get_node<Button>("%ChatButton");
+	_chat_button->connect("pressed", Callable(this, "_on_chat_button_pressed"));
+	_chat_close_button = get_node<Button>("%ChatCloseButton");
+	_chat_close_button->connect("pressed", Callable(this, "_on_chat_close_button_pressed"));
+	_chat_panel = get_node<Panel>("%ChatPanel");
+	_chat_panel->set_visible(false);
 	_velocity = Vector3(0, 0, 0);
 	_health = DEFAULT_HEALTH;
+	_is_dead = false;
 	_death_panel->set_visible(false);
 	_climbing = false;
 	spawn_position = get_position();
@@ -248,16 +274,20 @@ void PlayerBody::_physics_process(double delta)
 
 		// Jump
 		if (is_on_floor()) {
-			if (_player_input->is_action_pressed("jump") || _jump_pressed) {
-				_velocity.y = JUMP_SPEED;
-			}
-			else if (_velocity.y != 0) {
-				auto fall_speed = (int) Math::floor(Math::floor(_velocity.y));
+			if (_velocity.y != 0) {
+				auto fall_speed = (float) -_velocity.y;
 				if (fall_speed > FALL_DAMAGE_THRESHOLD) {
-					take_damage(fall_speed * 2);
+					// (x=_velocity.y, y=fall_damage), a=FALL_DAMAGE_THRESHOLD, b=0, c=32, d=9.4, b=FALL_DAMAGE_MIN
+					// f\left(x\right)=\frac{d-b}{\left(c-a\right)2}\left(x-a\right)^{2}+b
+					auto fall_damage = (9.4f / Math::pow(32.0f - FALL_DAMAGE_THRESHOLD, 2.0f))
+						* Math::pow(fall_speed - FALL_DAMAGE_THRESHOLD, 2.0f) + FALL_DAMAGE_MIN;
+					take_damage(fall_damage);
 				}
 
 				_velocity.y = 0;
+			}
+			if (_player_input->is_action_pressed("jump") || _jump_pressed) {
+				_velocity.y = JUMP_SPEED;
 			}
 		}
 	}
@@ -299,6 +329,7 @@ void PlayerBody::_process(double delta)
 	if (_stats_enabled) {
 		update_stats();
 	}
+	update_hotbar();
 }
 
 void PlayerBody::_on_revive_pressed()
@@ -329,10 +360,60 @@ void PlayerBody::_on_jump_button_up()
 	_jump_pressed = false;
 }
 
+void PlayerBody::open_chat()
+{
+	auto viewport_size = get_viewport()->get_window()->get_size();
+	_chat_panel->set_position(Vector2(viewport_size.x, 0));
+	_chat_panel->set_scale(Vector2(0.8, 0.8));
+
+	_chat_panel->set_visible(true);
+	_player_input->set_mouse_mode(Input::MOUSE_MODE_VISIBLE);
+
+	auto chat_tween = create_tween();
+	chat_tween->set_parallel(true);
+	chat_tween->tween_property(_chat_panel, "position", Vector2(viewport_size.x - _chat_panel->get_size().x, 0), 0.2)
+		->set_trans(Tween::TransitionType::TRANS_QUAD)
+		->set_ease(Tween::EASE_OUT);
+	chat_tween->tween_property(_chat_panel, "scale", Vector2(1.0, 1.0), 0.2)
+		->set_trans(Tween::TransitionType::TRANS_QUAD)
+		->set_ease(Tween::EASE_OUT);
+	chat_tween->play();
+}
+
+void PlayerBody::close_chat()
+{
+	auto viewport_size = get_viewport()->get_window()->get_size();
+
+	auto chat_tween = create_tween();
+	chat_tween->tween_property(_chat_panel, "position", Vector2(viewport_size.x, 0), 0.2)
+		->set_trans(Tween::TransitionType::TRANS_QUAD)
+		->set_ease(Tween::EASE_IN);
+	chat_tween->parallel()->tween_property(_chat_panel, "scale", Vector2(0.8, 0.8), 0.2)
+		->set_trans(Tween::TransitionType::TRANS_QUAD)
+		->set_ease(Tween::EASE_IN);
+	chat_tween->tween_callback(Callable(this, "_on_chat_close_tween_completed"));
+	chat_tween->play();
+}
+
+void PlayerBody::_on_chat_close_tween_completed()
+{
+	_chat_panel->set_visible(false);
+}
+
+void PlayerBody::_on_chat_button_pressed()
+{
+	open_chat();
+}
+
+void PlayerBody::_on_chat_close_button_pressed()
+{
+	close_chat();
+}
+
 void PlayerBody::take_damage(int damage)
 {
 	_health -= damage;
-	if (_health < 0) {
+	if (_health <= 0 && !_is_dead) {
 		die();
 	}
 }
@@ -342,14 +423,17 @@ void PlayerBody::respawn(Vector3 position)
 	set_position(position);
 	_camera_pivot->set_rotation(Vector3(90, 0, 0));
 	set_rotation(Vector3(0, 0, 0));
-	_player_input->set_mouse_mode(godot::Input::MOUSE_MODE_CAPTURED);
+	_player_input->set_mouse_mode(Input::MOUSE_MODE_CAPTURED);
 	_death_panel->set_visible(false);
 	_health = DEFAULT_HEALTH;
+	_is_dead = false;
 }
 
 void PlayerBody::die(String death_title, String death_mesage)
 {
-	_player_input->set_mouse_mode(godot::Input::MOUSE_MODE_VISIBLE);
+	_health = 0;
+	_is_dead = true;
+	_player_input->set_mouse_mode(Input::MOUSE_MODE_VISIBLE);
 	_death_panel->set_visible(true);
 	_death_title_label->set_text(death_title);
 	_death_message_label->set_text(death_mesage);

@@ -5,16 +5,21 @@
 using namespace godot;
 using namespace dataproto;
 
-namespace NetworkManager {
-	enum ServerPacket {
-		CONFIGURATION = 0,
-		LOADING_INFO = 1,
-		START = 2,
-		ENTITY_CREATE = 16,
-		ENTITY_UPDATE = 17,
-		ENTITY_DELETE = 18
-	};
+class NetworkManager : public Object {
+	GDCLASS(NetworkManager, Object)
 
+private:
+	bool _closed;
+	Ref<WebSocketPeer> _socket;
+
+protected:
+	static void _bind_methods();
+
+public:
+	NetworkManager();
+	~NetworkManager();
 	void init_client(String url);
+	bool get_closed();
+	Ref<WebSocketPeer> get_socket();
 	vector<BufReader> poll_next_packets();
-}
+};

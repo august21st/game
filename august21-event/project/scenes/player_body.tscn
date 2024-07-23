@@ -33,7 +33,12 @@ _data = {
 "player_camera_bob": SubResource("Animation_0xf1g")
 }
 
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_a54i1"]
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_s8dch"]
+bg_color = Color(0.0784314, 0.0784314, 0.0784314, 0.784314)
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_right = 14
+corner_radius_bottom_left = 14
 
 [node name="PlayerBody" type="PlayerBody"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
@@ -96,64 +101,6 @@ pivot_offset = Vector2(8, 8)
 texture = ExtResource("1_hyn0r")
 expand_mode = 1
 
-[node name="ChatPanel" type="Panel" parent="PlayerGui"]
-layout_mode = 1
-anchors_preset = -1
-anchor_left = 0.770833
-anchor_top = 0.691358
-anchor_right = 0.993055
-anchor_bottom = 0.987654
-grow_horizontal = 0
-grow_vertical = 0
-theme_override_styles/panel = SubResource("StyleBoxEmpty_a54i1")
-metadata/_edit_use_anchors_ = true
-
-[node name="VBoxContainer" type="VBoxContainer" parent="PlayerGui/ChatPanel"]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-
-[node name="ScrollContainer" type="ScrollContainer" parent="PlayerGui/ChatPanel/VBoxContainer"]
-layout_mode = 2
-size_flags_vertical = 3
-horizontal_scroll_mode = 0
-
-[node name="MarginContainer" type="MarginContainer" parent="PlayerGui/ChatPanel/VBoxContainer/ScrollContainer"]
-layout_mode = 2
-theme_override_constants/margin_left = 4
-theme_override_constants/margin_top = 4
-theme_override_constants/margin_right = 4
-
-[node name="VBoxContainer" type="VBoxContainer" parent="PlayerGui/ChatPanel/VBoxContainer/ScrollContainer/MarginContainer"]
-layout_mode = 2
-
-[node name="Message" type="Label" parent="PlayerGui/ChatPanel/VBoxContainer/ScrollContainer/MarginContainer/VBoxContainer"]
-layout_mode = 2
-text = "[test] message"
-
-[node name="MarginContainer" type="MarginContainer" parent="PlayerGui/ChatPanel/VBoxContainer"]
-layout_mode = 2
-theme_override_constants/margin_left = 4
-theme_override_constants/margin_top = 4
-theme_override_constants/margin_right = 4
-theme_override_constants/margin_bottom = 4
-metadata/_edit_use_anchors_ = true
-
-[node name="HBoxContainer" type="HBoxContainer" parent="PlayerGui/ChatPanel/VBoxContainer/MarginContainer"]
-layout_mode = 2
-
-[node name="ChatInput" type="TextEdit" parent="PlayerGui/ChatPanel/VBoxContainer/MarginContainer/HBoxContainer"]
-layout_mode = 2
-size_flags_horizontal = 3
-placeholder_text = "Enter message..."
-
-[node name="SendButton" type="Button" parent="PlayerGui/ChatPanel/VBoxContainer/MarginContainer/HBoxContainer"]
-layout_mode = 2
-text = "Send"
-
 [node name="GrabButton" type="Button" parent="PlayerGui"]
 unique_name_in_owner = true
 layout_mode = 1
@@ -191,13 +138,12 @@ expand_mode = 2
 unique_name_in_owner = true
 layout_mode = 1
 anchors_preset = -1
-anchor_left = 0.833333
+anchor_left = 0.8125
 anchor_top = 0.777778
-anchor_right = 0.930556
+anchor_right = 0.909723
 anchor_bottom = 0.864198
 grow_horizontal = 2
 grow_vertical = 0
-metadata/_edit_use_anchors_ = true
 
 [node name="HBoxContainer" type="HBoxContainer" parent="PlayerGui/JumpButton"]
 layout_mode = 1
@@ -222,13 +168,25 @@ expand_mode = 2
 stretch_mode = 4
 metadata/_edit_use_anchors_ = true
 
+[node name="ChatButton" type="Button" parent="PlayerGui"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.916667
+anchor_top = 0.777778
+anchor_right = 0.972223
+anchor_bottom = 0.864198
+grow_horizontal = 2
+grow_vertical = 0
+text = "Chat"
+
 [node name="ThumbstickPanelContainer" type="AspectRatioContainer" parent="PlayerGui"]
 layout_mode = 1
 anchors_preset = -1
-anchor_left = 0.00694444
-anchor_top = 0.691358
-anchor_right = 0.173611
-anchor_bottom = 0.987654
+anchor_left = 0.0277778
+anchor_top = 0.654321
+anchor_right = 0.194444
+anchor_bottom = 0.950617
 alignment_horizontal = 0
 alignment_vertical = 2
 metadata/_edit_use_anchors_ = true
@@ -257,6 +215,118 @@ theme_override_styles/focus = ExtResource("8_kdq0u")
 icon_alignment = 1
 expand_icon = true
 metadata/_edit_use_anchors_ = true
+
+[node name="HealthLabel" type="Label" parent="PlayerGui"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.395833
+anchor_top = 0.802469
+anchor_right = 0.604167
+anchor_bottom = 0.884259
+text = "Health: 100 / Holding: Chair"
+horizontal_alignment = 1
+vertical_alignment = 1
+metadata/_edit_use_anchors_ = true
+
+[node name="ChatPanel" type="Panel" parent="PlayerGui"]
+unique_name_in_owner = true
+clip_contents = true
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.763889
+anchor_right = 1.0
+anchor_bottom = 1.0
+pivot_offset = Vector2(136, 324)
+theme_override_styles/panel = SubResource("StyleBoxFlat_s8dch")
+metadata/_edit_use_anchors_ = true
+
+[node name="BorderPanel" type="Panel" parent="PlayerGui/ChatPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="PlayerGui/ChatPanel/BorderPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 12
+
+[node name="VBoxContainer" type="VBoxContainer" parent="PlayerGui/ChatPanel/BorderPanel/MarginContainer"]
+layout_mode = 2
+
+[node name="ScrollContainer" type="ScrollContainer" parent="PlayerGui/ChatPanel/BorderPanel/MarginContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="MarginContainer" type="MarginContainer" parent="PlayerGui/ChatPanel/BorderPanel/MarginContainer/VBoxContainer/ScrollContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 4
+
+[node name="VBoxContainer" type="VBoxContainer" parent="PlayerGui/ChatPanel/BorderPanel/MarginContainer/VBoxContainer/ScrollContainer/MarginContainer"]
+layout_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="PlayerGui/ChatPanel/BorderPanel/MarginContainer/VBoxContainer/ScrollContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_stretch_ratio = 0.0
+
+[node name="ChatTitleLabel" type="Label" parent="PlayerGui/ChatPanel/BorderPanel/MarginContainer/VBoxContainer/ScrollContainer/MarginContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 1)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 24
+text = "Live chat:"
+
+[node name="Spacer" type="Control" parent="PlayerGui/ChatPanel/BorderPanel/MarginContainer/VBoxContainer/ScrollContainer/MarginContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="ChatCloseButton" type="Button" parent="PlayerGui/ChatPanel/BorderPanel/MarginContainer/VBoxContainer/ScrollContainer/MarginContainer/VBoxContainer/HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Close"
+
+[node name="ChatMessagesContainer" type="VBoxContainer" parent="PlayerGui/ChatPanel/BorderPanel/MarginContainer/VBoxContainer/ScrollContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="Message" type="Label" parent="PlayerGui/ChatPanel/BorderPanel/MarginContainer/VBoxContainer/ScrollContainer/MarginContainer/VBoxContainer/ChatMessagesContainer"]
+layout_mode = 2
+text = "[test] message"
+
+[node name="MarginContainer" type="MarginContainer" parent="PlayerGui/ChatPanel/BorderPanel/MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 4
+theme_override_constants/margin_bottom = 4
+metadata/_edit_use_anchors_ = true
+
+[node name="HBoxContainer" type="HBoxContainer" parent="PlayerGui/ChatPanel/BorderPanel/MarginContainer/VBoxContainer/MarginContainer"]
+layout_mode = 2
+
+[node name="ChatInput" type="TextEdit" parent="PlayerGui/ChatPanel/BorderPanel/MarginContainer/VBoxContainer/MarginContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "Enter message..."
+
+[node name="SendButton" type="Button" parent="PlayerGui/ChatPanel/BorderPanel/MarginContainer/VBoxContainer/MarginContainer/HBoxContainer"]
+layout_mode = 2
+text = "Send"
 
 [node name="DeathPanel" type="TextureRect" parent="PlayerGui"]
 unique_name_in_owner = true

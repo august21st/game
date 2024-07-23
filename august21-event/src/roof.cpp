@@ -14,12 +14,13 @@
 #include <dataproto_cpp/dataproto.hpp>
 
 #include "network_manager.hpp"
-//#include "board_mesh.hpp"
+#include "network_shared.hpp"
+#include "board_mesh.hpp"
 #include "roof.hpp"
 
 using namespace godot;
 using namespace dataproto;
-using namespace NetworkManager;
+using namespace NetworkShared;
 
 Roof::Roof()
 {
@@ -40,6 +41,11 @@ void Roof::_ready()
 	_engine = Engine::get_singleton();
 	if (_engine->is_editor_hint()) {
 		return;
+	}
+
+	_network_manager = (NetworkManager*) _engine->get_singleton("NetworkManager");
+	if (_network_manager == nullptr) {
+		UtilityFunctions::printerr("Could not initialise network manager: singleton was null");
 	}
 
 	_floor_area = get_node<Area3D>("%FloorArea");
@@ -79,7 +85,7 @@ void Roof::_process(double delta)
 		return;
 	}
 
-	auto packets = poll_next_packets();
+	auto packets = _network_manager->poll_next_packets();
 	for (BufReader packet : packets) {
 		uint8_t code = packet.u8();
 		switch (code) {

@@ -9,8 +9,9 @@
 #include "climbable_area.hpp"
 #include "intro.hpp"
 #include "board_mesh.hpp"
+#include "network_manager.hpp"
 #include "roof.hpp"
-//#include "server.hpp"
+#include "server.hpp"
 
 using namespace godot;
 
@@ -26,8 +27,9 @@ void initialize_gdextension_types(ModuleInitializationLevel p_level)
 	GDREGISTER_CLASS(Intro);
 	GDREGISTER_CLASS(Roof);
 	GDREGISTER_CLASS(BoardMesh);
-	//GDREGISTER_CLASS(Server);
-	//Engine::get_singleton()->register_singleton("Server", memnew(Server));
+	GDREGISTER_CLASS(Server);
+	GDREGISTER_CLASS(NetworkManager);
+	Engine::get_singleton()->register_singleton("NetworkManager", memnew(NetworkManager));
 }
 
 void uninitialize_gdextension_types(ModuleInitializationLevel p_level)

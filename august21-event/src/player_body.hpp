@@ -28,6 +28,7 @@ private:
 	Input* _player_input;
 	float _gravity;
 	int _health;
+	bool _is_dead;
 	Vector3 _velocity;
 	Camera3D* _camera;
 	AnimationPlayer* _camera_animation_player;
@@ -43,7 +44,11 @@ private:
 	Vector2 _thumbstick_direction;
 	Button* _jump_button;
 	bool _jump_pressed;
+	Button* _chat_button;
+	Button* _chat_close_button;
+	Panel* _chat_panel;
 	Label * _stats_label;
+	Label* _health_label;
 	bool _stats_enabled;
 	bool _climbing;
 
@@ -51,6 +56,7 @@ protected:
 	static void _bind_methods();
 	void set_stats_enabled(bool enable);
 	void update_stats();
+	void update_hotbar();
 
 public:
 	PlayerBody();
@@ -66,8 +72,13 @@ public:
 	void _on_thumbstick_button_up();
 	void _on_jump_button_down();
 	void _on_jump_button_up();
+	void _on_chat_button_pressed();
+	void _on_chat_close_button_pressed();
+	void _on_chat_close_tween_completed();
 	void die(String death_title = "YOU DIED", String death_message = "[center]Press revive to respawn...[/center]");
 	void respawn(Vector3 position);
 	void take_damage(int damage);
 	void set_climbing(bool climbing);
+	void open_chat();
+	void close_chat();
 };

@@ -1,8 +1,10 @@
-[gd_resource type="Theme" load_steps=4 format=3 uid="uid://dbwgna8gjqom8"]
+[gd_resource type="Theme" load_steps=6 format=3 uid="uid://dbwgna8gjqom8"]
 
 [ext_resource type="FontFile" uid="uid://vo3twycs6ve7" path="res://assets/reddit/reddit_sans_bold.woff2" id="1_iduiu"]
 [ext_resource type="StyleBox" uid="uid://cupxj4f1qn4oh" path="res://assets/ui/button_normal_style.tres" id="2_7r2se"]
 [ext_resource type="StyleBox" uid="uid://diw7iubo4674i" path="res://assets/ui/button_pressed_style.tres" id="3_eb574"]
+[ext_resource type="StyleBox" uid="uid://df16cx8gfsva4" path="res://assets/ui/panel_style.tres" id="4_24lr0"]
+[ext_resource type="StyleBox" uid="uid://k5s3s73ijpgx" path="res://assets/ui/input_style.tres" id="5_tdgoo"]
 
 [resource]
 default_font = ExtResource("1_iduiu")
@@ -13,3 +15,8 @@ Button/styles/focus = ExtResource("2_7r2se")
 Button/styles/hover = ExtResource("3_eb574")
 Button/styles/normal = ExtResource("2_7r2se")
 Button/styles/pressed = ExtResource("3_eb574")
+LineEdit/styles/focus = ExtResource("5_tdgoo")
+LineEdit/styles/normal = ExtResource("5_tdgoo")
+Panel/styles/panel = ExtResource("4_24lr0")
+TextEdit/styles/focus = ExtResource("5_tdgoo")
+TextEdit/styles/normal = ExtResource("5_tdgoo")

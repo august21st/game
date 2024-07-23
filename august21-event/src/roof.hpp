@@ -7,6 +7,7 @@
 #include <godot_cpp/classes/random_number_generator.hpp>
 #include <map>
 
+#include "network_manager.hpp"
 #include "board_mesh.hpp"
 #include "player_body.hpp"
 
@@ -18,6 +19,7 @@ class Roof : public Node3D {
 
 protected:
 	Engine* _engine;
+	NetworkManager* _network_manager;
 	Area3D* _floor_area;
 	AnimationPlayer* _sky_animation_player;
 	BoardMesh* _board_mesh;
