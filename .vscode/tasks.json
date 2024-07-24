@@ -6,7 +6,7 @@
             "group": "build",
             "type": "shell",
             "command": "scons",
-            "args": [ /*"dev_build=yes",*/ ],
+            "args": [ "dev_build=yes" ],
             "problemMatcher": "$msCompile",
             "options": {
                 "cwd": "${workspaceFolder}/august21-event"

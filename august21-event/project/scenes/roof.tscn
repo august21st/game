@@ -397,6 +397,7 @@ directional_shadow_mode = 1
 
 [node name="PlayerBody" parent="." instance=ExtResource("3_3xjkh")]
 unique_name_in_owner = true
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.1, 0)
 
 [node name="SkyVortexMesh" type="CSGMesh3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, -1, 1.50996e-07, 0, -1.50996e-07, -1, 0, 512, 0)

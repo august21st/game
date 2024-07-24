@@ -3,7 +3,7 @@
 namespace NetworkShared {
 	enum ServerPacket {
 		CONFIGURATION = 0,
-		LOADING_INFO = 1,
+		GAME_INFO = 1,
 		START = 2,
 		ENTITY_CREATE = 16,
 		ENTITY_UPDATE = 17,

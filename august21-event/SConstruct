@@ -9,7 +9,7 @@ def normalize_path(val, env):
 def validate_parent_dir(key, val, env):
 	if not os.path.isdir(normalize_path(os.path.dirname(val), env)):
 		raise UserError("'%s' is not a directory: %s" % (key, os.path.dirname(val)))
-	
+
 def get_filename(libname, env):
 	filename = "{}{}{}".format(libname, env["suffix"], env["SHLIBSUFFIX"])
 
@@ -63,17 +63,21 @@ compilation_db = env.CompilationDatabase(
 env.Alias("compiledb", compilation_db)
 
 env = SConscript("godot-cpp/SConstruct", {"env": env, "customs": customs})
-_, dataproto_library = SConscript("dataproto-cpp/SConstruct", {"env": env.Clone(), "customs": customs})
 source_dirs = find_directories("src/")
 env.Append(CPPPATH=source_dirs)
-dataproto_include_dirs = find_directories("#dataproto-cpp/include")
-env.Append(CPPPATH=dataproto_include_dirs)
 
 # Dataproto
-dataproto_file = get_filename("dataproto", env)
-dataproto_installdir = "{}/bin/{}".format(source_projectdir, env["platform"])
-dataproto_installpath = "{}/lib{}".format(dataproto_installdir, dataproto_file)
-dataproto_copy = env.InstallAs(dataproto_installpath, dataproto_library)
+dataproto_include_dirs = find_directories("dataproto-cpp/include")
+env.Append(CPPPATH=dataproto_include_dirs)
+source_dirs += dataproto_include_dirs
+dataproto_source_dirs = find_directories("dataproto-cpp/src/")
+env.Append(CPPPATH=dataproto_source_dirs)
+source_dirs += dataproto_source_dirs
+
+# CommandIO
+command_io_source_dirs = find_directories("commandIO-cpp/src/")
+env.Append(CPPPATH=command_io_source_dirs)
+source_dirs += command_io_source_dirs
 
 # Source
 sources = []
@@ -84,9 +88,6 @@ source_file = get_filename(source_libname, env)
 # Build output from env.SharedLibrary to 'august21-event/bin/{platform}/...'
 source_libfile = "bin/{}/{}".format(env["platform"], source_file)
 
-env.Append(LIBS=[dataproto_file])
-env.Append(LIBPATH=[dataproto_installdir])
-
 source_library = env.SharedLibrary(
 	source_libfile,
 	source=sources
@@ -94,7 +95,7 @@ source_library = env.SharedLibrary(
 source_installpath = "{}/bin/{}/lib{}".format(source_projectdir, env["platform"], source_file)
 source_copy = env.InstallAs(source_installpath, source_library)
 
-default_args = [source_library, source_copy, dataproto_copy]
+default_args = [source_library, source_copy]
 if localEnv.get("compiledb", False):
 	default_args += [compilation_db]
 Default(*default_args)

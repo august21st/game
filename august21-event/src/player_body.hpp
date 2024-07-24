@@ -8,6 +8,7 @@
 #include <godot_cpp/classes/project_settings.hpp>
 #include <godot_cpp/classes/camera3d.hpp>
 #include <godot_cpp/classes/control.hpp>
+#include <godot_cpp/classes/line_edit.hpp>
 #include <godot_cpp/classes/button.hpp>
 #include <godot_cpp/classes/panel.hpp>
 #include <godot_cpp/classes/label.hpp>
@@ -47,6 +48,8 @@ private:
 	Button* _chat_button;
 	Button* _chat_close_button;
 	Panel* _chat_panel;
+	LineEdit* _chat_input;
+	Button* _chat_send_button;
 	Label * _stats_label;
 	Label* _health_label;
 	bool _stats_enabled;

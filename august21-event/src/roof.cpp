@@ -13,6 +13,7 @@
 #include <godot_cpp/core/method_bind.hpp>
 #include <dataproto_cpp/dataproto.hpp>
 
+#include "godot_cpp/templates/hash_map.hpp"
 #include "network_manager.hpp"
 #include "network_shared.hpp"
 #include "board_mesh.hpp"
@@ -22,7 +23,7 @@ using namespace godot;
 using namespace dataproto;
 using namespace NetworkShared;
 
-Roof::Roof()
+Roof::Roof() : _network_manager(nullptr)
 {
 }
 
@@ -85,37 +86,39 @@ void Roof::_process(double delta)
 		return;
 	}
 
-	auto packets = _network_manager->poll_next_packets();
-	for (BufReader packet : packets) {
-		uint8_t code = packet.u8();
-		switch (code) {
-			case ServerPacket::ENTITY_CREATE: {
-				auto id = packet.u32();
-				auto type_str = packet.str().copy();
-				auto type = String(type_str);
-				std::free(type_str);
-				break;
-			}
-			case ServerPacket::ENTITY_UPDATE: {
-				auto id = packet.u32();
-				if (_entities[id] == nullptr) {
-					UtilityFunctions::print("roof: Couldn't update entity with id {0}, entity not found.",
-						Array::make(id));
+	if (_network_manager != nullptr) {
+		auto packets = _network_manager->poll_next_packets();
+		for (BufReader packet : packets) {
+			uint8_t code = packet.u8();
+			switch (code) {
+				case ServerPacket::ENTITY_CREATE: {
+					auto id = packet.u32();
+					auto type_str = packet.str().copy();
+					auto type = String(type_str);
+					std::free(type_str);
 					break;
 				}
-				auto property_str = packet.str().copy();
-				auto property = String(property_str);
-				std::free(property_str);
-				break;
-			}
-			case ServerPacket::ENTITY_DELETE: {
-				auto id = packet.u32();
-				if (_entities[id] == nullptr) {
-					UtilityFunctions::print("roof: Couldn't delete entity with id {0}, entity not found.",
-						Array::make(id));
+				case ServerPacket::ENTITY_UPDATE: {
+					auto id = packet.u32();
+					if (_entities[id] == nullptr) {
+						UtilityFunctions::print("roof: Couldn't update entity with id {0}, entity not found.",
+							Array::make(id));
+						break;
+					}
+					auto property_str = packet.str().copy();
+					auto property = String(property_str);
+					std::free(property_str);
 					break;
 				}
-				break;
+				case ServerPacket::ENTITY_DELETE: {
+					auto id = packet.u32();
+					if (_entities[id] == nullptr) {
+						UtilityFunctions::print("roof: Couldn't delete entity with id {0}, entity not found.",
+							Array::make(id));
+						break;
+					}
+					break;
+				}
 			}
 		}
 	}

@@ -5,3 +5,4 @@ CompileFlags:
     - "-Iaugust21-event/godot-cpp/gdextension"
     - "-Iaugust21-event/godot-cpp/include"
     - "-Iaugust21-event/dataproto-cpp/include"
+    - "-Iaugust21-event/commandIO-cpp/src"

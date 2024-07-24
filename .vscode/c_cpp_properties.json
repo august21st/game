@@ -8,7 +8,8 @@
                 "${workspaceFolder}/august21-event/godot-cpp/gen/include",
                 "${workspaceFolder}/august21-event/godot-cpp/gdextension",
                 "${workspaceFolder}/august21-event/godot-cpp/include",
-                "${workspaceFolder}/august21-event/dataproto-cpp/include"
+                "${workspaceFolder}/august21-event/dataproto-cpp/include",
+                "${workspaceFolder}/august21-event/commandIO-cpp/src"
             ],
             "defines": [],
             "compilerPath": "/usr/bin/gcc",

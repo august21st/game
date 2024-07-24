@@ -319,12 +319,14 @@ metadata/_edit_use_anchors_ = true
 [node name="HBoxContainer" type="HBoxContainer" parent="PlayerGui/ChatPanel/BorderPanel/MarginContainer/VBoxContainer/MarginContainer"]
 layout_mode = 2
 
-[node name="ChatInput" type="TextEdit" parent="PlayerGui/ChatPanel/BorderPanel/MarginContainer/VBoxContainer/MarginContainer/HBoxContainer"]
+[node name="ChatInput" type="LineEdit" parent="PlayerGui/ChatPanel/BorderPanel/MarginContainer/VBoxContainer/MarginContainer/HBoxContainer"]
+unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
-placeholder_text = "Enter message..."
+placeholder_text = "Send message..."
 
-[node name="SendButton" type="Button" parent="PlayerGui/ChatPanel/BorderPanel/MarginContainer/VBoxContainer/MarginContainer/HBoxContainer"]
+[node name="ChatSendButton" type="Button" parent="PlayerGui/ChatPanel/BorderPanel/MarginContainer/VBoxContainer/MarginContainer/HBoxContainer"]
+unique_name_in_owner = true
 layout_mode = 2
 text = "Send"
 

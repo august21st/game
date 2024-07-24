@@ -6,7 +6,7 @@
 using namespace godot;
 using namespace dataproto;
 
-NetworkManager::NetworkManager() : _closed(true)
+NetworkManager::NetworkManager() : _closed(true), _socket(Ref<WebSocketPeer>())
 {
 }
 

@@ -11,6 +11,7 @@
 #include <godot_cpp/classes/camera3d.hpp>
 #include <godot_cpp/classes/control.hpp>
 #include <godot_cpp/classes/panel.hpp>
+#include <godot_cpp/classes/line_edit.hpp>
 #include <godot_cpp/classes/button.hpp>
 #include <godot_cpp/variant/utility_functions.hpp>
 #include <godot_cpp/classes/label.hpp>
@@ -164,6 +165,8 @@ void PlayerBody::_ready()
 	_chat_close_button->connect("pressed", Callable(this, "_on_chat_close_button_pressed"));
 	_chat_panel = get_node<Panel>("%ChatPanel");
 	_chat_panel->set_visible(false);
+	_chat_input = get_node<LineEdit>("%ChatInput");
+	_chat_send_button = get_node<Button>("%ChatSendButton");
 	_velocity = Vector3(0, 0, 0);
 	_health = DEFAULT_HEALTH;
 	_is_dead = false;
@@ -368,6 +371,7 @@ void PlayerBody::open_chat()
 
 	_chat_panel->set_visible(true);
 	_player_input->set_mouse_mode(Input::MOUSE_MODE_VISIBLE);
+	_chat_input->grab_focus();
 
 	auto chat_tween = create_tween();
 	chat_tween->set_parallel(true);
@@ -383,6 +387,7 @@ void PlayerBody::open_chat()
 void PlayerBody::close_chat()
 {
 	auto viewport_size = get_viewport()->get_window()->get_size();
+	_chat_input->release_focus();
 
 	auto chat_tween = create_tween();
 	chat_tween->tween_property(_chat_panel, "position", Vector2(viewport_size.x, 0), 0.2)
