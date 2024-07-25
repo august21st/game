@@ -303,6 +303,8 @@ size_flags_vertical = 3
 [node name="ChatMessagesContainer" type="VBoxContainer" parent="PlayerGui/ChatPanel/BorderPanel/MarginContainer/VBoxContainer/MarginContainer2/VBoxContainer/ScrollContainer"]
 unique_name_in_owner = true
 layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
 
 [node name="MarginContainer" type="MarginContainer" parent="PlayerGui/ChatPanel/BorderPanel/MarginContainer/VBoxContainer"]
 layout_mode = 2
