@@ -16,6 +16,10 @@
 #include <godot_cpp/classes/rich_text_label.hpp>
 #include <godot_cpp/classes/animation_player.hpp>
 #include <godot_cpp/classes/performance.hpp>
+#include <godot_cpp/templates/hash_map.hpp>
+#include <godot_cpp/classes/v_box_container.hpp>
+
+#include "network_manager.hpp"
 
 using namespace godot;
 
@@ -24,6 +28,7 @@ class PlayerBody : public CharacterBody3D {
 
 private:
 	Engine* _engine;
+	NetworkManager* _network_manager;
 	Performance* _performance;
 	ProjectSettings* _project_settings;
 	Input* _player_input;
@@ -50,10 +55,12 @@ private:
 	Panel* _chat_panel;
 	LineEdit* _chat_input;
 	Button* _chat_send_button;
+	VBoxContainer* _chat_messages_container;
 	Label * _stats_label;
 	Label* _health_label;
 	bool _stats_enabled;
 	bool _climbing;
+	HashMap<int, Node*> _entities;
 
 protected:
 	static void _bind_methods();
@@ -78,6 +85,7 @@ public:
 	void _on_chat_button_pressed();
 	void _on_chat_close_button_pressed();
 	void _on_chat_close_tween_completed();
+	void _on_chat_send_button_pressed();
 	void die(String death_title = "YOU DIED", String death_message = "[center]Press revive to respawn...[/center]");
 	void respawn(Vector3 position);
 	void take_damage(int damage);

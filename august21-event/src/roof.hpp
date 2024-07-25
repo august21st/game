@@ -5,7 +5,6 @@
 #include <godot_cpp/classes/animation.hpp>
 #include <godot_cpp/classes/animation_player.hpp>
 #include <godot_cpp/classes/random_number_generator.hpp>
-#include <godot_cpp/templates/hash_map.hpp>
 
 #include "network_manager.hpp"
 #include "board_mesh.hpp"
@@ -42,12 +41,10 @@ protected:
 		"\n[center][rainbow freq=1.0 sat=0.8 val=0.8]🪑 is 🔥, 🕳️ is 🔥, and you too[/rainbow][/center]",
 		"\n[center]Peace never was an opinion...\n- Goose from Untitled Goose Game[/center]"
 	};
-	HashMap<int, Node*> _entities;
 
 public:
 	Roof();
 	~Roof();
 	void _ready() override;
-	void _process(double delta) override;
 	void _on_floor_area_body_entered(Node3D* body);
 };

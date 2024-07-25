@@ -2,6 +2,7 @@
 #include <dataproto_cpp/dataproto.hpp>
 
 #include "network_manager.hpp"
+#include "godot_cpp/classes/web_socket_peer.hpp"
 
 using namespace godot;
 using namespace dataproto;
@@ -29,6 +30,30 @@ void NetworkManager::init_client(String url)
 		UtilityFunctions::printerr(String("dataproto error: {0}").format(Array::make(str_reason)));
 	});
 	_closed = false;
+}
+
+Ref<WebSocketPeer> NetworkManager::get_socket()
+{
+	return _socket;
+}
+
+Error NetworkManager::send(BufWriter* packet)
+{
+	send(packet->data(), packet->size());
+	return Error::OK;
+}
+
+Error NetworkManager::send(const char* data, size_t size)
+{
+	if (!_socket.is_valid()) {
+		return Error::ERR_UNAVAILABLE;
+	}
+
+	PackedByteArray packed_data;
+    packed_data.resize(size);
+    memcpy(packed_data.ptrw(), data, size);
+    _socket->put_packet(packed_data);
+    return Error::OK;
 }
 
 vector<BufReader> NetworkManager::poll_next_packets()

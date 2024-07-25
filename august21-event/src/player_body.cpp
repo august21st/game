@@ -29,10 +29,16 @@
 #include <godot_cpp/classes/callback_tweener.hpp>
 #include <godot_cpp/classes/viewport.hpp>
 #include <godot_cpp/classes/window.hpp>
+#include <godot_cpp/classes/web_socket_peer.hpp>
+#include <godot_cpp/classes/v_box_container.hpp>
 
 #include "player_body.hpp"
+#include "network_shared.hpp"
+#include "dataproto_cpp/dataproto.hpp"
+#include "server.hpp"
 
 using namespace godot;
+using namespace NetworkShared;
 
 const float MAX_SPEED = 6.0f;
 const float MAX_CLIMB_SPEED = 5.0f;
@@ -66,7 +72,7 @@ static Vector2 circular_clamp(const Vector2& vector, const Vector2& min, const V
     return vector;
 }
 
-PlayerBody::PlayerBody()
+PlayerBody::PlayerBody() : _network_manager(nullptr)
 {
 }
 
@@ -125,6 +131,8 @@ void PlayerBody::_bind_methods()
 		&PlayerBody::_on_chat_close_button_pressed);
 	ClassDB::bind_method(D_METHOD("_on_chat_close_tween_completed"),
 			&PlayerBody::_on_chat_close_tween_completed);
+	ClassDB::bind_method(D_METHOD("_on_chat_send_button_pressed"),
+		&PlayerBody::_on_chat_send_button_pressed);
 }
 
 void PlayerBody::_ready()
@@ -132,6 +140,11 @@ void PlayerBody::_ready()
 	_engine = Engine::get_singleton();
 	if (_engine->is_editor_hint()) {
 		return;
+	}
+
+	_network_manager = (NetworkManager*) _engine->get_singleton("NetworkManager");
+	if (_network_manager == nullptr) {
+		UtilityFunctions::printerr("Could not initialise network manager: singleton was null");
 	}
 
 	_performance = Performance::get_singleton();
@@ -167,11 +180,14 @@ void PlayerBody::_ready()
 	_chat_panel->set_visible(false);
 	_chat_input = get_node<LineEdit>("%ChatInput");
 	_chat_send_button = get_node<Button>("%ChatSendButton");
+	_chat_send_button->connect("pressed", Callable(this, "_on_chat_send_button_pressed"));
+	_chat_messages_container = get_node<VBoxContainer>("%ChatMessagesContainer");
 	_velocity = Vector3(0, 0, 0);
 	_health = DEFAULT_HEALTH;
 	_is_dead = false;
 	_death_panel->set_visible(false);
 	_climbing = false;
+	_entities = { };
 	spawn_position = get_position();
 	set_stats_enabled(false);
 	set_process_input(true);
@@ -232,6 +248,7 @@ void PlayerBody::_unhandled_input(const Ref<InputEvent> &event)
 		_player_input->set_mouse_mode(godot::Input::MOUSE_MODE_CAPTURED);
 	}
 }
+
 
 void PlayerBody::_physics_process(double delta)
 {
@@ -329,10 +346,74 @@ void PlayerBody::_process(double delta)
 	if (_engine->is_editor_hint()) {
 		return;
 	}
+
+	// Update UI
 	if (_stats_enabled) {
 		update_stats();
 	}
 	update_hotbar();
+
+	// Handle packets
+	if (_network_manager != nullptr) {
+		auto packets = _network_manager->poll_next_packets();
+		for (BufReader packet : packets) {
+			uint8_t code = packet.u8();
+			switch (code) {
+				case ServerPacket::CREATE_ENTITY: {
+					auto id = packet.u32();
+					auto type_str = (string) packet.str().copy();
+					auto type = String(type_str.c_str());
+					break;
+				}
+				case ServerPacket::UPDATE_ENTITY: {
+					auto id = packet.u32();
+					if (_entities[id] == nullptr) {
+						UtilityFunctions::print("Couldn't update entity with id {0}: entity not found.",
+							Array::make(id));
+						break;
+					}
+					auto property_str = (string) packet.str();
+					auto property = String(property_str.c_str());
+					break;
+				}
+				case ServerPacket::DELETE_ENTITY: {
+					auto id = packet.u32();
+					if (_entities[id] == nullptr) {
+						UtilityFunctions::print("Couldn't delete entity with id {0}: entity not found.",
+							Array::make(id));
+						break;
+					}
+					break;
+				}
+				case ServerPacket::SET_PHASE: {
+					auto phase_name_str = string(packet.str());
+					auto phase_name = String(phase_name_str.c_str());
+					if (phase_name == "roof") {
+						get_tree()->change_scene_to_file("res://scenes/roof.tscn");
+					}
+					else {
+						UtilityFunctions::printerr("Could not set phase to ", phase_name, ": unknown phase");
+					}
+					break;
+				}
+				case ServerPacket::CHAT_MESSAGE: {
+					// TODO: These
+					auto player_id = packet.i32();
+					auto user_id = packet.i32();
+					auto chat_name_str = string(packet.str());
+
+					auto message_str = string(packet.str());
+					auto message = String(message_str.c_str());
+
+					auto message_label = memnew(Label);
+					message_label->set_text(message);
+					message_label->set_autowrap_mode(TextServer::AutowrapMode::AUTOWRAP_WORD_SMART);
+					_chat_messages_container->add_child(message_label);
+					break;
+				}
+			}
+		}
+	}
 }
 
 void PlayerBody::_on_revive_pressed()
@@ -413,6 +494,21 @@ void PlayerBody::_on_chat_button_pressed()
 void PlayerBody::_on_chat_close_button_pressed()
 {
 	close_chat();
+}
+
+void PlayerBody::_on_chat_send_button_pressed()
+{
+	if (_network_manager == nullptr) {
+		UtilityFunctions::printerr("Could not send chat message: socket was null or closed");
+		return;
+	}
+
+	auto chat_packet = new BufWriter();
+	chat_packet->u8(ClientPacket::SEND_CHAT_MESSAGE);
+	auto chat_message = _chat_input->get_text();
+	chat_packet->str(chat_message.ptr(), chat_message.length());
+	_network_manager->send(chat_packet);
+	delete chat_packet;
 }
 
 void PlayerBody::take_damage(int damage)

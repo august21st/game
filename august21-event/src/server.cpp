@@ -70,6 +70,7 @@ void Server::_ready()
 
 	_entities = { };
 	_game_time = 0.0L;
+	_tick_count = 0;
 	_engine->set_physics_ticks_per_second(TPS);
 	set_process(true);
 	set_physics_process(true);
@@ -89,30 +90,30 @@ void Server::_physics_process(double delta)
 			}
 			auto sender = _clients[sender_id];
 			auto data = _socket_server->get_packet();
-			UtilityFunctions::print("Data received from client ", sender_id, ": ", data);
 			auto packet = BufReader((char*) data.ptr(), data.size());
 			auto code = packet.u8();
 			switch (code) {
-				case ClientPacket::AUTHENTICATE_LINKAGE: {
+				case ClientPacket::LINK_KEY: {
 					auto link_key = packet.str();
 					// TODO: Authenticate link key with server, set user int ID, retrieve chat name... etc
 					break;
 				}
-				case ClientPacket::MOVEMENT_UPDATE: {
+				case ClientPacket::UPDATE_POSITION: {
 					break;
 				}
-				case ClientPacket::DROP_ACTION: {
+				case ClientPacket::ACTION_DROP: {
 					break;
 				}
-				case ClientPacket::GRAB_ACTION: {
+				case ClientPacket::ACTION_GRAB: {
 					break;
 				}
-				case ClientPacket::CHAT_MESSAGE: {
-					auto message = packet.str();
+				case ClientPacket::SEND_CHAT_MESSAGE: {
+					auto message = (string) packet.str();
 					auto chat_packet = new BufWriter();
-					chat_packet->u8(ServerPacket::CLIENT_CHAT_MESSAGE);
-					chat_packet->i32(0); // TODO: entity_id
+					chat_packet->u8(ServerPacket::CHAT_MESSAGE);
+					chat_packet->i32(0); // TODO: player_id
 					chat_packet->i32(0); // TODO: user_int_id
+					string anon = "anon"; chat_packet->str(anon); // TODO: chat_name
 					chat_packet->str(message);
 					send_to_all(chat_packet);
 					delete chat_packet;
@@ -122,7 +123,7 @@ void Server::_physics_process(double delta)
 		}
 
 		// Every 2s update player count
-		if (((int) Math::floor(_game_time)) % 2 == 0) {
+		if (_tick_count % (TPS * 2) == 0) {
 			auto game_info_packet = new BufWriter();
 			game_info_packet->u8(ServerPacket::GAME_INFO);
 			game_info_packet->u32((uint32_t) _clients.size());
@@ -133,26 +134,25 @@ void Server::_physics_process(double delta)
 
 	// Run game loop
 	_game_time += delta;
+	_tick_count++;
 }
 
 void Server::_on_peer_connected(int id)
 {
 	Ref<WebSocketPeer> client = _socket_server->get_peer(id);
 	_clients[id] = client;
-	UtilityFunctions::print("Client connected: ", id);
 }
 
 void Server::_on_peer_disconnected(int id)
 {
 	_clients.erase(id);
-	UtilityFunctions::print("Client disconnected: ", id);
 }
 
 void Server::run_console_loop()
 {
 	ReplIO repl;
 	while (interface(repl,
-		func(pack(this, &Server::set_phase), "phase", "Set the game phase to the specified stage",
+		func(pack(this, &Server::set_phase), "set_phase", "Set the game phase to the specified stage",
 			param("name", "String name of phase")),
 		func(pack(this, &Server::create_entity), "create_entity", "Create a new entity of specified type",
 			param("type", "Node type name of entity to be created")),
@@ -171,11 +171,18 @@ void Server::run_console_loop()
 			param("scene", "String name of scene in which to teleport player"),
 			param("x", "X-coordinate of new location"),
 			param("y", "Y-coordinate of new location"),
-			param("z", "Z-coordinate of new location"))));
+			param("z", "Z-coordinate of new location")),
+		func(pack(this, &Server::announce), "announce", "Send a message to all connected players",
+			param("message", "Chat message to be broadcast"))));
 }
 
 void Server::set_phase(string name)
 {
+	auto phase_packet = new BufWriter();
+	phase_packet->u8(ServerPacket::SET_PHASE);
+	phase_packet->str(name);
+	send_to_all(phase_packet);
+	delete phase_packet;
 }
 
 void Server::create_entity(string type)
@@ -192,6 +199,13 @@ void Server::update_entity(int id, string property, string value)
 
 void Server::list_players()
 {
+	auto player_list = String("Showing {0} players:")
+		.format(Array::make(_clients.size()));
+	for (auto client : _clients) {
+		player_list += client.key;
+		player_list += "\n";
+	}
+	UtilityFunctions::print(player_list);
 }
 
 void Server::kill_player(int id)
@@ -200,10 +214,29 @@ void Server::kill_player(int id)
 
 void Server::kick_player(int id)
 {
+	if (!_clients.has(id)) {
+		UtilityFunctions::print("Could not kick player ", id, ": Player not found");
+		return;
+	}
+
+	_clients[id]->close(4000, "You were kicked from the server");
 }
 
 void Server::tp_player(string scene, int x, int y, int z)
 {
+}
+
+void Server::announce(string message)
+{
+	auto chat_packet = new BufWriter();
+	chat_packet->u8(ServerPacket::CHAT_MESSAGE);
+	chat_packet->i32(0); // player_id
+	chat_packet->i32(0); // user_int_id
+	string anon = "SERVER@AUGUST21-EVENT";
+	chat_packet->str(anon); // chat_name
+	chat_packet->str(message);
+	send_to_all(chat_packet);
+	delete chat_packet;
 }
 
 void Server::send_to_all(BufWriter* packet)

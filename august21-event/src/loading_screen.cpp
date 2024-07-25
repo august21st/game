@@ -4,6 +4,7 @@
 #include <godot_cpp/classes/label.hpp>
 #include <godot_cpp/variant/utility_functions.hpp>
 #include <godot_cpp/classes/web_socket_peer.hpp>
+#include <godot_cpp/classes/scene_tree.hpp>
 #include <dataproto_cpp/dataproto.hpp>
 
 #include "loading_screen.hpp"
@@ -58,7 +59,7 @@ void LoadingScreen::_process(double delta)
 		for (BufReader packet : packets) {
 			uint8_t code = packet.u8();
 			switch (code) {
-				case ServerPacket::CONFIGURATION: {
+				case ServerPacket::LINK_RESPONSE: {
 					break;
 				}
 				case ServerPacket::GAME_INFO: {
@@ -68,8 +69,15 @@ void LoadingScreen::_process(double delta)
 					_players_label->set_text(formatted_count);
 					break;
 				}
-				case ServerPacket::START: {
-					UtilityFunctions::print("loading_screen: Starting game...");
+				case ServerPacket::SET_PHASE: {
+					auto phase_name_str = (string) packet.str();
+					auto phase_name = String(phase_name_str.c_str());
+					if (phase_name == "roof") {
+						get_tree()->change_scene_to_file("res://scenes/roof.tscn");
+					}
+					else {
+						UtilityFunctions::printerr("Could not set phase to ", phase_name, ": unknown phase");
+					}
 					break;
 				}
 			}

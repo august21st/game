@@ -19,7 +19,8 @@ public:
 	NetworkManager();
 	~NetworkManager();
 	void init_client(String url);
-	bool get_closed();
+	Error send(BufWriter* packet);
+	Error send(const char* data, size_t size);
 	Ref<WebSocketPeer> get_socket();
 	vector<BufReader> poll_next_packets();
 };

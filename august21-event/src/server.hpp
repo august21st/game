@@ -24,6 +24,7 @@ private:
 	Ref<WebSocketMultiplayerPeer> _socket_server;
 	Ref<Thread> _console_thread;
 	double _game_time;
+	int _tick_count;
 	HashMap<int, Ref<WebSocketPeer>> _clients;
 	List<Node*> _entities;
 
@@ -41,12 +42,13 @@ public:
 	void run_console_loop();
 	void set_phase(string name);
 	void create_entity(string type);
-	void delete_entity(int id);
 	void update_entity(int id, string property, string value);
+	void delete_entity(int id);
 	void list_players();
 	void kill_player(int id);
 	void kick_player(int id);
 	void tp_player(string scene, int x, int y, int z);
+	void announce(string message);
 	void send_to_all(BufWriter* packet);
 	void send_to_all(const char* data, size_t size);
 	void send(int id, BufWriter* packet);
