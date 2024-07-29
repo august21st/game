@@ -21,6 +21,11 @@ config/icon="res://assets/rplace_gold.svg"
 [autoload]
 
 GlobalServer="*res://scenes/server.tscn"
+GlobalClient="*res://scenes/client.tscn"
+
+[display]
+
+window/vsync/vsync_mode=0
 
 [dotnet]
 
@@ -40,6 +45,7 @@ folder_colors={
 
 [filesystem]
 
+import/blender/enabled=false
 import/fbx/enabled=false
 
 [input]

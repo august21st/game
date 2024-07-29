@@ -13,7 +13,10 @@
 #include <godot_cpp/core/method_bind.hpp>
 #include <dataproto_cpp/dataproto.hpp>
 #include <godot_cpp/templates/hash_map.hpp>
+#include <godot_cpp/classes/scene_tree.hpp>
+#include <godot_cpp/classes/window.hpp>
 
+#include "client.hpp"
 #include "board_mesh.hpp"
 #include "roof.hpp"
 
@@ -38,6 +41,12 @@ void Roof::_ready()
 {
 	_engine = Engine::get_singleton();
 	if (_engine->is_editor_hint()) {
+		return;
+	}
+
+	_client = get_tree()->get_root()->get_node<Client>("/root/GlobalClient");
+	if (_client == nullptr) {
+		UtilityFunctions::printerr("Could not get client: autoload singleton was null");
 		return;
 	}
 

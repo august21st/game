@@ -19,7 +19,7 @@
 #include <godot_cpp/templates/hash_map.hpp>
 #include <godot_cpp/classes/v_box_container.hpp>
 
-#include "network_manager.hpp"
+#include "client.hpp"
 
 using namespace godot;
 
@@ -28,7 +28,7 @@ class PlayerBody : public CharacterBody3D {
 
 private:
 	Engine* _engine;
-	NetworkManager* _network_manager;
+	Client* _client;
 	Performance* _performance;
 	ProjectSettings* _project_settings;
 	Input* _player_input;
@@ -85,6 +85,7 @@ public:
 	void _on_chat_button_pressed();
 	void _on_chat_close_button_pressed();
 	void _on_chat_close_tween_completed();
+	void _on_packet_received(PackedByteArray packed_packet);
 	void _on_chat_send_button_pressed();
 	void die(String death_title = "YOU DIED", String death_message = "[center]Press revive to respawn...[/center]");
 	void respawn(Vector3 position);
