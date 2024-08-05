@@ -1,3 +1,169 @@
-[gd_scene format=3 uid="uid://dtk5blgx8msq8"]
+[gd_scene load_steps=6 format=3 uid="uid://dtk5blgx8msq8"]
+
+[ext_resource type="Theme" uid="uid://dbwgna8gjqom8" path="res://assets/default_theme.tres" id="1_ce75g"]
+[ext_resource type="StyleBox" uid="uid://b7hyoe2nep4ja" path="res://assets/panel_background_style.tres" id="2_qo466"]
+[ext_resource type="Texture2D" uid="uid://bs5bpra4x4bvj" path="res://assets/place_text_bubble.png" id="3_3mkms"]
+[ext_resource type="Texture2D" uid="uid://x655ls7qa32w" path="res://assets/corrupted_pyramids.png" id="4_4pcmh"]
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_cw870"]
+texture = ExtResource("3_3mkms")
+texture_margin_left = 20.0
+texture_margin_top = 21.0
+texture_margin_right = 20.0
+texture_margin_bottom = 39.0
 
 [node name="Client" type="Client"]
+
+[node name="ClientScene" type="Node3D" parent="."]
+unique_name_in_owner = true
+
+[node name="ClientGui" type="Control" parent="."]
+unique_name_in_owner = true
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 1
+theme = ExtResource("1_ce75g")
+
+[node name="StatsLabel" type="Label" parent="ClientGui"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 0.277778
+anchor_bottom = 0.197531
+metadata/_edit_use_anchors_ = true
+
+[node name="PauseButton" type="Button" parent="ClientGui"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -72.0
+offset_top = 8.0
+offset_right = -8.00024
+offset_bottom = 71.9999
+grow_horizontal = 0
+text = "| |"
+
+[node name="PausePanel" type="Panel" parent="ClientGui"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.00694444
+anchor_top = 0.0123457
+anchor_right = 0.993056
+anchor_bottom = 0.987654
+theme_override_styles/panel = ExtResource("2_qo466")
+metadata/_edit_use_anchors_ = true
+
+[node name="PanelBorder" type="Panel" parent="ClientGui/PausePanel"]
+clip_contents = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="PanelOverlayRect" type="TextureRect" parent="ClientGui/PausePanel/PanelBorder"]
+self_modulate = Color(1, 1, 1, 0.243137)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("4_4pcmh")
+expand_mode = 1
+stretch_mode = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="ClientGui/PausePanel"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.361111
+anchor_top = 0.197531
+anchor_right = 0.638889
+anchor_bottom = 0.790123
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 8
+alignment = 1
+metadata/_edit_use_anchors_ = true
+
+[node name="Label" type="Label" parent="ClientGui/PausePanel/VBoxContainer"]
+layout_mode = 2
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 1)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 36
+text = "Options:"
+
+[node name="HBoxContainer" type="HBoxContainer" parent="ClientGui/PausePanel/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Label" type="Label" parent="ClientGui/PausePanel/VBoxContainer/HBoxContainer"]
+custom_minimum_size = Vector2(80, 0)
+layout_mode = 2
+text = "Volume:"
+
+[node name="VolumeSlider" type="HSlider" parent="ClientGui/PausePanel/VBoxContainer/HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+value = 100.0
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="ClientGui/PausePanel/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Label" type="Label" parent="ClientGui/PausePanel/VBoxContainer/HBoxContainer2"]
+custom_minimum_size = Vector2(80, 0)
+layout_mode = 2
+text = "Graphics:"
+
+[node name="GraphicsOptions" type="OptionButton" parent="ClientGui/PausePanel/VBoxContainer/HBoxContainer2"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_colors/font_pressed_color = Color(0, 0, 0, 1)
+theme_override_colors/font_hover_color = Color(0, 0, 0, 1)
+theme_override_colors/font_hover_pressed_color = Color(0, 0, 0, 1)
+theme_override_colors/font_focus_color = Color(0, 0, 0, 1)
+theme_override_constants/modulate_arrow = 1
+item_count = 2
+selected = 1
+fit_to_longest_item = false
+popup/item_0/text = "Potato qualiy"
+popup/item_0/id = 1
+popup/item_1/text = "High quality"
+popup/item_1/id = 0
+
+[node name="BackButton" type="Button" parent="ClientGui/PausePanel/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Back to game"
+
+[node name="QuitButton" type="Button" parent="ClientGui/PausePanel/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Quit"
+
+[node name="VolumeLabel" type="RichTextLabel" parent="ClientGui/PausePanel"]
+unique_name_in_owner = true
+layout_mode = 0
+offset_right = 298.0
+offset_bottom = 80.0
+pivot_offset = Vector2(149, 80)
+theme_override_colors/default_color = Color(0, 0, 0, 1)
+theme_override_colors/font_shadow_color = Color(1, 0.67062, 0.522109, 1)
+theme_override_styles/normal = SubResource("StyleBoxTexture_cw870")
+fit_content = true
+scroll_active = false
+autowrap_mode = 0
+metadata/_edit_use_anchors_ = true

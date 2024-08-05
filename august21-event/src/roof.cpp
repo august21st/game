@@ -15,6 +15,12 @@
 #include <godot_cpp/templates/hash_map.hpp>
 #include <godot_cpp/classes/scene_tree.hpp>
 #include <godot_cpp/classes/window.hpp>
+#include <godot_cpp/classes/directional_light3d.hpp>
+#include <godot_cpp/classes/resource.hpp>
+#include <godot_cpp/classes/environment.hpp>
+#include <godot_cpp/classes/camera3d.hpp>
+#include <godot_cpp/classes/resource_loader.hpp>
+#include <godot_cpp/classes/world_environment.hpp>
 
 #include "client.hpp"
 #include "board_mesh.hpp"
@@ -35,6 +41,8 @@ void Roof::_bind_methods()
 {
 	ClassDB::bind_method(D_METHOD("_on_floor_area_body_entered", "body"),
 		&Roof::_on_floor_area_body_entered);
+	ClassDB::bind_method(D_METHOD("_on_graphics_quality_changed", "level"),
+		&Roof::_on_graphics_quality_changed);
 }
 
 void Roof::_ready()
@@ -49,11 +57,15 @@ void Roof::_ready()
 		UtilityFunctions::printerr("Could not get client: autoload singleton was null");
 		return;
 	}
+	_client->connect("graphics_quality_changed", Callable(this, "_on_graphics_quality_changed"));
+	_player = _client->get_player_body();
+
+	_resource_loader = ResourceLoader::get_singleton();
+
+	_sun_light = get_node<DirectionalLight3D>("%SunLight");
 
 	_floor_area = get_node<Area3D>("%FloorArea");
 	_floor_area->connect("body_entered", Callable(this, "_on_floor_area_body_entered"));
-
-	_player = get_node<PlayerBody>("%PlayerBody");
 
 	_sky_animation_player = get_node<AnimationPlayer>("%SkyAnimationPlayer");
 	_sky_animation_player->set_current_animation("roof_sky_animation");
@@ -77,4 +89,30 @@ void Roof::_on_floor_area_body_entered(Node3D* body)
 		_player->die(_death_titles[death_title_i], _death_messages[death_message_i]);
 		UtilityFunctions::print("roof: Player killed (fell out of map bounds)");
 	}
+}
+
+void Roof::_on_graphics_quality_changed(int level)
+{
+	String environment_path;
+	if (level == 0) {
+		environment_path = "res://assets/roof_environment_high.tres";
+	}
+	else if (level == 1) {
+		environment_path = "res://assets/roof_environment_low.tres";
+	}
+	auto environment_resource = _resource_loader->load(environment_path);
+	if (environment_resource.is_valid() && environment_resource->is_class("Environment")) {
+		const Ref<Environment> environment = environment_resource;
+		if (!environment.is_valid()) {
+			UtilityFunctions::printerr("Failed to load enviromnent: resource was invalid");
+		}
+		else {
+			_world_environment->set_environment(environment);
+		}
+	}
+	else {
+		UtilityFunctions::printerr("Failed to load environment: file not found");
+	}
+
+	_sun_light->set_shadow(level == 0 ? false : true);
 }

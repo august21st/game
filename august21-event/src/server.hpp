@@ -10,6 +10,8 @@
 #include <godot_cpp/classes/thread.hpp>
 #include <godot_cpp/templates/hash_map.hpp>
 
+#include "client.hpp"
+
 using namespace godot;
 using namespace std;
 using namespace dataproto;
@@ -21,6 +23,7 @@ private:
 	OS *_os;
 	Engine *_engine;
 	DisplayServer *_display_server;
+	Client* _loopback_client;
 	Ref<WebSocketMultiplayerPeer> _socket_server;
 	Ref<Thread> _console_thread;
 	double _game_time;

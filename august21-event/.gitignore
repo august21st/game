@@ -2,9 +2,27 @@
 .godot/
 *.kra~
 *blend1
-project/export/*
+*.kate-swp
+project/android
 project/assets/skybox/cubemap/*
 !project/assets/skybox/cubemap/.gitkeep
+
+# Ignore exports - keep directory structure for ease
+project/export/*
+!project/export/android
+project/export/android/*
+!project/export/android/.gitkeep
+!project/export/linux
+project/export/linux/*
+!project/export/linux/.gitkeep
+!project/export/macos
+project/export/macos/*
+!project/export/macos/.gitkeep
+!project/export/windows
+project/export/windows/*
+!project/export/windows/.gitkeep
+project/export/web/*
+!project/export/web/.gitkeep
 
 # Ignore library files in project but not the gdextension file
 project/bin/*
@@ -23,7 +41,6 @@ project/bin/windows/*
 project/bin/web/*
 !project/bin/web/.gitkeep
 !project/bin/*.gdextension
-project/android
 .sconsign*.dblite
 
 # Ignore custom.py

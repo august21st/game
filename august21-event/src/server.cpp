@@ -3,10 +3,13 @@
 #include <godot_cpp/variant/utility_functions.hpp>
 #include <godot_cpp/classes/thread.hpp>
 #include <godot_cpp/templates/hash_map.hpp>
+#include <godot_cpp/classes/scene_tree.hpp>
+#include <godot_cpp/classes/window.hpp>
 #include <dataproto_cpp/dataproto.hpp>
 #include <commandIO.hpp>
 
 #include "server.hpp"
+#include "client.hpp"
 #include "godot_cpp/core/class_db.hpp"
 #include "godot_cpp/variant/packed_byte_array.hpp"
 #include "network_shared.hpp"
@@ -67,6 +70,13 @@ void Server::_ready()
 		return;
 	}
 	UtilityFunctions::print("Websocket started on port ", SERVER_PORT);
+
+	_loopback_client = get_tree()->get_root()->get_node<Client>("/root/GlobalClient");
+	if (_loopback_client == nullptr) {
+		UtilityFunctions::printerr("Could not get loopback client: autoload singleton was null");
+		return;
+	}
+	_loopback_client->init_socket_client("8082");
 
 	_entities = { };
 	_game_time = 0.0L;

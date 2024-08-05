@@ -54,11 +54,6 @@ const int DEFAULT_HEALTH = 100;
 const float STILL_THRESHOLD  = 0.1;
 const float PI = 3.14159265358979f;
 
-static inline double round_decimal(double value, int places)
-{
-	return Math::round(value*Math::pow(10.0, places)) / Math::pow(10.0, places);
-}
-
 // min: top left corner, max: bottom left corner, object can move within a circular area within the rectangle
 static Vector2 circular_clamp(const Vector2& vector, const Vector2& min, const Vector2& max)
 {
@@ -80,33 +75,6 @@ PlayerBody::PlayerBody() : _client(nullptr)
 
 PlayerBody::~PlayerBody()
 {
-}
-
-void PlayerBody::set_stats_enabled(bool enable)
-{
-	_stats_enabled = enable;
-	_stats_label->set_visible(enable);
-}
-
-void PlayerBody::update_stats()
-{
-	auto fps = _engine->get_frames_per_second();
-	auto frame_time = _performance->get_monitor(Performance::Monitor::TIME_FPS);
-	auto object_count = _performance->get_monitor(Performance::Monitor::OBJECT_COUNT);
-	auto rendered_objects_count = _performance->get_monitor(Performance::Monitor::RENDER_TOTAL_OBJECTS_IN_FRAME);
-	auto memory_static = _performance->get_monitor(Performance::Monitor::MEMORY_STATIC);
-	auto memory_static_unit = "B";
-	if (memory_static > 1'000'000) {
-		memory_static_unit = "MB";
-		memory_static = round_decimal(memory_static / 1'000'000, 2);
-	}
-	else if (memory_static > 1'000) {
-		memory_static_unit = "KB";
-		memory_static = Math::floor(memory_static / 1'000);
-	}
-	auto stats_string = String("fps: {0}\nframe time: {1}\nscene objects: {2}\nRendered objects: {3}\nStatic memory usage: {4}{5}\n")
-		.format(Array::make(fps, frame_time, object_count, rendered_objects_count, memory_static, memory_static_unit));
-	_stats_label->set_text(stats_string);
 }
 
 void PlayerBody::update_hotbar()
@@ -153,7 +121,6 @@ void PlayerBody::_ready()
 	}
 	_client->connect("packet_received", Callable(this, "_on_packet_received"));
 
-	_performance = Performance::get_singleton();
 	_player_input = Input::get_singleton();
 	_project_settings = ProjectSettings::get_singleton();
 	_gravity = _project_settings->get_setting("physics/3d/default_gravity");
@@ -163,7 +130,6 @@ void PlayerBody::_ready()
 	_death_panel = get_node<Control>("%DeathPanel");
 	_death_title_label = get_node<Label>("%DeathTitleLabel");
 	_death_message_label = get_node<RichTextLabel>("%DeathMessageLabel");
-	_stats_label = get_node<Label>("%StatsLabel");
 	_health_label = get_node<Label>("%HealthLabel");
 	_grab_button = get_node<Button>("%ReviveButton");
 	_revive_button = get_node<Button>("%ReviveButton");
@@ -195,7 +161,6 @@ void PlayerBody::_ready()
 	_climbing = false;
 	_entities = { };
 	spawn_position = get_position();
-	set_stats_enabled(false);
 	set_process_input(true);
 	set_process_unhandled_input(true);
 	set_process(true);
@@ -237,9 +202,6 @@ void PlayerBody::_input(const Ref<InputEvent> &event)
 	else if (event->is_action_pressed("unfocus")) {
 		// Release pointer lock
 		_player_input->set_mouse_mode(godot::Input::MOUSE_MODE_VISIBLE);
-	}
-	else if (event->is_action_pressed("toggle_stats")) {
-		set_stats_enabled(!_stats_enabled);
 	}
 }
 
@@ -353,10 +315,6 @@ void PlayerBody::_process(double delta)
 		return;
 	}
 
-	// Update UI
-	if (_stats_enabled) {
-		update_stats();
-	}
 	update_hotbar();
 }
 

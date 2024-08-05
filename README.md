@@ -29,7 +29,7 @@ To perform a debug build of the project, navigate to the august21-event director
 This should automatically output the compiled library to `august21-event/project/bin/YOUR_TARGET_PLATFORM`:
    ```bash
    cd august21-event
-   scons dev_build=yes debug_symbols=yes
+   scons debug_symbols=yes
    ```
 
 5. **Run with Godot 4.2:**

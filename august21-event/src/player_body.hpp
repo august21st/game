@@ -19,6 +19,8 @@
 #include <godot_cpp/templates/hash_map.hpp>
 #include <godot_cpp/classes/v_box_container.hpp>
 
+// WORKAROUND: Forward declare to fix circular dependency
+class Client;
 #include "client.hpp"
 
 using namespace godot;
@@ -29,7 +31,6 @@ class PlayerBody : public CharacterBody3D {
 private:
 	Engine* _engine;
 	Client* _client;
-	Performance* _performance;
 	ProjectSettings* _project_settings;
 	Input* _player_input;
 	float _gravity;
@@ -56,17 +57,13 @@ private:
 	LineEdit* _chat_input;
 	Button* _chat_send_button;
 	VBoxContainer* _chat_messages_container;
-	Label * _stats_label;
 	Label* _health_label;
-	bool _stats_enabled;
 	bool _climbing;
 	HashMap<int, Node*> _entities;
+	void update_hotbar();
 
 protected:
 	static void _bind_methods();
-	void set_stats_enabled(bool enable);
-	void update_stats();
-	void update_hotbar();
 
 public:
 	PlayerBody();

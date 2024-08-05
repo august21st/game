@@ -27,6 +27,7 @@ void Intro::_ready()
     {
         return;
     }
+
     _building_camera_player = get_node<AnimationPlayer>("BuildingCameraPlayer");
     _building_camera_player->play("intro_animation");
 }

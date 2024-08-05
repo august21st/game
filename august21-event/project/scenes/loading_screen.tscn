@@ -1,27 +1,15 @@
-[gd_scene load_steps=13 format=3 uid="uid://ca11fthwu1qho"]
+[gd_scene load_steps=10 format=3 uid="uid://ca11fthwu1qho"]
 
 [ext_resource type="Texture2D" uid="uid://bpcp8t666sgwn" path="res://assets/rplace_gold.png" id="2_bqd13"]
 [ext_resource type="Shader" path="res://shaders/ripple_warp.gdshader" id="2_kc0ms"]
 [ext_resource type="FontFile" uid="uid://vo3twycs6ve7" path="res://assets/reddit/reddit_sans_bold.woff2" id="3_bi7p0"]
 [ext_resource type="Texture2D" uid="uid://cmh7xdvmp2o16" path="res://assets/title/title.png" id="3_v3ctt"]
-[ext_resource type="Shader" path="res://shaders/lava.gdshader" id="5_ci4wn"]
 [ext_resource type="PackedScene" uid="uid://cdn343nsbxvqi" path="res://assets/tube.glb" id="5_uxkte"]
+[ext_resource type="Material" uid="uid://b3aaq2cp51dw7" path="res://assets/tube_material_high.tres" id="6_0wwry"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_3f3t6"]
 shader = ExtResource("2_kc0ms")
 shader_parameter/opacity = 0.5
-
-[sub_resource type="FastNoiseLite" id="FastNoiseLite_diaqp"]
-
-[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_kjuue"]
-seamless = true
-noise = SubResource("FastNoiseLite_diaqp")
-
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_stf5h"]
-render_priority = 0
-shader = ExtResource("5_ci4wn")
-shader_parameter/timeScaleFactor = 0.2
-shader_parameter/noise_texture = SubResource("NoiseTexture2D_kjuue")
 
 [sub_resource type="Environment" id="Environment_qhq8w"]
 background_energy_multiplier = 5.0
@@ -36,14 +24,6 @@ shading_mode = 0
 albedo_color = Color(0, 0, 0, 1)
 
 [node name="LoadingScreen" type="LoadingScreen"]
-_import_path = NodePath("")
-unique_name_in_owner = false
-process_mode = 0
-process_priority = 0
-process_physics_priority = 0
-process_thread_group = 0
-editor_description = ""
-script = null
 
 [node name="Gui" type="Control" parent="."]
 layout_mode = 3
@@ -148,10 +128,11 @@ stretch_mode = 5
 metadata/_edit_use_anchors_ = true
 
 [node name="Tube" parent="." instance=ExtResource("5_uxkte")]
+unique_name_in_owner = true
 transform = Transform3D(6, 0, 0, 0, 6, 0, 0, 0, 6, 0, 0, 0)
 
 [node name="Cylinder" parent="Tube" index="0"]
-material_override = SubResource("ShaderMaterial_stf5h")
+material_override = ExtResource("6_0wwry")
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource("Environment_qhq8w")
@@ -164,5 +145,7 @@ size = 0.001
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.01964, 9.53674e-07, -44.4949)
 size = Vector3(13, 13, 8)
 material = SubResource("StandardMaterial3D_enspf")
+
+[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="."]
 
 [editable path="Tube"]

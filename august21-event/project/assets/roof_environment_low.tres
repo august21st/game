@@ -1,0 +1,25 @@
+[gd_resource type="Environment" load_steps=4 format=3 uid="uid://byrpec33soypf"]
+
+[ext_resource type="Texture2D" uid="uid://tpgj7natv128" path="res://assets/skybox/roof_sky.png" id="1_6tujs"]
+
+[sub_resource type="PanoramaSkyMaterial" id="PanoramaSkyMaterial_71yl5"]
+panorama = ExtResource("1_6tujs")
+
+[sub_resource type="Sky" id="Sky_ttrnk"]
+sky_material = SubResource("PanoramaSkyMaterial_71yl5")
+
+[resource]
+background_mode = 2
+sky = SubResource("Sky_ttrnk")
+ambient_light_source = 3
+tonemap_mode = 3
+tonemap_exposure = 0.65
+tonemap_white = 0.8
+fog_light_color = Color(0.971649, 0.498885, 0.0663957, 1)
+fog_light_energy = 0.3
+fog_density = 0.001
+fog_height = 140.0
+fog_height_density = 0.005
+adjustment_brightness = 1.83
+adjustment_contrast = 2.14
+adjustment_saturation = 0.49

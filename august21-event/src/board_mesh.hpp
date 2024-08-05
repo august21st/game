@@ -10,8 +10,8 @@
 using namespace std;
 using namespace godot;
 
-//const static String DEFAULT_CANVAS_URL = "https://raw.githubusercontent.com/rplacetk/canvas1/main/place";
-//const static String DEFAULT_PALETTE_URL = "https://raw.githubusercontent.com/rplacetk/canvas1/main/metadata.json";
+#define DEFAULT_CANVAS_URL "https://raw.githubusercontent.com/rplacetk/canvas1/main/place"
+#define DEFAULT_METADATA_URL "https://raw.githubusercontent.com/rplacetk/canvas1/main/metadata.json"
 
 class BoardMesh : public MeshInstance3D {
     GDCLASS(BoardMesh, MeshInstance3D)
@@ -34,8 +34,7 @@ public:
     BoardMesh();
     ~BoardMesh();
     void _ready() override;
-    Error load_canvas(String canvas_url = "https://raw.githubusercontent.com/rplacetk/canvas1/main/place",
-    	String metadata_url = "https://raw.githubusercontent.com/rplacetk/canvas1/main/metadata.json");
+    Error load_canvas(String canvas_url = DEFAULT_CANVAS_URL, String metadata_url = DEFAULT_METADATA_URL);
     void _on_board_request_completed(int result, int response_code, const PackedStringArray &headers, const PackedByteArray &body);
     void _on_metadata_request_completed(int result, int response_code, const PackedStringArray &headers, const PackedByteArray &body);
 };

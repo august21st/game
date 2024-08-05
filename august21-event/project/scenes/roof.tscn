@@ -1,8 +1,7 @@
-[gd_scene load_steps=68 format=3 uid="uid://dh3f0fyoo6ibo"]
+[gd_scene load_steps=65 format=3 uid="uid://dh3f0fyoo6ibo"]
 
 [ext_resource type="Material" uid="uid://dhejphsc088k2" path="res://assets/concrete/concrete.tres" id="1_bacw7"]
-[ext_resource type="PackedScene" uid="uid://c0bj2uusm1bfq" path="res://scenes/player_body.tscn" id="3_3xjkh"]
-[ext_resource type="Texture2D" uid="uid://tpgj7natv128" path="res://assets/skybox/roof_sky.png" id="3_oboqe"]
+[ext_resource type="Texture2D" uid="uid://e88undo8tgp7" path="res://assets/vignette.png" id="1_olgna"]
 [ext_resource type="PackedScene" uid="uid://ca7n3vrq5gy37" path="res://assets/rplace_logo.glb" id="4_o0vqv"]
 [ext_resource type="Texture2D" uid="uid://c5tmyq4qeg1gf" path="res://assets/concrete/concrete.png" id="4_sbhyi"]
 [ext_resource type="Material" uid="uid://7ob7uwp8gnn7" path="res://assets/chair/plywood.tres" id="5_vkl7b"]
@@ -16,6 +15,7 @@
 [ext_resource type="PackedScene" uid="uid://b6u2gq168cs2c" path="res://assets/aeroplane/united_airlines_boeing_777.glb" id="10_6ytol"]
 [ext_resource type="PackedScene" uid="uid://m4hc42l78dri" path="res://assets/chair/wooden_chair.glb" id="11_2jt52"]
 [ext_resource type="Animation" uid="uid://bfdgkhni3jem7" path="res://animations/roof_sky_animation.tres" id="12_4kdpp"]
+[ext_resource type="Environment" uid="uid://cmsqy2cn6g8pj" path="res://assets/roof_environment_high.tres" id="12_148le"]
 [ext_resource type="PackedScene" uid="uid://cwgp0q1aj5tli" path="res://assets/ataturk/ataturk_head.glb" id="15_uuxt7"]
 [ext_resource type="PackedScene" uid="uid://dtx7bvrf1lk6e" path="res://assets/canvas_frame.glb" id="16_uonlf"]
 [ext_resource type="PackedScene" uid="uid://bmqxjo7ithlk8" path="res://assets/eiffel/eiffel_lowpoly.glb" id="17_1m336"]
@@ -146,29 +146,6 @@ shader_parameter/noise_texture = SubResource("NoiseTexture2D_ggyga")
 material = SubResource("ShaderMaterial_3sv73")
 size = Vector2(4096, 4096)
 
-[sub_resource type="PanoramaSkyMaterial" id="PanoramaSkyMaterial_71yl5"]
-panorama = ExtResource("3_oboqe")
-
-[sub_resource type="Sky" id="Sky_ttrnk"]
-sky_material = SubResource("PanoramaSkyMaterial_71yl5")
-
-[sub_resource type="Environment" id="Environment_qa8cm"]
-background_mode = 2
-sky = SubResource("Sky_ttrnk")
-ambient_light_source = 3
-tonemap_mode = 3
-tonemap_exposure = 0.7
-tonemap_white = 0.8
-fog_enabled = true
-fog_light_color = Color(0.971649, 0.498885, 0.0663957, 1)
-fog_light_energy = 0.3
-fog_density = 0.001
-fog_height = 140.0
-fog_height_density = 0.005
-adjustment_brightness = 0.83
-adjustment_contrast = 2.14
-adjustment_saturation = 0.49
-
 [sub_resource type="CameraAttributesPractical" id="CameraAttributesPractical_jqt5r"]
 exposure_multiplier = 1.01
 
@@ -231,6 +208,24 @@ size = Vector3(1, 15.5, 0.2)
 size = Vector3(1, 8.5, 0.1)
 
 [node name="Roof" type="Roof"]
+
+[node name="RoofGui" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="OverlayTextureRect" type="TextureRect" parent="RoofGui"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("1_olgna")
+expand_mode = 1
 
 [node name="RplaceHQ" type="Node3D" parent="."]
 
@@ -384,20 +379,18 @@ mesh = SubResource("PlaneMesh_db1we")
 skeleton = NodePath("../../RplaceHQ")
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
-environment = SubResource("Environment_qa8cm")
+unique_name_in_owner = true
+environment = ExtResource("12_148le")
 camera_attributes = SubResource("CameraAttributesPractical_jqt5r")
 
-[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+[node name="SunLight" type="DirectionalLight3D" parent="."]
+unique_name_in_owner = true
 transform = Transform3D(0.906308, 0.408218, -0.109381, -1.39399e-07, 0.258819, 0.965926, 0.422618, -0.875426, 0.23457, 0, 10, 0)
 light_color = Color(0.883315, 0.378748, 0.336059, 1)
 light_energy = 0.5
 light_bake_mode = 1
 shadow_enabled = true
 directional_shadow_mode = 1
-
-[node name="PlayerBody" parent="." instance=ExtResource("3_3xjkh")]
-unique_name_in_owner = true
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.1, 0)
 
 [node name="SkyVortexMesh" type="CSGMesh3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, -1, 1.50996e-07, 0, -1.50996e-07, -1, 0, 512, 0)
@@ -420,11 +413,11 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -140, 0)
 [node name="DistantBuildings" parent="DistantObjects" instance=ExtResource("8_vgi18")]
 transform = Transform3D(2.29813, 0, 1.92837, 0, 3, 0, -1.92837, 0, 2.29813, -289, 19, -257)
 
-[node name="CrashedPlane" parent="DistantObjects" instance=ExtResource("10_6ytol")]
-transform = Transform3D(-0.692092, -0.649519, -0.314855, -0.416867, 0.715776, -0.560256, 0.589263, -0.256497, -0.766146, -461, 223, -480)
-
 [node name="EiffelLowpoly" parent="DistantObjects" instance=ExtResource("17_1m336")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -467, 15, -480)
+
+[node name="CrashedPlane" parent="DistantObjects" instance=ExtResource("10_6ytol")]
+transform = Transform3D(-0.692092, -0.649519, -0.314855, -0.416867, 0.715776, -0.560256, 0.589263, -0.256497, -0.766146, -461, 223, -480)
 
 [node name="EiffelSmokeParticles" type="GPUParticles3D" parent="DistantObjects"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -464, 233, -477)

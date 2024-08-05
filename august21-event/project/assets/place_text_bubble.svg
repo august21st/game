@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg width="64" height="32px" viewBox="0 0 64 32" version="1.1" id="svg1550" xmlns="http://www.w3.org/2000/svg" xmlns:bx="https://boxy-svg.com">
+  <defs id="defs1554">
+    <bx:grid x="0" y="0" width="1" height="1"/>
+  </defs>
+  <rect style="fill: rgb(255, 255, 255); fill-opacity: 1; stroke: rgb(1, 1, 1); stroke-linecap: round; stroke-dasharray: none; stroke-dashoffset: 31.92; stroke-opacity: 1; paint-order: stroke; stroke-width: 2px; transform-box: fill-box; transform-origin: 50% 50%;" id="rect344" width="59.52" height="17.563" x="0.603" y="22.224" transform="matrix(1, 0.000065, 0.005078, 1, 1.666567, -18.559487)" ry="6.586"/>
+  <rect x="14.079" y="18.364" width="11.019" height="11.019" style="stroke: rgb(0, 0, 0); fill: rgb(255, 255, 255); transform-box: fill-box; transform-origin: 50% 50%;" transform="matrix(0.707107, -0.707107, 0.707107, 0.707107, 12.410329, -2.665611)"/>
+  <rect x="18.5" y="8" width="27" height="13.224" style="fill: rgb(255, 255, 255);"/>
+</svg>

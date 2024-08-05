@@ -10,6 +10,7 @@
 #include "intro.hpp"
 #include "board_mesh.hpp"
 #include "roof.hpp"
+#include "end.hpp"
 #include "server.hpp"
 #include "client.hpp"
 
@@ -27,6 +28,7 @@ void initialize_gdextension_types(ModuleInitializationLevel p_level)
 	GDREGISTER_CLASS(ClimbableArea);
 	GDREGISTER_CLASS(Intro);
 	GDREGISTER_CLASS(Roof);
+	GDREGISTER_CLASS(End);
 	GDREGISTER_CLASS(BoardMesh);
 	GDREGISTER_CLASS(Server);
 }
