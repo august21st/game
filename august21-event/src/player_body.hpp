@@ -16,7 +16,6 @@
 #include <godot_cpp/classes/rich_text_label.hpp>
 #include <godot_cpp/classes/animation_player.hpp>
 #include <godot_cpp/classes/performance.hpp>
-#include <godot_cpp/templates/hash_map.hpp>
 #include <godot_cpp/classes/v_box_container.hpp>
 
 // WORKAROUND: Forward declare to fix circular dependency
@@ -59,7 +58,7 @@ private:
 	VBoxContainer* _chat_messages_container;
 	Label* _health_label;
 	bool _climbing;
-	HashMap<int, Node*> _entities;
+	Vector3 _spawn_position;
 	void update_hotbar();
 
 protected:
@@ -68,7 +67,6 @@ protected:
 public:
 	PlayerBody();
 	~PlayerBody();
-	Vector3 spawn_position;
 	void _ready() override;
 	void _input(const Ref<InputEvent> &event) override;
 	void _unhandled_input(const Ref<InputEvent> &event) override;
@@ -90,4 +88,5 @@ public:
 	void set_climbing(bool climbing);
 	void open_chat();
 	void close_chat();
+	void set_spawn_position(Vector3 position);
 };

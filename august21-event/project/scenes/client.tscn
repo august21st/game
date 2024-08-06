@@ -1,9 +1,10 @@
-[gd_scene load_steps=6 format=3 uid="uid://dtk5blgx8msq8"]
+[gd_scene load_steps=7 format=3 uid="uid://dtk5blgx8msq8"]
 
 [ext_resource type="Theme" uid="uid://dbwgna8gjqom8" path="res://assets/default_theme.tres" id="1_ce75g"]
 [ext_resource type="StyleBox" uid="uid://b7hyoe2nep4ja" path="res://assets/panel_background_style.tres" id="2_qo466"]
 [ext_resource type="Texture2D" uid="uid://bs5bpra4x4bvj" path="res://assets/place_text_bubble.png" id="3_3mkms"]
 [ext_resource type="Texture2D" uid="uid://x655ls7qa32w" path="res://assets/corrupted_pyramids.png" id="4_4pcmh"]
+[ext_resource type="Texture2D" uid="uid://bwf28jy8amyee" path="res://assets/close.svg" id="5_fcvpu"]
 
 [sub_resource type="StyleBoxTexture" id="StyleBoxTexture_cw870"]
 texture = ExtResource("3_3mkms")
@@ -154,6 +155,23 @@ unique_name_in_owner = true
 layout_mode = 2
 text = "Quit"
 
+[node name="HSeparator" type="HSeparator" parent="ClientGui/PausePanel/VBoxContainer"]
+layout_mode = 2
+
+[node name="RichTextLabel" type="RichTextLabel" parent="ClientGui/PausePanel/VBoxContainer"]
+layout_mode = 2
+bbcode_enabled = true
+text = "[shake rate=4.0 level=8 connected=0][font_size=24][b]Credits:[/b][/font_size][/shake]
+[p]
+[url=https://github.com/Zekiah-A]Zekiah-A[/url]  - Programming, & development
+[url=https://www.youtube.com/channel/UC1-W2gaSVuAgSJicIKZjfAg]Zubigri[/url] - Textures, art & original lore
+[url=https://www.youtube.com/channel/UC8SkDRjigJej02DpkXteGJQ]xv_bez[/url]  - Design, models & assets
+[font_size=12]
+..and all other authors whose works were included in the project [url=https://github.com/Zekiah-A/august21-event](see readmes)[/url]
+[/font_size]
+[/p]"
+fit_content = true
+
 [node name="VolumeLabel" type="RichTextLabel" parent="ClientGui/PausePanel"]
 unique_name_in_owner = true
 layout_mode = 0
@@ -166,4 +184,18 @@ theme_override_styles/normal = SubResource("StyleBoxTexture_cw870")
 fit_content = true
 scroll_active = false
 autowrap_mode = 0
+metadata/_edit_use_anchors_ = true
+
+[node name="CloseButton" type="Button" parent="ClientGui/PausePanel"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -64.0
+offset_bottom = 64.0001
+theme_override_constants/icon_max_width = 24
+icon = ExtResource("5_fcvpu")
+icon_alignment = 1
+expand_icon = true
 metadata/_edit_use_anchors_ = true

@@ -20,6 +20,7 @@
 #include <godot_cpp/classes/input.hpp>
 #include <godot_cpp/classes/node3d.hpp>
 #include <godot_cpp/classes/rich_text_label.hpp>
+#include <godot_cpp/templates/hash_map.hpp>
 
 // WORKAROUND: Forward declare to fix circular dependency
 class PlayerBody;
@@ -41,6 +42,7 @@ private:
 	Performance* _performance;
 	ResourceLoader* _resource_loader;
 	Input* _player_input;
+	bool _is_server;
 	Node3D* _client_scene;
 	Control* _client_gui;
 	Label* _stats_label;
@@ -58,17 +60,23 @@ private:
 	void _on_volume_slider_value_changed(float value);
 	HSlider* _volume_slider;
 	OptionButton* _graphics_options;
+	int _current_graphics_level;
 	void _on_graphics_options_item_selected(int index);
 	Button* _back_button;
+	Button* _close_button;
 	void _on_back_button_pressed();
 	Button* _quit_button;
 	void _on_quit_button_pressed();
 	Ref<WebSocketPeer> _socket;
+	vector<PackedByteArray> poll_next_packets();
 	bool _socket_closed;
+	String _current_phase_scene;
+	String _current_phase_event;
 	PlayerBody* _player_body;
 	PlayerBody* instance_player_body();
+	void orphan_player_body();
+	HashMap<int, Node*> _entities;
 	double round_decimal(double value, int places);
-	vector<PackedByteArray> poll_next_packets();
 	const String _volume_comments[101] = {
 		"Goes hard on mute 🗣️ 🗣️", // 0
 		"Interesting choice...", // 1
@@ -185,7 +193,7 @@ public:
 	Ref<WebSocketPeer> get_socket();
 	Error send(BufWriter* packet);
 	Error send(const char* data, size_t size);
-	Node* get_current_scene();
+	template<typename T> T* get_current_scene();
 	void init_socket_client(String url);
 	void set_volume(float volume);
 	Error load_scene(String scene_path, Node** out_scene);

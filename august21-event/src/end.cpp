@@ -58,3 +58,26 @@ void End::_on_graphics_quality_changed(int level)
 		_sun_light->set_shadow(true);
 	}
 }
+
+void End::spawn_player(PlayerBody* player)
+{
+	add_child(player);
+	player->set_position(Vector3(0, 0, 0));
+	player->set_spawn_position(Vector3(0, 0, 0));
+	player->set_climbing(false);
+}
+
+void End::run_phase_event(String phase_event)
+{
+	if (phase_event == "intro") {
+		return;
+	}
+
+	if (phase_event == "sandbox") {
+		return;
+	}
+}
+
+
+
+

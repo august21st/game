@@ -159,8 +159,7 @@ void PlayerBody::_ready()
 	_is_dead = false;
 	_death_panel->set_visible(false);
 	_climbing = false;
-	_entities = { };
-	spawn_position = get_position();
+	_spawn_position = Vector3(0, 0, 0);
 	set_process_input(true);
 	set_process_unhandled_input(true);
 	set_process(true);
@@ -318,9 +317,14 @@ void PlayerBody::_process(double delta)
 	update_hotbar();
 }
 
+void PlayerBody::set_spawn_position(Vector3 new_spawn_position)
+{
+	_spawn_position = new_spawn_position;
+}
+
 void PlayerBody::_on_revive_pressed()
 {
-	PlayerBody::respawn(spawn_position);
+	PlayerBody::respawn(_spawn_position);
 }
 
 void PlayerBody::_on_thumbstick_button_down()
@@ -394,43 +398,6 @@ void PlayerBody::_on_packet_received(PackedByteArray packed_packet)
 	auto packet = BufReader((char*) packed_packet.ptr(), packed_packet.size());
 	uint8_t code = packet.u8();
 	switch (code) {
-		case ServerPacket::CREATE_ENTITY: {
-			auto id = packet.u32();
-			auto type_str = (string) packet.str().copy();
-			auto type = String(type_str.c_str());
-			break;
-		}
-		case ServerPacket::UPDATE_ENTITY: {
-			auto id = packet.u32();
-			if (_entities[id] == nullptr) {
-				UtilityFunctions::print("Couldn't update entity with id {0}: entity not found.",
-					Array::make(id));
-				break;
-			}
-			auto property_str = (string) packet.str();
-			auto property = String(property_str.c_str());
-			break;
-		}
-		case ServerPacket::DELETE_ENTITY: {
-			auto id = packet.u32();
-			if (_entities[id] == nullptr) {
-				UtilityFunctions::print("Couldn't delete entity with id {0}: entity not found.",
-					Array::make(id));
-				break;
-			}
-			break;
-		}
-		case ServerPacket::SET_PHASE: {
-			auto phase_name_str = string(packet.str());
-			auto phase_name = String(phase_name_str.c_str());
-			if (phase_name == "roof") {
-				get_tree()->change_scene_to_file("res://scenes/roof.tscn");
-			}
-			else {
-				UtilityFunctions::printerr("Could not set phase to ", phase_name, ": unknown phase");
-			}
-			break;
-		}
 		case ServerPacket::CHAT_MESSAGE: {
 			// TODO: Implement these
 			auto player_id = packet.i32();

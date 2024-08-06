@@ -17,8 +17,11 @@
 #include <godot_cpp/classes/input.hpp>
 #include <godot_cpp/classes/node3d.hpp>
 #include <godot_cpp/classes/rich_text_label.hpp>
+#include <godot_cpp/templates/hash_map.hpp>
 
 #include "client.hpp"
+#include "roof.hpp"
+#include "end.hpp"
 #include "player_body.hpp"
 #include "network_shared.hpp"
 
@@ -26,7 +29,8 @@ using namespace godot;
 using namespace dataproto;
 using namespace NetworkShared;
 
-Client::Client() : _socket(Ref<WebSocketPeer>()), _socket_closed(true)
+Client::Client() : _socket(Ref<WebSocketPeer>()), _socket_closed(true),
+	_player_body(nullptr)
 {
 }
 
@@ -62,14 +66,13 @@ void Client::_ready()
 {
 	_os = OS::get_singleton();
 	_engine = Engine::get_singleton();
-	_performance = Performance::get_singleton();
-	_display_server = DisplayServer::get_singleton();
-	bool is_server = _os->has_feature("dedicated_server") || _display_server->get_name() == "headless";
-	if ((_engine &&_engine->is_editor_hint()) || is_server) {
-		set_process(false);
+	if (_engine &&_engine->is_editor_hint()) {
 		return;
 	}
-	UtilityFunctions::print("Starting as client...");
+
+	_performance = Performance::get_singleton();
+	_display_server = DisplayServer::get_singleton();
+	_is_server = _os->has_feature("dedicated_server") || _display_server->get_name() == "headless";
 
 	_resource_loader = ResourceLoader::get_singleton();
 	_audio_server = AudioServer::get_singleton();
@@ -96,22 +99,39 @@ void Client::_ready()
 
 	_graphics_options = get_node<OptionButton>("%GraphicsOptions");
 	_graphics_options->connect("item_selected", Callable(this, "_on_graphics_options_item_selected"));
+	_current_graphics_level = 1;
 
 	_back_button = get_node<Button>("%BackButton");
 	_back_button->connect("pressed", Callable(this, "_on_back_button_pressed"));
+	_close_button = get_node<Button>("%CloseButton");
+	_close_button->connect("pressed", Callable(this, "_on_back_button_pressed"));
 
 	_quit_button = get_node<Button>("%QuitButton");
 	_quit_button->connect("pressed", Callable(this, "_on_quit_button_pressed"));
 
-	_player_body = instance_player_body();
+	_entities = { };
 
-	init_socket_client("ws://localhost:8082");
-	change_scene("res://scenes/loading_screen.tscn");
+	if (_is_server) {
+		UtilityFunctions::print("Starting loopback client");
+	}
+	else {
+		UtilityFunctions::print("Starting as client...");
+		_player_body = instance_player_body();
+
+		init_socket_client("ws://localhost:8082");
+		change_scene("res://scenes/loading_screen.tscn");
+	}
 }
 
-Node* Client::get_current_scene()
+template<typename T>
+T* Client::get_current_scene()
 {
-	return get_tree()->get_current_scene();
+	auto scene_node = _client_scene->get_child(0);
+	if (scene_node->get_class() != T::get_class_static()) {
+		return nullptr;
+	}
+
+	return (T*) scene_node;
 }
 
 double Client::round_decimal(double value, int places)
@@ -218,22 +238,78 @@ void Client::_process(double delta)
 			auto packet = BufReader((char*) packed_packet.ptr(), packed_packet.size());
 			uint8_t code = packet.u8();
 			switch (code) {
+				case ServerPacket::CREATE_ENTITY: {
+					auto id = packet.u32();
+					auto type_str = (string) packet.str().copy();
+					auto type = String(type_str.c_str());
+					break;
+				}
+				case ServerPacket::UPDATE_ENTITY: {
+					auto id = packet.u32();
+					if (_entities[id] == nullptr) {
+						UtilityFunctions::print("Couldn't update entity with id {0}: entity not found.",
+							Array::make(id));
+						break;
+					}
+					auto property_str = (string) packet.str();
+					auto property = String(property_str.c_str());
+					break;
+				}
+				case ServerPacket::DELETE_ENTITY: {
+					auto id = packet.u32();
+					if (_entities[id] == nullptr) {
+						UtilityFunctions::print("Couldn't delete entity with id {0}: entity not found.",
+							Array::make(id));
+						break;
+					}
+					break;
+				}
 				case ServerPacket::SET_PHASE: {
-					auto phase_name_str = (string) packet.str();
-					auto phase_name = String(phase_name_str.c_str());
-					auto phase_scene = phase_name.split(":")[0];
-					if (phase_scene == "inro") {
+					auto phase_str = (string) packet.str();
+					auto phase = String(phase_str.c_str());
+					auto phase_parts = phase.split(":");
+					auto phase_scene = phase_parts.size() > 0 ? phase_parts[0] : "";
+					auto phase_event = phase_parts.size() > 1 ? phase_parts[1] : "";
+
+					if (phase_scene == "loading_screen") {
+						change_scene("res://scenes/loading_screen.tscn");
+					}
+					if (phase_scene == "intro") {
 						change_scene("res://scenes/intro.tscn");
 					}
 					else if (phase_scene == "roof") {
-						change_scene("res://scenes/roof.tscn");
+						if (_current_phase_scene != phase_scene) {
+							change_scene("res://scenes/roof.tscn");
+						}
+
+						auto roof_scene = get_current_scene<Roof>();
+						// Remove player from wherever it was and hand it over
+						// TODO: Use a descendant approach, in case scene put
+						// TODO: player somewhere else than directly under
+						if (_player_body->get_parent() != roof_scene) {
+							orphan_player_body();
+							roof_scene->spawn_player(_player_body);
+						}
+						roof_scene->run_phase_event(phase_event);
 					}
 					else if (phase_scene == "end") {
-						change_scene("res://scenes/end.tscn");
+						if (_current_phase_scene != phase_scene) {
+							change_scene("res://scenes/end.tscn");
+						}
+
+						auto end_scene = get_current_scene<End>();
+						if (_player_body->get_parent() != end_scene) {
+							orphan_player_body();
+							end_scene->spawn_player(_player_body);
+						}
+						end_scene->run_phase_event(phase_event);
 					}
 					else {
-						UtilityFunctions::printerr("Could not set phase to ", phase_name, ": unknown phase");
+						UtilityFunctions::printerr("Could not set phase to ",
+							phase, ": unknown phase");
 					}
+					_current_phase_scene = phase_scene;
+					_current_phase_event = phase_event;
 					break;
 				}
 				default: {
@@ -334,6 +410,11 @@ Error Client::change_scene(String scene_path)
 	}
 
 	_client_scene->add_child(scene_instance);
+
+	if (!_is_server) {
+		emit_signal("graphics_quality_changed", _current_graphics_level);
+	}
+
 	return Error::OK;
 }
 
@@ -347,6 +428,14 @@ PlayerBody* Client::instance_player_body()
 
 	auto player_body = (PlayerBody*) scene_instance;
 	return player_body;
+}
+
+void Client::orphan_player_body()
+{
+	auto player_parent = _player_body->get_parent();
+	if (player_parent != nullptr) {
+		player_parent->remove_child(_player_body);
+	}
 }
 
 void Client::_on_volume_slider_value_changed(float value)
@@ -380,6 +469,7 @@ void Client::set_volume(float volume_ratio)
 
 void Client::_on_graphics_options_item_selected(int index)
 {
+	_current_graphics_level = index;
 	emit_signal("graphics_quality_changed", index);
 }
 

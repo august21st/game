@@ -6,77 +6,11 @@
 [ext_resource type="Animation" uid="uid://butjgk4p71n3g" path="res://animations/intro_animation.tres" id="3_rvdho"]
 [ext_resource type="PackedScene" uid="uid://216xcciqsui0" path="res://assets/building_ground.glb" id="4_rom83"]
 [ext_resource type="PackedScene" uid="uid://b6u2gq168cs2c" path="res://assets/aeroplane/united_airlines_boeing_777.glb" id="5_ua2td"]
-[ext_resource type="PackedScene" uid="uid://xr8d7au3y4um" path="res://assets/distant_buildings.glb" id="6_xwii3"]
+[ext_resource type="PackedScene" uid="uid://xr8d7au3y4um" path="res://assets/distant_buildings/distant_buildings.glb" id="6_xwii3"]
 [ext_resource type="PackedScene" uid="uid://bmqxjo7ithlk8" path="res://assets/eiffel/eiffel_lowpoly.glb" id="7_jev6g"]
 
 [sub_resource type="Animation" id="Animation_inc0k"]
 length = 0.001
-tracks/0/type = "bezier"
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/path = NodePath("Plane:position:x")
-tracks/0/interp = 1
-tracks/0/loop_wrap = true
-tracks/0/keys = {
-"handle_modes": PackedInt32Array(0),
-"points": PackedFloat32Array(67, -0.25, 0, 0.25, 0),
-"times": PackedFloat32Array(0)
-}
-tracks/1/type = "bezier"
-tracks/1/imported = false
-tracks/1/enabled = true
-tracks/1/path = NodePath("Plane:position:y")
-tracks/1/interp = 1
-tracks/1/loop_wrap = true
-tracks/1/keys = {
-"handle_modes": PackedInt32Array(0),
-"points": PackedFloat32Array(130, -0.25, 0, 0.25, 0),
-"times": PackedFloat32Array(0)
-}
-tracks/2/type = "bezier"
-tracks/2/imported = false
-tracks/2/enabled = true
-tracks/2/path = NodePath("Plane:position:z")
-tracks/2/interp = 1
-tracks/2/loop_wrap = true
-tracks/2/keys = {
-"handle_modes": PackedInt32Array(0),
-"points": PackedFloat32Array(105, -0.25, 0, 0.25, 0),
-"times": PackedFloat32Array(0)
-}
-tracks/3/type = "bezier"
-tracks/3/imported = false
-tracks/3/enabled = true
-tracks/3/path = NodePath("Plane:rotation:x")
-tracks/3/interp = 1
-tracks/3/loop_wrap = true
-tracks/3/keys = {
-"handle_modes": PackedInt32Array(0),
-"points": PackedFloat32Array(-0.0523599, -0.25, 0, 0.25, 0),
-"times": PackedFloat32Array(0)
-}
-tracks/4/type = "bezier"
-tracks/4/imported = false
-tracks/4/enabled = true
-tracks/4/path = NodePath("Plane:rotation:y")
-tracks/4/interp = 1
-tracks/4/loop_wrap = true
-tracks/4/keys = {
-"handle_modes": PackedInt32Array(0),
-"points": PackedFloat32Array(-3.01942, -0.25, 0, 0.25, 0),
-"times": PackedFloat32Array(0)
-}
-tracks/5/type = "bezier"
-tracks/5/imported = false
-tracks/5/enabled = true
-tracks/5/path = NodePath("Plane:rotation:z")
-tracks/5/interp = 1
-tracks/5/loop_wrap = true
-tracks/5/keys = {
-"handle_modes": PackedInt32Array(0),
-"points": PackedFloat32Array(-0.289725, -0.25, 0, 0.25, 0),
-"times": PackedFloat32Array(0)
-}
 
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_etu56"]
 _data = {
@@ -143,18 +77,22 @@ text = "Rplace HQ, Manhattan"
 scroll_active = false
 metadata/_edit_use_anchors_ = true
 
-[node name="Tower" type="CSGBox3D" parent="."]
+[node name="RplaceHQ" type="Node3D" parent="."]
+
+[node name="Building" type="CSGBox3D" parent="RplaceHQ"]
 transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 0, 80, 0)
 size = Vector3(64, 160, 64)
 material = ExtResource("1_k6hli")
 
-[node name="RplaceLogo" parent="." instance=ExtResource("1_mjyb7")]
+[node name="RplaceLogo" parent="RplaceHQ" instance=ExtResource("1_mjyb7")]
 transform = Transform3D(2, 0, 0, 0, -8.74228e-08, 2, 0, -2, -8.74228e-08, 0, 140, 32)
 
 [node name="BuildingCamera" type="Camera3D" parent="."]
-transform = Transform3D(0.72124, 0.219461, 0.656999, -0.00662015, 0.950624, -0.310274, -0.692652, 0.219433, 0.687081, -50, 70, 66)
+transform = Transform3D(0.741975, 0.21827, 0.633901, 5.28991e-07, 0.945518, -0.325569, -0.670427, 0.241564, 0.701551, -50, 70, 66)
 current = true
-fov = 73.9242
+fov = 24.5
+
+[node name="BuildingAudioPlayer" type="AudioStreamPlayer" parent="."]
 
 [node name="BuildingCameraPlayer" type="AnimationPlayer" parent="."]
 libraries = {
@@ -241,7 +179,12 @@ rings = 12
 surface_material_override/0 = SubResource("StandardMaterial3D_ambu1")
 
 [node name="Plane" parent="." instance=ExtResource("5_ua2td")]
-transform = Transform3D(-0.953001, -0.277447, -0.121702, -0.285297, 0.957009, 0.0523359, 0.101949, 0.0845975, -0.991185, 67, 130, 105)
+transform = Transform3D(-0.38938, -0.390584, -0.834162, -0.908407, 0.31254, 0.277695, 0.152245, 0.865888, -0.476506, -504, 214, -342)
+
+[node name="PlaneAudioPlayer" type="AudioStreamPlayer3D" parent="Plane"]
+attenuation_model = 2
+volume_db = -80.0
+bus = &"IntroPlane"
 
 [node name="DistantBuildings" parent="." instance=ExtResource("6_xwii3")]
 transform = Transform3D(2.12132, 0, 2.12132, 0, 3, 0, -2.12132, 0, 2.12132, -289, 19, -257)
@@ -253,3 +196,4 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -511, 50.4379, -343)
 mesh = SubResource("PlaneMesh_n5cef")
 
 [editable path="BuildingGround"]
+[editable path="Plane"]

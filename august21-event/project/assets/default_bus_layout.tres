@@ -1,3 +1,22 @@
-[gd_resource type="AudioBusLayout" format=3 uid="uid://c6mrbnc16d8mt"]
+[gd_resource type="AudioBusLayout" load_steps=3 format=3 uid="uid://c6mrbnc16d8mt"]
+
+[sub_resource type="AudioEffectDistortion" id="AudioEffectDistortion_unjha"]
+resource_name = "Distortion"
+pre_gain = 8.0
+
+[sub_resource type="AudioEffectReverb" id="AudioEffectReverb_avies"]
+resource_name = "Reverb"
+room_size = 0.27
+damping = 0.66
 
 [resource]
+bus/1/name = &"IntroPlane"
+bus/1/solo = false
+bus/1/mute = false
+bus/1/bypass_fx = false
+bus/1/volume_db = 0.0
+bus/1/send = &"Master"
+bus/1/effect/0/effect = SubResource("AudioEffectDistortion_unjha")
+bus/1/effect/0/enabled = true
+bus/1/effect/1/effect = SubResource("AudioEffectReverb_avies")
+bus/1/effect/1/enabled = true

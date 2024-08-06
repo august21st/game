@@ -28,6 +28,7 @@ private:
 	AnimationPlayer* _sky_animation_player;
 	WorldEnvironment* _world_environment;
 	BoardMesh* _board_mesh;
+	Node3D* _player_spawnpoint;
 	Ref<RandomNumberGenerator> _random;
 	PlayerBody* _player;
 	const String _death_titles[6] = {
@@ -56,4 +57,6 @@ public:
 	Roof();
 	~Roof();
 	void _ready() override;
+	void spawn_player(PlayerBody* player);
+	void run_phase_event(String phase_event);
 };

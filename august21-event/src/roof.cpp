@@ -62,6 +62,7 @@ void Roof::_ready()
 
 	_resource_loader = ResourceLoader::get_singleton();
 
+	_world_environment = get_node<WorldEnvironment>("%WorldEnvironment");
 	_sun_light = get_node<DirectionalLight3D>("%SunLight");
 
 	_floor_area = get_node<Area3D>("%FloorArea");
@@ -76,6 +77,8 @@ void Roof::_ready()
 
 	_board_mesh = get_node<BoardMesh>("%BoardMesh");
 	_board_mesh->load_canvas();
+
+	_player_spawnpoint = get_node<Node3D>("%PlayerSpawnpoint");
 
 	_random = Ref<RandomNumberGenerator>();
 	_random.instantiate();
@@ -102,7 +105,7 @@ void Roof::_on_graphics_quality_changed(int level)
 	}
 	auto environment_resource = _resource_loader->load(environment_path);
 	if (environment_resource.is_valid() && environment_resource->is_class("Environment")) {
-		const Ref<Environment> environment = environment_resource;
+		Ref<Environment> environment = environment_resource;
 		if (!environment.is_valid()) {
 			UtilityFunctions::printerr("Failed to load enviromnent: resource was invalid");
 		}
@@ -115,4 +118,43 @@ void Roof::_on_graphics_quality_changed(int level)
 	}
 
 	_sun_light->set_shadow(level == 0 ? false : true);
+}
+
+void Roof::spawn_player(PlayerBody* player)
+{
+	add_child(player);
+	auto spawn_position = _player_spawnpoint->get_position();
+	player->set_position(spawn_position);
+	player->set_spawn_position(spawn_position);
+	player->set_climbing(false);
+}
+
+// Necessary prerequisites for a phase are outside the specific
+// event cases, such that a client can skip a phase event without
+// encountering a desync
+void Roof::run_phase_event(String phase_event)
+{
+	if (phase_event == "intro") {
+		return;
+	}
+
+	if (phase_event == "vortex") {
+		return;
+	}
+
+	if (phase_event == "zombies") {
+		return;
+	}
+
+	if (phase_event == "evil_zubigri_sky") {
+		return;
+	}
+
+	if (phase_event == "evil_zubigri_platformer") {
+		return;
+	}
+
+	if (phase_event == "collapse") {
+		return;
+	}
 }

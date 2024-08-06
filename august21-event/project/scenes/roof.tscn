@@ -10,7 +10,7 @@
 [ext_resource type="Texture2D" uid="uid://cmt1bh1b0hrie" path="res://assets/signpost/leap_of_faith.png" id="7_rss4r"]
 [ext_resource type="Material" uid="uid://bfjx4pf6sb5q0" path="res://assets/circular_vortex/circular_vortex.tres" id="7_td0np"]
 [ext_resource type="Shader" path="res://shaders/floor_lava.gdshader" id="8_5yos5"]
-[ext_resource type="PackedScene" uid="uid://xr8d7au3y4um" path="res://assets/distant_buildings.glb" id="8_vgi18"]
+[ext_resource type="PackedScene" uid="uid://xr8d7au3y4um" path="res://assets/distant_buildings/distant_buildings.glb" id="8_vgi18"]
 [ext_resource type="Texture2D" uid="uid://drt1pwrtbfnm4" path="res://assets/skybox/floor_lava.png" id="9_6v2eb"]
 [ext_resource type="PackedScene" uid="uid://b6u2gq168cs2c" path="res://assets/aeroplane/united_airlines_boeing_777.glb" id="10_6ytol"]
 [ext_resource type="PackedScene" uid="uid://m4hc42l78dri" path="res://assets/chair/wooden_chair.glb" id="11_2jt52"]
@@ -85,7 +85,7 @@ rings = 2
 albedo_texture = ExtResource("4_sbhyi")
 
 [sub_resource type="PlaneMesh" id="PlaneMesh_rmmtj"]
-size = Vector2(60, 60)
+size = Vector2(48, 48)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_sk8h7"]
 shading_mode = 0
@@ -228,6 +228,7 @@ texture = ExtResource("1_olgna")
 expand_mode = 1
 
 [node name="RplaceHQ" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -3, 0)
 
 [node name="Building" type="CSGBox3D" parent="RplaceHQ"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -70, 0)
@@ -293,20 +294,21 @@ process_material = SubResource("ParticleProcessMaterial_13gme")
 draw_pass_1 = SubResource("SphereMesh_8nvlb")
 
 [node name="WoodenChair" parent="RplaceHQ" instance=ExtResource("11_2jt52")]
-transform = Transform3D(-0.5, 0, -0.866025, 0, 1, 0, 0.866025, 0, -0.5, -28.8807, 0.1, -28.1515)
+transform = Transform3D(-0.5, 0, -0.866025, 0, 1, 0, 0.866025, 0, -0.5, -28.8807, 0, -28.1515)
 
 [node name="WoodenChair2" parent="RplaceHQ" instance=ExtResource("11_2jt52")]
-transform = Transform3D(-0.965926, 0, -0.258819, 0, 1, 0, 0.258819, 0, -0.965926, -27.4526, 0.1, -29.7765)
+transform = Transform3D(-0.965926, 0, -0.258819, 0, 1, 0, 0.258819, 0, -0.965926, -27.4526, 0, -29.7765)
 
 [node name="RoofDoor" type="CSGPolygon3D" parent="RplaceHQ"]
-transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, -17, 0.1, -29)
-polygon = PackedVector2Array(5.2, 3.6, 5.2, 0.8, 5.6, 0.8, 5.6, 0.4, 6, 0.4, 6, 0, -1, 0, -0.2, 2.4)
+transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, -17, 0, -29)
+polygon = PackedVector2Array(5.2, 3.6, 5.2, 0.8, 5.6, 0.8, 5.6, 0.4, 6, 0.4, 6, 0, -1, 0)
 depth = 3.0
 material = ExtResource("1_bacw7")
 
 [node name="CanvasFloorBody" type="StaticBody3D" parent="RplaceHQ"]
 
 [node name="CanvasFrame" parent="RplaceHQ/CanvasFloorBody" instance=ExtResource("16_uonlf")]
+visible = false
 
 [node name="Cube" parent="RplaceHQ/CanvasFloorBody/CanvasFrame" index="0"]
 surface_material_override/0 = SubResource("StandardMaterial3D_kvku4")
@@ -322,7 +324,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, 0)
 shape = SubResource("BoxShape3D_gc2up")
 
 [node name="PixelStall2" type="StaticBody3D" parent="RplaceHQ"]
-transform = Transform3D(1, 0, 1.74846e-07, 0, 1, 0, -1.74846e-07, 0, 1, 0, 1.5, 31.5)
+transform = Transform3D(1, 0, 1.74846e-07, 0, 1, 0, -1.74846e-07, 0, 1, 0, 0.5, 27.5)
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="RplaceHQ/PixelStall2"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.98023e-08, 0, 0)
@@ -358,6 +360,10 @@ transform = Transform3D(0.258819, 0, -0.965926, 0, 1, 0, 0.965926, 0, 0.258819, 
 
 [node name="Front" parent="RplaceHQ/Signpost" index="2"]
 surface_material_override/0 = SubResource("StandardMaterial3D_m8hv4")
+
+[node name="PlayerSpawnpoint" type="Node3D" parent="RplaceHQ"]
+unique_name_in_owner = true
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -26, 0, -27)
 
 [node name="FloorBody" type="StaticBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -140, 0)

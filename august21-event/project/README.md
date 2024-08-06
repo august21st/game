@@ -21,12 +21,12 @@
 
 ### Phase descriptions:
 - **loading_screen**: Will wait until the next phase update before attempting
-   to slide the player into the correct stage of the game. *(Duration: ~3 minutes
+   to slide the player into the correct stage of the game. *(Duration: ~1 minute
    for initial game load OR longest phase length)*
-- **intro**: Camera sequence of main event storyline, introducing the player to
-   the protagonists and greater event context. *(Duration: ~2 minutes)*
-- **roof:intro**: Camera sequence of intro characters entering roof, guide
-   showing the player where notable items are, and describing game
+- **intro**: Camera sequence of game storyline, introducing the player to
+   the objective and game context. *(Duration: ~2 minutes)*
+- **roof:intro**: Camera sequence of storyline characters entering roof, short
+   tutorial showing the player where notable items are, and describing game
    controls. *(Duration: ~30s)*
 - **roof:vortex**: Vortex spawns overhead, starts throwing down chairs and
    random objects, that will kill the player on contact. *(Duration: ~3 minutes)*
@@ -46,9 +46,9 @@
    invokes Oppenheimer, who nukes everything, causing the tower to slowly
    collapse and sink into the lava, the players must build up to Atatürk who
    will save and transport the players. *(Duration: 2~ minutes)*
-- **end:intro**: Canera sequence of characters consolidating the success of the
-   event, alongside credits and info about the sandbox. *(Duration: 30s)*
-- **end:sandbox**: Can navigate the end of the canvas, a heaven-like dimension,
-   with the corner of the real game canvas just in sight in the distance, there
-   is a temple-like structure with various Rplace related monuments and credits.
-   *(Duration: 15 minutes before event will restart)*
+- **end:intro**: Camera sequence of storyline characters consolidating the
+   success of the players, achievements, alongside game credits. *(Duration: 30s)*
+- **end:sandbox**: Player can navigate the end of the canvas, a heaven-like
+   dimension, with the corner of the rplace.live canvas just in sight in the
+   distance, there is a temple-like structure with various Rplace related
+   monuments and credits. *(Duration: 10 minutes before event will restart)*

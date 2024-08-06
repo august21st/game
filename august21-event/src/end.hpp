@@ -24,4 +24,6 @@ public:
 	End();
 	~End();
 	void _ready() override;
+	void spawn_player(PlayerBody* player);
+	void run_phase_event(String phase_event);
 };
