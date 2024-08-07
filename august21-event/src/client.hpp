@@ -25,6 +25,7 @@
 // WORKAROUND: Forward declare to fix circular dependency
 class PlayerBody;
 #include "player_body.hpp"
+#include "entity_player.hpp"
 
 using namespace godot;
 using namespace dataproto;
@@ -73,9 +74,8 @@ private:
 	String _current_phase_scene;
 	String _current_phase_event;
 	PlayerBody* _player_body;
-	PlayerBody* instance_player_body();
-	void orphan_player_body();
 	HashMap<int, Node*> _entities;
+	HashMap<int, EntityPlayer*> _players;
 	double round_decimal(double value, int places);
 	const String _volume_comments[101] = {
 		"Goes hard on mute 🗣️ 🗣️", // 0
@@ -194,9 +194,13 @@ public:
 	Error send(BufWriter* packet);
 	Error send(const char* data, size_t size);
 	template<typename T> T* get_current_scene();
+	template<typename T> T* instance_scene(String scene_path);
+	void orphan_node(Node* node);
 	void init_socket_client(String url);
 	void set_volume(float volume);
 	Error load_scene(String scene_path, Node** out_scene);
 	Error change_scene(String scene_path);
+	String get_current_phase_scene();
+	String get_current_phase_event();
 	PlayerBody* get_player_body();
 };

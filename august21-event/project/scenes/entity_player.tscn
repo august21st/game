@@ -1,0 +1,25 @@
+[gd_scene load_steps=3 format=3 uid="uid://bs2n1sc2cpdc1"]
+
+[ext_resource type="PackedScene" uid="uid://djm1sm8xypjdg" path="res://assets/character/character_lowpoly.glb" id="1_lfaqm"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_rlf0b"]
+radius = 0.2
+height = 1.8
+
+[node name="EntityPlayer" type="EntityPlayer"]
+
+[node name="PlayerModel" parent="." instance=ExtResource("1_lfaqm")]
+
+[node name="StaticBody3D" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+
+[node name="PlayerCollider" type="CollisionShape3D" parent="StaticBody3D"]
+shape = SubResource("CapsuleShape3D_rlf0b")
+
+[node name="Label3D" type="Label3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.9, 0)
+billboard = 1
+double_sided = false
+text = "Username"
+font_size = 24
+outline_size = 6

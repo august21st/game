@@ -84,13 +84,19 @@ transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 0, 80,
 size = Vector3(64, 160, 64)
 material = ExtResource("1_k6hli")
 
+[node name="BuildingInner" type="CSGBox3D" parent="RplaceHQ"]
+transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 0, 80, 0)
+flip_faces = true
+size = Vector3(64, 160, 64)
+material = ExtResource("1_k6hli")
+
 [node name="RplaceLogo" parent="RplaceHQ" instance=ExtResource("1_mjyb7")]
 transform = Transform3D(2, 0, 0, 0, -8.74228e-08, 2, 0, -2, -8.74228e-08, 0, 140, 32)
 
 [node name="BuildingCamera" type="Camera3D" parent="."]
-transform = Transform3D(0.741975, 0.21827, 0.633901, 5.28991e-07, 0.945518, -0.325569, -0.670427, 0.241564, 0.701551, -50, 70, 66)
+transform = Transform3D(-0.0636906, -0.635736, -0.769275, 0.0155358, 0.770115, -0.637716, 0.997849, -0.0525679, -0.0391724, -52.4425, 67.3379, 67.877)
 current = true
-fov = 24.5
+fov = 42.4446
 
 [node name="BuildingAudioPlayer" type="AudioStreamPlayer" parent="."]
 
@@ -179,11 +185,11 @@ rings = 12
 surface_material_override/0 = SubResource("StandardMaterial3D_ambu1")
 
 [node name="Plane" parent="." instance=ExtResource("5_ua2td")]
-transform = Transform3D(-0.38938, -0.390584, -0.834162, -0.908407, 0.31254, 0.277695, 0.152245, 0.865888, -0.476506, -504, 214, -342)
+transform = Transform3D(-0.886925, -0.445591, -0.121702, -0.454037, 0.889444, 0.0523359, 0.0849269, 0.101675, -0.991185, 62.9044, 130, 91.9289)
 
 [node name="PlaneAudioPlayer" type="AudioStreamPlayer3D" parent="Plane"]
 attenuation_model = 2
-volume_db = -80.0
+volume_db = 50.0
 bus = &"IntroPlane"
 
 [node name="DistantBuildings" parent="." instance=ExtResource("6_xwii3")]

@@ -88,6 +88,10 @@ void Server::_ready()
 
 void Server::_physics_process(double delta)
 {
+	if (_engine->is_editor_hint()) {
+		return;
+	}
+
 	// Handle new WS updates
 	if (_socket_server.is_valid()) {
 		_socket_server->poll();
@@ -108,7 +112,23 @@ void Server::_physics_process(double delta)
 					// TODO: Authenticate link key with server, set user int ID, retrieve chat name... etc
 					break;
 				}
-				case ClientPacket::UPDATE_POSITION: {
+				case ClientPacket::UPDATE: {
+					auto phase_scene = packet.str();
+					auto position = Vector3(packet.f32(), packet.f32(), packet.f32());
+					auto rotation = Vector3(packet.f32(), packet.f32(), packet.f32());
+					auto current_animation = packet.str();
+					auto update_packet = new BufWriter();
+					update_packet->u8(ServerPacket::UPDATE_PLAYER);
+					update_packet->u32(sender_id); // player ID
+					update_packet->str(phase_scene); // phase scene
+					update_packet->f32(position.x); // position
+					update_packet->f32(position.y);
+					update_packet->f32(position.z);
+					update_packet->f32(rotation.x); // rotation
+					update_packet->f32(rotation.y);
+					update_packet->f32(rotation.z);
+					update_packet->str(current_animation); // current animation
+					send_to_all(update_packet);
 					break;
 				}
 				case ClientPacket::ACTION_DROP: {
@@ -121,9 +141,7 @@ void Server::_physics_process(double delta)
 					auto message = (string) packet.str();
 					auto chat_packet = new BufWriter();
 					chat_packet->u8(ServerPacket::CHAT_MESSAGE);
-					chat_packet->i32(0); // TODO: player_id
-					chat_packet->i32(0); // TODO: user_int_id
-					string anon = "anon"; chat_packet->str(anon); // TODO: chat_name
+					chat_packet->i32(sender_id); // TODO: player_id
 					chat_packet->str(message);
 					send_to_all(chat_packet);
 					delete chat_packet;
@@ -151,6 +169,23 @@ void Server::_on_peer_connected(int id)
 {
 	Ref<WebSocketPeer> client = _socket_server->get_peer(id);
 	_clients[id] = client;
+
+	// Send playerlist to client
+	auto player_list_packet = new BufWriter();
+	player_list_packet->u8(ServerPacket::PLAYERS_INFO);
+	player_list_packet->u16(_clients.size());
+	for (auto client_pair  : _clients) {
+		auto client_id = client_pair.key;
+		auto client = client_pair.value;
+
+		// TODO: Implement these
+		player_list_packet->i32(client_id);
+		player_list_packet->i32(0); // user_int_id
+		string chat_name = "anon";
+		player_list_packet->str(chat_name); // chat_name
+	}
+	send(id, player_list_packet);
+	delete player_list_packet;
 }
 
 void Server::_on_peer_disconnected(int id)
@@ -241,9 +276,6 @@ void Server::announce(string message)
 	auto chat_packet = new BufWriter();
 	chat_packet->u8(ServerPacket::CHAT_MESSAGE);
 	chat_packet->i32(0); // player_id
-	chat_packet->i32(0); // user_int_id
-	string anon = "SERVER@AUGUST21-EVENT";
-	chat_packet->str(anon); // chat_name
 	chat_packet->str(message);
 	send_to_all(chat_packet);
 	delete chat_packet;
@@ -256,13 +288,13 @@ void Server::send_to_all(BufWriter* packet)
 
 void Server::send_to_all(const char* data, size_t size)
 {
-    PackedByteArray packed_data;
-    packed_data.resize(size);
-    memcpy(packed_data.ptrw(), data, size);
+	PackedByteArray packed_data;
+	packed_data.resize(size);
+	memcpy(packed_data.ptrw(), data, size);
 
-    for (auto &[id, client] : _clients) {
-        client->put_packet(packed_data);
-    }
+	for (auto &[id, client] : _clients) {
+		client->put_packet(packed_data);
+	}
 }
 
 void Server::send(int id, BufWriter* packet)
@@ -273,7 +305,7 @@ void Server::send(int id, BufWriter* packet)
 void Server::send(int id, const char* data, size_t size)
 {
 	PackedByteArray packed_data;
-    packed_data.resize(size);
-    memcpy(packed_data.ptrw(), data, size);
-    _clients[id]->put_packet(packed_data);
+	packed_data.resize(size);
+	memcpy(packed_data.ptrw(), data, size);
+	_clients[id]->put_packet(packed_data);
 }

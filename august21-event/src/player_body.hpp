@@ -59,6 +59,7 @@ private:
 	Label* _health_label;
 	bool _climbing;
 	Vector3 _spawn_position;
+	int _update_tick;
 	void update_hotbar();
 
 protected:

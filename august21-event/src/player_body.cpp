@@ -160,6 +160,7 @@ void PlayerBody::_ready()
 	_death_panel->set_visible(false);
 	_climbing = false;
 	_spawn_position = Vector3(0, 0, 0);
+	_update_tick = 0;
 	set_process_input(true);
 	set_process_unhandled_input(true);
 	set_process(true);
@@ -306,6 +307,30 @@ void PlayerBody::_physics_process(double delta)
 
 	set_velocity(_velocity);
 	move_and_slide();
+
+	// Update player on server
+	if (_update_tick % 3 == 0) { // 20 tps
+		auto update_packet = new BufWriter();
+		update_packet->u8(ClientPacket::UPDATE);
+		auto phase_scene = _client->get_current_phase_scene();
+		auto phase_scene_utf8 = phase_scene.utf8().get_data();
+		update_packet->str(phase_scene_utf8);
+		auto position = get_position();
+		update_packet->f32(position.x);
+		update_packet->f32(position.y);
+		update_packet->f32(position.z);
+		auto rotation = get_rotation();
+		update_packet->f32(rotation.x);
+		update_packet->f32(rotation.y);
+		update_packet->f32(rotation.z);
+		// TODO: Implement current_animation
+		auto current_animation = String("walk");
+		auto current_animation_utf8 = current_animation.utf8().get_data();
+		 update_packet->str(current_animation_utf8);
+		_client->send(update_packet);
+		delete update_packet;
+	}
+	_update_tick++;
 }
 
 void PlayerBody::_process(double delta)
@@ -401,14 +426,20 @@ void PlayerBody::_on_packet_received(PackedByteArray packed_packet)
 		case ServerPacket::CHAT_MESSAGE: {
 			// TODO: Implement these
 			auto player_id = packet.i32();
-			auto user_id = packet.i32();
-			auto chat_name_str = string(packet.str());
-
+			String chat_name;
+			if (player_id == 0) {
+				chat_name = "SERVER@AUGUST21-EVENT";
+			}
+			else {
+				chat_name = "anon";
+			}
 			auto message_str = string(packet.str());
 			auto message = String(message_str.c_str());
 
-			auto message_label = memnew(Label);
-			message_label->set_text(message);
+			auto message_label = memnew(RichTextLabel);
+			message_label->set_use_bbcode(true);
+			message_label->set_text(String("[{0}] {1}")
+				.format(Array::make(chat_name, message)));
 			message_label->set_autowrap_mode(TextServer::AutowrapMode::AUTOWRAP_WORD_SMART);
 			_chat_messages_container->add_child(message_label);
 			break;
@@ -436,7 +467,8 @@ void PlayerBody::_on_chat_send_button_pressed()
 	auto chat_packet = new BufWriter();
 	chat_packet->u8(ClientPacket::SEND_CHAT_MESSAGE);
 	auto chat_message = _chat_input->get_text();
-	chat_packet->str(chat_message.ptr(), chat_message.length());
+	auto chat_message_utf8 = chat_message.utf8().get_data();
+	chat_packet->str(chat_message_utf8);
 	_client->send(chat_packet);
 	delete chat_packet;
 }

@@ -23,6 +23,7 @@
 #include "roof.hpp"
 #include "end.hpp"
 #include "player_body.hpp"
+#include "entity_player.hpp"
 #include "network_shared.hpp"
 
 using namespace godot;
@@ -30,7 +31,7 @@ using namespace dataproto;
 using namespace NetworkShared;
 
 Client::Client() : _socket(Ref<WebSocketPeer>()), _socket_closed(true),
-	_player_body(nullptr)
+	_player_body(nullptr), _stats_label(nullptr)
 {
 }
 
@@ -110,13 +111,14 @@ void Client::_ready()
 	_quit_button->connect("pressed", Callable(this, "_on_quit_button_pressed"));
 
 	_entities = { };
+	_players = { };
 
 	if (_is_server) {
 		UtilityFunctions::print("Starting loopback client");
 	}
 	else {
 		UtilityFunctions::print("Starting as client...");
-		_player_body = instance_player_body();
+		_player_body = instance_scene<PlayerBody>("res://scenes/player_body.tscn");
 
 		init_socket_client("ws://localhost:8082");
 		change_scene("res://scenes/loading_screen.tscn");
@@ -228,6 +230,10 @@ void Client::_input(const Ref<InputEvent> &event)
 
 void Client::_process(double delta)
 {
+	if (_engine->is_editor_hint()) {
+		return;
+	}
+
 	if (_stats_enabled) {
 		update_stats();
 	}
@@ -238,9 +244,53 @@ void Client::_process(double delta)
 			auto packet = BufReader((char*) packed_packet.ptr(), packed_packet.size());
 			uint8_t code = packet.u8();
 			switch (code) {
+				case ServerPacket::PLAYERS_INFO: {
+					auto player_count = packet.u16();
+					for (auto i = 0; i < player_count; i++) {
+						auto id = packet.u32();
+						auto user_int_id = packet.u32();
+						auto chat_name = packet.str();
+
+						auto player = instance_scene<EntityPlayer>("res://scenes/entity_player.tscn");
+						_players.insert(id, player);
+					}
+					break;
+				}
+				case ServerPacket::UPDATE_PLAYER: {
+					auto player_id = packet.u32();
+					if (!_players.has(player_id)) {
+						UtilityFunctions::printerr("Could not update player ",
+							player_id, " player entity not found");
+						break;
+					}
+					auto phase_scene_str = (string) packet.str();
+					auto phase_scene = String(phase_scene_str.c_str());
+					if (phase_scene != _current_phase_scene) {
+						UtilityFunctions::print("TRACE: Ignoring player update in scene: ", phase_scene);
+						// Player is not in our world, ignore it
+						break;
+					}
+
+					auto player = _players[player_id];
+					auto position = Vector3(packet.f32(), packet.f32(), packet.f32());
+					auto rotation = Vector3(packet.f32(), packet.f32(), packet.f32());
+					auto current_animation_str = (string) packet.str();
+					auto current_animation = String(current_animation_str.c_str());
+
+					auto current_scene_node = _client_scene->get_child(0);
+					auto player_parent = player->get_parent();
+					if (player_parent != current_scene_node) {
+						orphan_node(player);
+						current_scene_node->add_child(player);
+					}
+
+					player->set_position(position);
+					player->set_rotation(rotation);
+					break;
+				}
 				case ServerPacket::CREATE_ENTITY: {
 					auto id = packet.u32();
-					auto type_str = (string) packet.str().copy();
+					auto type_str = (string) packet.str();
 					auto type = String(type_str.c_str());
 					break;
 				}
@@ -287,7 +337,7 @@ void Client::_process(double delta)
 						// TODO: Use a descendant approach, in case scene put
 						// TODO: player somewhere else than directly under
 						if (_player_body->get_parent() != roof_scene) {
-							orphan_player_body();
+							orphan_node(_player_body);
 							roof_scene->spawn_player(_player_body);
 						}
 						roof_scene->run_phase_event(phase_event);
@@ -299,7 +349,7 @@ void Client::_process(double delta)
 
 						auto end_scene = get_current_scene<End>();
 						if (_player_body->get_parent() != end_scene) {
-							orphan_player_body();
+							orphan_node(_player_body);
 							end_scene->spawn_player(_player_body);
 						}
 						end_scene->run_phase_event(phase_event);
@@ -418,23 +468,23 @@ Error Client::change_scene(String scene_path)
 	return Error::OK;
 }
 
-PlayerBody* Client::instance_player_body()
+template<typename T>
+T* Client::instance_scene(String scene_path)
 {
-	Node* scene_instance;
-	auto load_error = load_scene("res://scenes/player_body.tscn", &scene_instance);
-	if (load_error != Error::OK || !scene_instance->is_class("PlayerBody")) {
+	Node* scene_node;
+	auto load_error = load_scene(scene_path, &scene_node);
+	if (load_error != Error::OK || !scene_node->is_class(T::get_class_static())) {
 		return nullptr;
 	}
 
-	auto player_body = (PlayerBody*) scene_instance;
-	return player_body;
+	return (T*) scene_node;
 }
 
-void Client::orphan_player_body()
+void Client::orphan_node(Node* node)
 {
-	auto player_parent = _player_body->get_parent();
-	if (player_parent != nullptr) {
-		player_parent->remove_child(_player_body);
+	auto node_parent = node->get_parent();
+	if (node_parent != nullptr) {
+		node_parent->remove_child(_player_body);
 	}
 }
 
@@ -487,4 +537,14 @@ void Client::_on_quit_button_pressed()
 PlayerBody* Client::get_player_body()
 {
 	return _player_body;
+}
+
+String Client::get_current_phase_scene()
+{
+	return _current_phase_scene;
+}
+
+String Client::get_current_phase_event()
+{
+	return _current_phase_event;
 }

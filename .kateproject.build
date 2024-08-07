@@ -1,0 +1,16 @@
+{
+    "Auto_generated": "This file is auto-generated. Any extra tags or formatting will be lost",
+    "target_sets": [
+        {
+            "directory": "",
+            "name": "Target Set",
+            "targets": [
+                {
+                    "build_cmd": "/home/zekiah/august21-event/august21-event",
+                    "name": "build",
+                    "run_cmd": "scons platform=linux debug_symbols=yes"
+                }
+            ]
+        }
+    ]
+}

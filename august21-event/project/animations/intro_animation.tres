@@ -7,13 +7,19 @@
 [resource]
 resource_name = "intro"
 length = 10.0
-tracks/0/type = "position_3d"
+step = 0.0333333
+tracks/0/type = "value"
 tracks/0/imported = false
 tracks/0/enabled = true
-tracks/0/path = NodePath("BuildingCamera")
+tracks/0/path = NodePath("BuildingCamera:fov")
 tracks/0/interp = 2
 tracks/0/loop_wrap = true
-tracks/0/keys = PackedFloat32Array(0, 1, -8, 126, 54.61, 0.4, 1, -9.9, 113.65, 53.2, 2, 1, -32.96, 88.572, 52.905, 3.8, 1, -50, 70, 66, 7.4, 1, -50, 70, 66)
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 2.6, 3.8, 6.2, 6.4, 7, 7.4),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1),
+"update": 0,
+"values": [31.6, 24.0, 33.0, 79.6, 79.6, 24.5, 24.5]
+}
 tracks/1/type = "rotation_3d"
 tracks/1/imported = false
 tracks/1/enabled = true
@@ -21,18 +27,13 @@ tracks/1/path = NodePath("BuildingCamera")
 tracks/1/interp = 2
 tracks/1/loop_wrap = true
 tracks/1/keys = PackedFloat32Array(0, 1, 0.196913, -0.153294, 0.031188, 0.96786, 0.4, 1, 0.297004, -0.149194, 0.0470407, 0.941975, 2, 1, 0.193252, -0.316433, 0.0668794, 0.92631, 3.2, 1, 0.211901, -0.314438, 0.0782151, 0.922014, 3.8, 1, 0.318765, -0.34058, 0.123961, 0.875801, 4.2, 1, 0.247063, -0.64981, 0.236511, 0.6788, 5.8, 1, 0.12222, 0.348022, -0.0458179, 0.928355, 6.8, 1, 0.154034, 0.354257, -0.0592822, 0.920468, 7.4, 1, 0.154034, 0.354257, -0.0592822, 0.920468)
-tracks/2/type = "value"
+tracks/2/type = "position_3d"
 tracks/2/imported = false
 tracks/2/enabled = true
-tracks/2/path = NodePath("BuildingCamera:fov")
+tracks/2/path = NodePath("BuildingCamera")
 tracks/2/interp = 2
 tracks/2/loop_wrap = true
-tracks/2/keys = {
-"times": PackedFloat32Array(0, 2.6, 3.8, 6.2, 6.4, 7, 7.4),
-"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1),
-"update": 0,
-"values": [31.6, 24.0, 33.0, 79.6, 79.6, 24.5, 24.5]
-}
+tracks/2/keys = PackedFloat32Array(0, 1, -8, 126, 54.61, 0.4, 1, -9.9, 113.65, 53.2, 2, 1, -32.96, 88.572, 52.905, 3.8, 1, -50, 70, 66, 7.4, 1, -50, 70, 66)
 tracks/3/type = "bezier"
 tracks/3/imported = false
 tracks/3/enabled = true
