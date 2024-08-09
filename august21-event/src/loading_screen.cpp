@@ -65,9 +65,9 @@ void LoadingScreen::_on_packet_received(PackedByteArray packed_packet)
 	uint8_t code = packet.u8();
 	switch (code) {
 		case ServerPacket::GAME_INFO: {
-			auto player_count = packet.u32();
+			auto players_waiting = packet.u32();
 			auto formatted_count = String("Players waiting: {0}")
-				.format(Array::make(player_count));
+				.format(Array::make(players_waiting));
 			_players_label->set_text(formatted_count);
 			break;
 		}

@@ -8,6 +8,9 @@
 #include <godot_cpp/classes/directional_light3d.hpp>
 #include <godot_cpp/classes/resource_loader.hpp>
 #include <godot_cpp/classes/world_environment.hpp>
+#include <godot_cpp/classes/texture_rect.hpp>
+#include <godot_cpp/classes/h_box_container.hpp>
+#include <godot_cpp/classes/rich_text_label.hpp>
 
 #include "client.hpp"
 #include "board_mesh.hpp"
@@ -29,6 +32,9 @@ private:
 	WorldEnvironment* _world_environment;
 	BoardMesh* _board_mesh;
 	Node3D* _player_spawnpoint;
+	HBoxContainer* _event_container;
+	RichTextLabel* _event_title_label;
+	TextureRect* _event_image;
 	Ref<RandomNumberGenerator> _random;
 	PlayerBody* _player;
 	const String _death_titles[6] = {

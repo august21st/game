@@ -15,7 +15,6 @@
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_qw2ey"]
 radius = 0.2
-height = 1.8
 
 [sub_resource type="Animation" id="Animation_0xf1g"]
 resource_name = "player_camera_bob"
@@ -26,7 +25,7 @@ tracks/0/enabled = true
 tracks/0/path = NodePath(".")
 tracks/0/interp = 2
 tracks/0/loop_wrap = true
-tracks/0/keys = PackedFloat32Array(0, 1, 0, 0.6, 0, 0.1, 1, 0, 0.594812, 0, 0.3, 1, 0, 0.629081, 0, 0.5, 1, 0, 0.628651, 0, 0.7, 1, 0, 0.580068, 0, 0.844761, 1, 0, 0.61998, 0, 1, 1, 0, 0.612802, 0, 1.17762, 1, 0, 0.589776, 0, 1.35027, 1, 0, 0.630973, 0, 1.53286, 1, 0, 0.629392, 0, 1.71989, 1, 0, 0.583445, 0, 1.95952, 1, 0, 0.626452, 0, 2.1865, 1, 0, 0.6, 0)
+tracks/0/keys = PackedFloat32Array(0, 1, 0, 1.6, 0, 0.1, 1, 0, 1.595, 0, 0.3, 1, 0, 1.629, 0, 0.5, 1, 0, 1.629, 0, 0.7, 1, 0, 1.58, 0, 0.844761, 1, 0, 1.62, 0, 1, 1, 0, 1.613, 0, 1.17762, 1, 0, 1.59, 0, 1.35027, 1, 0, 1.631, 0, 1.53286, 1, 0, 1.629, 0, 1.71989, 1, 0, 1.583, 0, 1.95952, 1, 0, 1.626, 0, 2.1865, 1, 0, 1.6, 0)
 
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_c550x"]
 _data = {
@@ -34,15 +33,14 @@ _data = {
 }
 
 [node name="PlayerBody" type="PlayerBody"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
 
 [node name="PlayerCollider" type="CollisionShape3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.1, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
 shape = SubResource("CapsuleShape3D_qw2ey")
 
 [node name="PlayerCameraPivot" type="Node3D" parent="."]
 unique_name_in_owner = true
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6, 0)
+transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 0, 1.6, 0)
 
 [node name="PlayerCamera" type="Camera3D" parent="PlayerCameraPivot"]
 unique_name_in_owner = true
@@ -378,4 +376,3 @@ anchor_bottom = 0.197531
 metadata/_edit_use_anchors_ = true
 
 [node name="PlayerModel" parent="." instance=ExtResource("6_ki0f4")]
-transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 0, -1, 0)

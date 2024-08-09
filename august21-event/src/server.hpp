@@ -6,11 +6,12 @@
 #include <godot_cpp/classes/os.hpp>
 #include <godot_cpp/classes/engine.hpp>
 #include <godot_cpp/classes/display_server.hpp>
+#include <godot_cpp/classes/resource_loader.hpp>
 #include <godot_cpp/variant/utility_functions.hpp>
 #include <godot_cpp/classes/thread.hpp>
 #include <godot_cpp/templates/hash_map.hpp>
 
-#include "client.hpp"
+#include "client_data.hpp"
 
 using namespace godot;
 using namespace std;
@@ -23,13 +24,18 @@ private:
 	OS *_os;
 	Engine *_engine;
 	DisplayServer *_display_server;
-	Client* _loopback_client;
 	Ref<WebSocketMultiplayerPeer> _socket_server;
 	Ref<Thread> _console_thread;
+	ResourceLoader* _resource_loader;
 	double _game_time;
 	int _tick_count;
-	HashMap<int, Ref<WebSocketPeer>> _clients;
+	HashMap<String, Node*> _phase_scenes;
+	HashMap<int, ClientData*> _clients;
 	List<Node*> _entities;
+	Error register_phase_scene(String identifier, String path);
+	template<typename T>
+	Error load_scene(String scene_path, T** out_scene_instance);
+	void orphan_node(Node* node);
 
 protected:
 	static void _bind_methods();

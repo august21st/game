@@ -47,8 +47,6 @@ void End::_ready()
 	_sun_light = get_node<DirectionalLight3D>("%SunLight");
 }
 
-
-
 void End::_on_graphics_quality_changed(int level)
 {
 	if (level == 0) {

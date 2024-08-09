@@ -21,6 +21,9 @@
 #include <godot_cpp/classes/camera3d.hpp>
 #include <godot_cpp/classes/resource_loader.hpp>
 #include <godot_cpp/classes/world_environment.hpp>
+#include <godot_cpp/classes/texture_rect.hpp>
+#include <godot_cpp/classes/h_box_container.hpp>
+#include <godot_cpp/classes/rich_text_label.hpp>
 
 #include "client.hpp"
 #include "board_mesh.hpp"
@@ -80,6 +83,11 @@ void Roof::_ready()
 
 	_player_spawnpoint = get_node<Node3D>("%PlayerSpawnpoint");
 
+	_event_container = get_node<HBoxContainer>("%EventContainer");
+	_event_container->set_visible(false);
+	_event_title_label = get_node<RichTextLabel>("%EventTitleLabel");
+	_event_image = get_node<TextureRect>("%EventImage");
+
 	_random = Ref<RandomNumberGenerator>();
 	_random.instantiate();
 }
@@ -134,16 +142,37 @@ void Roof::spawn_player(PlayerBody* player)
 // encountering a desync
 void Roof::run_phase_event(String phase_event)
 {
+	// Configure event title area
+	if (phase_event != "" && phase_event != "intro") {
+		_event_container->set_visible(false);
+	}
+	else {
+		_event_container->set_visible(true);
+	}
+
+	if (phase_event == "") {
+		return;
+	}
+
 	if (phase_event == "intro") {
 		return;
 	}
 
 	if (phase_event == "vortex") {
+		_event_title_label->set_text(
+			"[center][tornado][color=#666]  THE VOID VORTEX  [/color][/tornado][/center]");
 		return;
 	}
 
 	if (phase_event == "zombies") {
+		_event_title_label->set_text(
+			"[center][color=#058743]FURS & SPINES[/color][/center]");
 		return;
+	}
+
+	if (phase_event == "evil_zubigri_sky" || phase_event == "evil_zubigri_platformer") {
+		_event_title_label->set_text(
+			"[shake][center][color=#8a0303]E[color=6c0000]V[/color][color=4e0000]I[/color][color=330002]L[/color] [/color][color=#00FFFF]Z[/color][color=#8a0303]U[color=6c0000]B[/color][color=4e0000]I[/color][color=380002]G[/color][color=#310300]R[/color][color=#110000]I[/color][/color][/center][/shake]");
 	}
 
 	if (phase_event == "evil_zubigri_sky") {
@@ -155,6 +184,8 @@ void Roof::run_phase_event(String phase_event)
 	}
 
 	if (phase_event == "collapse") {
+		_event_title_label->set_text(
+			"[center][color=#d4af37]OPPENHEIMER'S LE BOMB[/color][/center]");
 		return;
 	}
 }

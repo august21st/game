@@ -244,29 +244,43 @@ void Client::_process(double delta)
 			auto packet = BufReader((char*) packed_packet.ptr(), packed_packet.size());
 			uint8_t code = packet.u8();
 			switch (code) {
+				case ServerPacket::GAME_INFO: {
+					auto players_waiting = packet.u32();
+					auto player_id = packet.u32();
+					_player_id = player_id;
+					break;
+				}
 				case ServerPacket::PLAYERS_INFO: {
 					auto player_count = packet.u16();
 					for (auto i = 0; i < player_count; i++) {
 						auto id = packet.u32();
 						auto user_int_id = packet.u32();
-						auto chat_name = packet.str();
+						auto chat_name_str = (string) packet.str();
+						auto chat_name = String(chat_name_str.c_str());
 
-						auto player = instance_scene<EntityPlayer>("res://scenes/entity_player.tscn");
-						_players.insert(id, player);
+						if (id == _player_id) {
+							// TODO: Apply to self
+						}
+						else {
+							auto player = instance_scene<EntityPlayer>("res://scenes/entity_player.tscn");
+							player->set_chat_name(chat_name);
+							_players.insert(id, player);
+						}
 					}
 					break;
 				}
-				case ServerPacket::UPDATE_PLAYER: {
+				case ServerPacket::UPDATE_PLAYER_MOVEMENT: {
 					auto player_id = packet.u32();
 					if (!_players.has(player_id)) {
-						UtilityFunctions::printerr("Could not update player ",
-							player_id, " player entity not found");
+						if (player_id != _player_id) {
+							UtilityFunctions::printerr("Could not update player ",
+								player_id, ": player entity not found");
+						}
 						break;
 					}
 					auto phase_scene_str = (string) packet.str();
 					auto phase_scene = String(phase_scene_str.c_str());
 					if (phase_scene != _current_phase_scene) {
-						UtilityFunctions::print("TRACE: Ignoring player update in scene: ", phase_scene);
 						// Player is not in our world, ignore it
 						break;
 					}
@@ -277,15 +291,40 @@ void Client::_process(double delta)
 					auto current_animation_str = (string) packet.str();
 					auto current_animation = String(current_animation_str.c_str());
 
-					auto current_scene_node = _client_scene->get_child(0);
-					auto player_parent = player->get_parent();
-					if (player_parent != current_scene_node) {
-						orphan_node(player);
-						current_scene_node->add_child(player);
+					if (player_id == _player_id) {
+						// TODO: Apply changes from server to us
 					}
+					else {
+						auto current_scene_node = _client_scene->get_child(0);
+						auto player_parent = player->get_parent();
+						if (player_parent != current_scene_node) {
+							orphan_node(player);
+							current_scene_node->add_child(player);
+						}
 
-					player->set_position(position);
-					player->set_rotation(rotation);
+						player->set_position(position);
+						player->set_rotation(rotation);
+					}
+					break;
+				}
+				case ServerPacket::PLAYER_HEALTH: {
+					auto player_id = packet.u32();
+					if (!_players.has(player_id)) {
+						if (player_id != _player_id) {
+							UtilityFunctions::printerr("Could not update health for player ",
+								player_id, ": player entity not found");
+						}
+						break;
+					}
+					auto player = _players[player_id];
+					auto health = packet.u32();
+
+					if (player_id == _player_id) {
+						// TODO: Apply changes from server to us
+					}
+					else {
+						player->set_health(health);
+					}
 					break;
 				}
 				case ServerPacket::CREATE_ENTITY: {
@@ -430,19 +469,19 @@ void Client::_on_volume_slider_drag_ended(bool value_changed)
 
 Error Client::load_scene(String scene_path, Node** out_scene_instance)
 {
-	auto control_scene_resource = _resource_loader->load(scene_path);
-	if (!control_scene_resource.is_valid() || !control_scene_resource->is_class("PackedScene")) {
-		UtilityFunctions::printerr("Failed to load scene control scene: file not found");
+	auto scene_resource = _resource_loader->load(scene_path);
+	if (!scene_resource.is_valid() || !scene_resource->is_class("PackedScene")) {
+		UtilityFunctions::printerr("Failed to load scene scene: file not found");
 		return Error::ERR_FILE_NOT_FOUND;
 	}
 
-	Ref<PackedScene> control_scene = control_scene_resource;
-	if (!control_scene.is_valid() || !control_scene->can_instantiate()) {
-		UtilityFunctions::printerr("Failed to load control scene: resource was invalid");
+	Ref<PackedScene> packed_scene = scene_resource;
+	if (!packed_scene.is_valid() || !packed_scene->can_instantiate()) {
+		UtilityFunctions::printerr("Failed to load scene: resource was invalid");
 		return Error::ERR_INVALID_DATA;
 	}
 
-	auto scene_instance = control_scene->instantiate();
+	auto scene_instance = packed_scene->instantiate();
 	*out_scene_instance = scene_instance;
 	return Error::OK;
 }
@@ -484,7 +523,7 @@ void Client::orphan_node(Node* node)
 {
 	auto node_parent = node->get_parent();
 	if (node_parent != nullptr) {
-		node_parent->remove_child(_player_body);
+		node_parent->remove_child(node);
 	}
 }
 
@@ -532,6 +571,11 @@ void Client::_on_back_button_pressed()
 void Client::_on_quit_button_pressed()
 {
 	UtilityFunctions::print("Exiting...");
+}
+
+int Client::get_player_id()
+{
+	return _player_id;
 }
 
 PlayerBody* Client::get_player_body()

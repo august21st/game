@@ -21,6 +21,8 @@
 #include <godot_cpp/classes/node3d.hpp>
 #include <godot_cpp/classes/rich_text_label.hpp>
 #include <godot_cpp/templates/hash_map.hpp>
+#include <godot_cpp/classes/texture_rect.hpp>
+#include <godot_cpp/classes/h_box_container.hpp>
 
 // WORKAROUND: Forward declare to fix circular dependency
 class PlayerBody;
@@ -73,6 +75,7 @@ private:
 	bool _socket_closed;
 	String _current_phase_scene;
 	String _current_phase_event;
+	int _player_id;
 	PlayerBody* _player_body;
 	HashMap<int, Node*> _entities;
 	HashMap<int, EntityPlayer*> _players;
@@ -202,5 +205,6 @@ public:
 	Error change_scene(String scene_path);
 	String get_current_phase_scene();
 	String get_current_phase_event();
+	int get_player_id();
 	PlayerBody* get_player_body();
 };

@@ -5,14 +5,16 @@
 #include <godot_cpp/templates/hash_map.hpp>
 #include <godot_cpp/classes/scene_tree.hpp>
 #include <godot_cpp/classes/window.hpp>
+#include <godot_cpp/classes/resource_loader.hpp>
+#include <godot_cpp/classes/packed_scene.hpp>
 #include <dataproto_cpp/dataproto.hpp>
 #include <commandIO.hpp>
 
 #include "server.hpp"
-#include "client.hpp"
 #include "godot_cpp/core/class_db.hpp"
 #include "godot_cpp/variant/packed_byte_array.hpp"
 #include "network_shared.hpp"
+#include "entity_player.hpp"
 
 using namespace commandIO;
 using namespace dataproto;
@@ -55,10 +57,7 @@ void Server::_ready()
 	}
 	UtilityFunctions::print("Starting as server...");
 
-	_console_thread = Ref<Thread>();
-	_console_thread.instantiate();
-	_console_thread->start(Callable(this, "run_console_loop"));
-
+	// Initialise websocket
 	_socket_server = Ref<WebSocketMultiplayerPeer>();
 	_socket_server.instantiate();
 	_socket_server->connect("peer_connected", Callable(this, "_on_peer_connected"));
@@ -71,13 +70,27 @@ void Server::_ready()
 	}
 	UtilityFunctions::print("Websocket started on port ", SERVER_PORT);
 
-	_loopback_client = get_tree()->get_root()->get_node<Client>("/root/GlobalClient");
-	if (_loopback_client == nullptr) {
-		UtilityFunctions::printerr("Could not get loopback client: autoload singleton was null");
+	// Initialise scenes
+	UtilityFunctions::print("Loading phase scenes...");
+	_resource_loader = ResourceLoader::get_singleton();
+	_phase_scenes = { };
+	auto roof_err = register_phase_scene("roof", "res://scenes/roof.tscn");
+	if (roof_err != godot::Error::OK) {
 		return;
 	}
-	_loopback_client->init_socket_client("8082");
+	auto end_err = register_phase_scene("end", "res://scenes/end.tscn");
+	if (end_err != godot::Error::OK) {
+		return;
+	}
+	UtilityFunctions::print("Sucessfully loaded phase scenes...");
 
+	// Initialise CLI
+	_console_thread = Ref<Thread>();
+	_console_thread.instantiate();
+	_console_thread->start(Callable(this, "run_console_loop"));
+
+	// Initialise properties
+	_clients = { };
 	_entities = { };
 	_game_time = 0.0L;
 	_tick_count = 0;
@@ -112,23 +125,52 @@ void Server::_physics_process(double delta)
 					// TODO: Authenticate link key with server, set user int ID, retrieve chat name... etc
 					break;
 				}
-				case ClientPacket::UPDATE: {
-					auto phase_scene = packet.str();
+				case ClientPacket::UPDATE_MOVEMENT: {
+					auto phase_scene_str = (string) packet.str();
+					auto phase_scene = String(phase_scene_str.c_str());
+					if (!_phase_scenes.has(phase_scene)) {
+						UtilityFunctions::print(
+							"Couldn't update movement for client {0}: phase scene doesn't exist", sender_id);
+						break;
+					}
+
+					// Apply updates locally
+					auto player_entity = sender->get_entity();
+					auto player_scene = _phase_scenes[phase_scene];
+					if (player_entity->get_parent() != player_scene) {
+						// Teleport serverside client to correct scene
+						orphan_node(player_entity);
+						player_scene->add_child(player_entity);
+					}
 					auto position = Vector3(packet.f32(), packet.f32(), packet.f32());
+					player_entity->set_position(position);
 					auto rotation = Vector3(packet.f32(), packet.f32(), packet.f32());
-					auto current_animation = packet.str();
+					player_entity->set_rotation(position);
+					auto current_animation_str = packet.str();
+
+					// Distribute updates to other clients
 					auto update_packet = new BufWriter();
-					update_packet->u8(ServerPacket::UPDATE_PLAYER);
+					update_packet->u8(ServerPacket::UPDATE_PLAYER_MOVEMENT);
 					update_packet->u32(sender_id); // player ID
-					update_packet->str(phase_scene); // phase scene
+					update_packet->str(phase_scene_str); // phase scene
 					update_packet->f32(position.x); // position
 					update_packet->f32(position.y);
 					update_packet->f32(position.z);
 					update_packet->f32(rotation.x); // rotation
 					update_packet->f32(rotation.y);
 					update_packet->f32(rotation.z);
-					update_packet->str(current_animation); // current animation
+					update_packet->str(current_animation_str); // current animation
 					send_to_all(update_packet);
+					break;
+				}
+				case ClientPacket::ACTION_TAKE_DAMAGE: {
+					auto health = packet.u32();
+
+					auto health_packet = new BufWriter();
+					health_packet->u8(ServerPacket::PLAYER_HEALTH);
+					health_packet->u32(sender_id);
+					health_packet->u32(health);
+					send_to_all(health_packet);
 					break;
 				}
 				case ClientPacket::ACTION_DROP: {
@@ -137,26 +179,20 @@ void Server::_physics_process(double delta)
 				case ClientPacket::ACTION_GRAB: {
 					break;
 				}
-				case ClientPacket::SEND_CHAT_MESSAGE: {
+				case ClientPacket::ACTION_USE: {
+					break;
+				}
+				case ClientPacket::ACTION_CHAT_MESSAGE: {
 					auto message = (string) packet.str();
 					auto chat_packet = new BufWriter();
 					chat_packet->u8(ServerPacket::CHAT_MESSAGE);
-					chat_packet->i32(sender_id); // TODO: player_id
+					chat_packet->i32(sender_id);
 					chat_packet->str(message);
 					send_to_all(chat_packet);
 					delete chat_packet;
 					break;
 				}
 			}
-		}
-
-		// Every 2s update player count
-		if (_tick_count % (TPS * 2) == 0) {
-			auto game_info_packet = new BufWriter();
-			game_info_packet->u8(ServerPacket::GAME_INFO);
-			game_info_packet->u32((uint32_t) _clients.size());
-			send_to_all(game_info_packet);
-			delete game_info_packet;
 		}
 	}
 
@@ -167,30 +203,109 @@ void Server::_physics_process(double delta)
 
 void Server::_on_peer_connected(int id)
 {
-	Ref<WebSocketPeer> client = _socket_server->get_peer(id);
-	_clients[id] = client;
-
-	// Send playerlist to client
-	auto player_list_packet = new BufWriter();
-	player_list_packet->u8(ServerPacket::PLAYERS_INFO);
-	player_list_packet->u16(_clients.size());
-	for (auto client_pair  : _clients) {
-		auto client_id = client_pair.key;
-		auto client = client_pair.value;
-
-		// TODO: Implement these
-		player_list_packet->i32(client_id);
-		player_list_packet->i32(0); // user_int_id
-		string chat_name = "anon";
-		player_list_packet->str(chat_name); // chat_name
+	// Init client datastructures
+	auto client_socket = _socket_server->get_peer(id);
+	EntityPlayer* client_body = nullptr;
+	auto load_error = load_scene<EntityPlayer>("res://scenes/entity_player.tscn", &client_body);
+	if (load_error != godot::Error::OK || client_body == nullptr) {
+		UtilityFunctions::print("Failed to connect peer: Player entity scene was invalid");
+		client_socket->close(4000, "Internal server error");
+		return;
 	}
-	send(id, player_list_packet);
-	delete player_list_packet;
+	auto client_data = new ClientData(client_socket, client_body);
+	_clients[id] = client_data;
+
+	// Send initial game state info to client
+	auto game_info_packet = new BufWriter();
+	game_info_packet->u8(ServerPacket::GAME_INFO);
+	// TODO: Implement players waiting
+	game_info_packet->u32((uint32_t) _clients.size()); // players waiting
+	game_info_packet->u32(id); // (their) player id
+	send(id, game_info_packet);
+	delete game_info_packet;
+
+	// Send initial playerlist to client
+	auto player_info_packet = new BufWriter();
+	player_info_packet->u8(ServerPacket::PLAYERS_INFO);
+	player_info_packet->u16(_clients.size());
+	for (auto &[player_id, client]  : _clients) {
+		// TODO: Implement chat name
+		player_info_packet->i32(player_id); // player_id
+		player_info_packet->i32(0); // user_int_id
+		string chat_name = "anon";
+		player_info_packet->str(chat_name); // chat_name
+	}
+	send(id, player_info_packet);
+	delete player_info_packet;
+
+	// Alert all other clients of the new player
+	auto new_player_info_packet = new BufWriter();
+	new_player_info_packet->u8(ServerPacket::PLAYERS_INFO);
+	new_player_info_packet->u16(1);
+	// TODO: Implement chat name
+	new_player_info_packet->i32(id);
+	new_player_info_packet->i32(0); // user_int_id
+	string chat_name = "anon";
+	new_player_info_packet->str(chat_name); // chat_name
+	send_to_all(new_player_info_packet);
+	delete new_player_info_packet;
 }
 
 void Server::_on_peer_disconnected(int id)
 {
+	delete _clients[id];
 	_clients.erase(id);
+}
+
+godot::Error Server::register_phase_scene(String identifier, String path)
+{
+	auto control_scene_resource = _resource_loader->load(path);
+	if (!control_scene_resource.is_valid() || !control_scene_resource->is_class("PackedScene")) {
+		UtilityFunctions::printerr("Failed to load scene scene: file not found");
+		return godot::Error::ERR_FILE_NOT_FOUND;
+	}
+
+	Ref<PackedScene> packed_scene = control_scene_resource;
+	if (!packed_scene.is_valid() || !packed_scene->can_instantiate()) {
+		UtilityFunctions::printerr("Failed to load scene: resource was invalid");
+		return godot::Error::ERR_INVALID_DATA;
+	}
+
+	auto scene_instance = packed_scene->instantiate();
+	_phase_scenes.insert(identifier, scene_instance);
+	return godot::Error::OK;
+}
+
+template<typename T>
+godot::Error Server::load_scene(String scene_path, T** out_scene_instance)
+{
+	auto scene_resource = _resource_loader->load(scene_path);
+	if (!scene_resource.is_valid() || !scene_resource->is_class("PackedScene")) {
+		UtilityFunctions::printerr("Failed to load scene scene: file not found");
+		return godot::Error::ERR_FILE_NOT_FOUND;
+	}
+
+	Ref<PackedScene> packed_scene = scene_resource;
+	if (!packed_scene.is_valid() || !packed_scene->can_instantiate()) {
+		UtilityFunctions::printerr("Failed to load scene: resource was invalid");
+		return godot::Error::ERR_INVALID_DATA;
+	}
+
+	auto scene_instance = packed_scene->instantiate();
+	if (scene_instance->get_class() != T::get_class_static()) {
+		UtilityFunctions::printerr("Failed to load scene: expected type did not match scene type");
+		return godot::Error::ERR_INVALID_DATA;
+	}
+	*out_scene_instance = (T*) scene_instance;
+	return godot::Error::OK;
+}
+
+void Server::orphan_node(Node* node)
+{
+	auto node_parent = node->get_parent();
+	if (node_parent != nullptr) {
+		node_parent->remove_child(node);
+	}
 }
 
 void Server::run_console_loop()
@@ -207,7 +322,7 @@ void Server::run_console_loop()
 			param("id", "Id of entity to be created"),
 			param("property", "Name of property to be modified"),
 			param("value", "New value to set of specified property")),
-		func(pack(this, &Server::list_players), "list_players", "List all connecteed players"),
+		func(pack(this, &Server::list_players), "list_players", "List all connected players"),
 		func(pack(this, &Server::kill_player), "kill_player", "Kill a specific player",
 			param("id", "Id of player to be killed")),
 		func(pack(this, &Server::kick_player), "kick_player", "Disconnect a specific player",
@@ -246,8 +361,12 @@ void Server::list_players()
 {
 	auto player_list = String("Showing {0} players:")
 		.format(Array::make(_clients.size()));
-	for (auto client : _clients) {
-		player_list += client.key;
+	for (auto &[player_id, client] : _clients) {
+		auto client_entity = client->get_entity();
+		player_list += String("{0}: { chat_name: {1}, health: {2}, position: {3}, rotation: {4} }")
+			.format(Array::make(player_id, client_entity->get_chat_name(),
+				client_entity->get_health(), client_entity->get_position(),
+				client_entity->get_rotation()));
 		player_list += "\n";
 	}
 	UtilityFunctions::print(player_list);
@@ -264,7 +383,7 @@ void Server::kick_player(int id)
 		return;
 	}
 
-	_clients[id]->close(4000, "You were kicked from the server");
+	_clients[id]->get_socket()->close(4000, "You were kicked from the server");
 }
 
 void Server::tp_player(string scene, int x, int y, int z)
@@ -293,7 +412,7 @@ void Server::send_to_all(const char* data, size_t size)
 	memcpy(packed_data.ptrw(), data, size);
 
 	for (auto &[id, client] : _clients) {
-		client->put_packet(packed_data);
+		client->get_socket()->put_packet(packed_data);
 	}
 }
 
@@ -307,5 +426,5 @@ void Server::send(int id, const char* data, size_t size)
 	PackedByteArray packed_data;
 	packed_data.resize(size);
 	memcpy(packed_data.ptrw(), data, size);
-	_clients[id]->put_packet(packed_data);
+	_clients[id]->get_socket()->put_packet(packed_data);
 }

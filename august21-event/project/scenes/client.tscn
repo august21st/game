@@ -1,17 +1,10 @@
-[gd_scene load_steps=7 format=3 uid="uid://dtk5blgx8msq8"]
+[gd_scene load_steps=6 format=3 uid="uid://dtk5blgx8msq8"]
 
 [ext_resource type="Theme" uid="uid://dbwgna8gjqom8" path="res://assets/default_theme.tres" id="1_ce75g"]
 [ext_resource type="StyleBox" uid="uid://b7hyoe2nep4ja" path="res://assets/panel_background_style.tres" id="2_qo466"]
-[ext_resource type="Texture2D" uid="uid://bs5bpra4x4bvj" path="res://assets/place_text_bubble.png" id="3_3mkms"]
 [ext_resource type="Texture2D" uid="uid://x655ls7qa32w" path="res://assets/corrupted_pyramids.png" id="4_4pcmh"]
+[ext_resource type="StyleBox" uid="uid://d012itce26c0x" path="res://assets/place_text_bubble_style.tres" id="4_gxwos"]
 [ext_resource type="Texture2D" uid="uid://bwf28jy8amyee" path="res://assets/close.svg" id="5_fcvpu"]
-
-[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_cw870"]
-texture = ExtResource("3_3mkms")
-texture_margin_left = 20.0
-texture_margin_top = 21.0
-texture_margin_right = 20.0
-texture_margin_bottom = 39.0
 
 [node name="Client" type="Client"]
 
@@ -180,7 +173,7 @@ offset_bottom = 80.0
 pivot_offset = Vector2(149, 80)
 theme_override_colors/default_color = Color(0, 0, 0, 1)
 theme_override_colors/font_shadow_color = Color(1, 0.67062, 0.522109, 1)
-theme_override_styles/normal = SubResource("StyleBoxTexture_cw870")
+theme_override_styles/normal = ExtResource("4_gxwos")
 fit_content = true
 scroll_active = false
 autowrap_mode = 0

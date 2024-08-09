@@ -6,8 +6,8 @@ namespace NetworkShared {
 		GAME_INFO = 1,
 		PLAYERS_INFO = 2,
 		SET_PHASE = 15,
-		KILL_PLAYER = 19,
-		UPDATE_PLAYER = 16,
+		PLAYER_HEALTH = 19,
+		UPDATE_PLAYER_MOVEMENT = 16,
 		TP_PLAYER = 21,
 		CREATE_ENTITY = 22,
 		UPDATE_ENTITY = 23,
@@ -17,9 +17,13 @@ namespace NetworkShared {
 
 	enum ClientPacket {
 		LINK_KEY = 0,
-		UPDATE = 16,
+		UPDATE_MOVEMENT = 16,
 		ACTION_GRAB = 17,
 		ACTION_DROP = 18,
-		SEND_CHAT_MESSAGE = 31
+		ACTION_USE = 19,
+		ACTION_TAKE_DAMAGE = 20,
+		ACTION_CHAT_MESSAGE = 31
 	};
+
+
 }

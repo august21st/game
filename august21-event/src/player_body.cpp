@@ -231,8 +231,10 @@ void PlayerBody::_physics_process(double delta)
 		direction.z = _thumbstick_direction.y;
 	}
 	else {
-		direction.x = _player_input->get_action_strength("move_right") - _player_input->get_action_strength("move_left");
-		direction.z = _player_input->get_action_strength("move_back") - _player_input->get_action_strength("move_forward");
+		direction.x = _player_input->get_action_strength("move_left")
+			- _player_input->get_action_strength("move_right");
+		direction.z = _player_input->get_action_strength("move_forward")
+			- _player_input->get_action_strength("move_back");
 		direction.normalize();
 	}
 
@@ -311,7 +313,7 @@ void PlayerBody::_physics_process(double delta)
 	// Update player on server
 	if (_update_tick % 3 == 0) { // 20 tps
 		auto update_packet = new BufWriter();
-		update_packet->u8(ClientPacket::UPDATE);
+		update_packet->u8(ClientPacket::UPDATE_MOVEMENT);
 		auto phase_scene = _client->get_current_phase_scene();
 		auto phase_scene_utf8 = phase_scene.utf8().get_data();
 		update_packet->str(phase_scene_utf8);
@@ -326,7 +328,8 @@ void PlayerBody::_physics_process(double delta)
 		// TODO: Implement current_animation
 		auto current_animation = String("walk");
 		auto current_animation_utf8 = current_animation.utf8().get_data();
-		 update_packet->str(current_animation_utf8);
+		update_packet->str(current_animation_utf8);
+		update_packet->u32(_health);
 		_client->send(update_packet);
 		delete update_packet;
 	}
@@ -465,7 +468,7 @@ void PlayerBody::_on_chat_send_button_pressed()
 	}
 
 	auto chat_packet = new BufWriter();
-	chat_packet->u8(ClientPacket::SEND_CHAT_MESSAGE);
+	chat_packet->u8(ClientPacket::ACTION_CHAT_MESSAGE);
 	auto chat_message = _chat_input->get_text();
 	auto chat_message_utf8 = chat_message.utf8().get_data();
 	chat_packet->str(chat_message_utf8);
@@ -475,7 +478,13 @@ void PlayerBody::_on_chat_send_button_pressed()
 
 void PlayerBody::take_damage(int damage)
 {
-	_health -= damage;
+	_health = Math::max(0, _health - damage);
+	auto damage_packet = new BufWriter();
+	damage_packet->u8(ClientPacket::ACTION_TAKE_DAMAGE);
+	damage_packet->u32(_health);
+	_client->send(damage_packet);
+	delete damage_packet;
+
 	if (_health <= 0 && !_is_dead) {
 		die();
 	}

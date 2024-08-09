@@ -1,8 +1,11 @@
-[gd_scene load_steps=65 format=3 uid="uid://dh3f0fyoo6ibo"]
+[gd_scene load_steps=71 format=3 uid="uid://dh3f0fyoo6ibo"]
 
 [ext_resource type="Material" uid="uid://dhejphsc088k2" path="res://assets/concrete/concrete.tres" id="1_bacw7"]
 [ext_resource type="Texture2D" uid="uid://e88undo8tgp7" path="res://assets/vignette.png" id="1_olgna"]
+[ext_resource type="FontFile" uid="uid://dud2oarn413ue" path="res://assets/impact/impacted.ttf" id="2_em1jt"]
+[ext_resource type="FontFile" uid="uid://vo3twycs6ve7" path="res://assets/reddit/reddit_sans_bold.woff2" id="2_gdjed"]
 [ext_resource type="PackedScene" uid="uid://ca7n3vrq5gy37" path="res://assets/rplace_logo.glb" id="4_o0vqv"]
+[ext_resource type="Texture2D" uid="uid://bpcp8t666sgwn" path="res://assets/rplace_gold.png" id="4_ql7d3"]
 [ext_resource type="Texture2D" uid="uid://c5tmyq4qeg1gf" path="res://assets/concrete/concrete.png" id="4_sbhyi"]
 [ext_resource type="Material" uid="uid://7ob7uwp8gnn7" path="res://assets/chair/plywood.tres" id="5_vkl7b"]
 [ext_resource type="Texture2D" uid="uid://pqivc2xifl8u" path="res://assets/stall/free_pixels_sign.png" id="6_jap0l"]
@@ -22,6 +25,18 @@
 [ext_resource type="Material" uid="uid://bydnt1xwreyo2" path="res://assets/near_visible_floor.tres" id="18_s8krs"]
 [ext_resource type="Texture2D" uid="uid://kgfd8cgtu6cq" path="res://assets/smoke_particle.png" id="18_ui233"]
 [ext_resource type="PackedScene" uid="uid://cld4tkf11mfmk" path="res://assets/signpost/signpost.glb" id="19_idya5"]
+
+[sub_resource type="FontVariation" id="FontVariation_ftvty"]
+base_font = ExtResource("2_gdjed")
+variation_embolden = 1.0
+variation_transform = Transform2D(1, 0.195, 0, 1, 0, 0)
+
+[sub_resource type="LabelSettings" id="LabelSettings_uar22"]
+font = SubResource("FontVariation_ftvty")
+shadow_color = Color(0, 0, 0, 1)
+
+[sub_resource type="LabelSettings" id="LabelSettings_c2b30"]
+shadow_color = Color(0, 0, 0, 1)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_gql42"]
 size = Vector3(64, 140, 64)
@@ -84,15 +99,6 @@ rings = 2
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_kvku4"]
 albedo_texture = ExtResource("4_sbhyi")
 
-[sub_resource type="PlaneMesh" id="PlaneMesh_rmmtj"]
-size = Vector2(48, 48)
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_sk8h7"]
-shading_mode = 0
-specular_mode = 2
-albedo_texture = ExtResource("4_sbhyi")
-texture_filter = 0
-
 [sub_resource type="BoxShape3D" id="BoxShape3D_gc2up"]
 size = Vector3(62, 0.2, 62)
 
@@ -150,7 +156,7 @@ size = Vector2(4096, 4096)
 exposure_multiplier = 1.01
 
 [sub_resource type="PlaneMesh" id="PlaneMesh_68h7l"]
-size = Vector2(600, 600)
+size = Vector2(1000, 1000)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_8qhy6"]
 transparency = 1
@@ -207,6 +213,11 @@ size = Vector3(1, 15.5, 0.2)
 [sub_resource type="BoxShape3D" id="BoxShape3D_gu0ne"]
 size = Vector3(1, 8.5, 0.1)
 
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_237as"]
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_oe232"]
+size = Vector2(50, 50)
+
 [node name="Roof" type="Roof"]
 
 [node name="RoofGui" type="Control" parent="."]
@@ -226,6 +237,88 @@ grow_horizontal = 2
 grow_vertical = 2
 texture = ExtResource("1_olgna")
 expand_mode = 1
+
+[node name="EventContainer" type="HBoxContainer" parent="RoofGui"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.278
+anchor_right = 0.722
+anchor_bottom = 0.099
+offset_left = -0.255981
+offset_right = 0.255981
+offset_bottom = -0.152
+grow_horizontal = 2
+alignment = 1
+
+[node name="Label" type="Label" parent="RoofGui/EventContainer"]
+layout_mode = 2
+text = "VS: "
+label_settings = SubResource("LabelSettings_uar22")
+
+[node name="EventTitleLabel" type="RichTextLabel" parent="RoofGui/EventContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 8
+theme_override_fonts/normal_font = ExtResource("2_em1jt")
+theme_override_font_sizes/normal_font_size = 42
+bbcode_enabled = true
+text = "AUGUST 21st"
+fit_content = true
+scroll_active = false
+autowrap_mode = 0
+metadata/_edit_use_anchors_ = true
+
+[node name="MarginContainer" type="MarginContainer" parent="RoofGui/EventContainer"]
+layout_mode = 2
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 4
+theme_override_constants/margin_bottom = 4
+
+[node name="EventImage" type="TextureRect" parent="RoofGui/EventContainer/MarginContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+texture = ExtResource("4_ql7d3")
+expand_mode = 2
+
+[node name="EvilZubigriEventGui" type="Control" parent="RoofGui"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Healthbar" type="ProgressBar" parent="RoofGui/EvilZubigriEventGui"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.277778
+anchor_top = 0.135802
+anchor_right = 0.722222
+anchor_bottom = 0.185185
+grow_horizontal = 2
+grow_vertical = 2
+max_value = 1000.0
+value = 900.0
+show_percentage = false
+metadata/_edit_use_anchors_ = true
+
+[node name="HealthLabel" type="Label" parent="RoofGui/EvilZubigriEventGui/Healthbar"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.015625
+anchor_right = 0.984375
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "HEALTH: 900"
+label_settings = SubResource("LabelSettings_c2b30")
+vertical_alignment = 1
+metadata/_edit_use_anchors_ = true
 
 [node name="RplaceHQ" type="Node3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -3, 0)
@@ -313,12 +406,6 @@ visible = false
 [node name="Cube" parent="RplaceHQ/CanvasFloorBody/CanvasFrame" index="0"]
 surface_material_override/0 = SubResource("StandardMaterial3D_kvku4")
 
-[node name="BoardMesh" type="BoardMesh" parent="RplaceHQ/CanvasFloorBody"]
-unique_name_in_owner = true
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, 0)
-mesh = SubResource("PlaneMesh_rmmtj")
-surface_material_override/0 = SubResource("StandardMaterial3D_sk8h7")
-
 [node name="CollisionShape3D" type="CollisionShape3D" parent="RplaceHQ/CanvasFloorBody"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, 0)
 shape = SubResource("BoxShape3D_gc2up")
@@ -399,7 +486,7 @@ shadow_enabled = true
 directional_shadow_mode = 1
 
 [node name="SkyVortexMesh" type="CSGMesh3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, -1, 1.50996e-07, 0, -1.50996e-07, -1, 0, 512, 0)
+transform = Transform3D(-0.902908, 7.76838e-08, -0.429835, -1.50996e-07, -1, 1.36451e-07, -0.429835, 1.88106e-07, 0.902908, 0, 512, 0)
 cast_shadow = 0
 calculate_tangents = false
 mesh = SubResource("PlaneMesh_68h7l")
@@ -495,6 +582,15 @@ shape = SubResource("BoxShape3D_gu0ne")
 [node name="CSGBox3D2" type="CSGBox3D" parent="ClimbableArea"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.75, -0.0499992)
 size = Vector3(1, 8.5, 0.1)
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
+unique_name_in_owner = true
+
+[node name="BoardMesh" type="BoardMesh" parent="."]
+unique_name_in_owner = true
+transform = Transform3D(0.918777, 0.341886, 0.197388, 0, -0.5, 0.866025, 0.394776, -0.795685, -0.459389, -29.736, 39.7276, 87)
+material_override = SubResource("StandardMaterial3D_237as")
+mesh = SubResource("PlaneMesh_oe232")
 
 [editable path="RplaceHQ/CanvasFloorBody/CanvasFrame"]
 [editable path="RplaceHQ/Signpost"]
