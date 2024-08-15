@@ -1,27 +1,62 @@
-[gd_scene load_steps=7 format=3 uid="uid://dfkyt1t78dw5b"]
+[gd_scene load_steps=20 format=3 uid="uid://dfkyt1t78dw5b"]
+
+[ext_resource type="Environment" uid="uid://djhbewoalb8be" path="res://assets/end_environment_low.tres" id="1_1pfpd"]
+[ext_resource type="PackedScene" uid="uid://bc1y56yq3m6pk" path="res://assets/temple_of_gold/entrance.glb" id="1_04bcx"]
+[ext_resource type="Shader" path="res://shaders/portal.gdshader" id="3_jk262"]
 
 [sub_resource type="PlaneMesh" id="PlaneMesh_dqln0"]
 size = Vector2(100, 100)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_5t3v7"]
-albedo_color = Color(1, 0, 1, 1)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_8336w"]
 size = Vector3(100, 1, 100)
-
-[sub_resource type="Environment" id="Environment_61vl4"]
-background_mode = 1
-background_color = Color(1, 1, 1, 1)
-ambient_light_source = 3
-ambient_light_color = Color(0.276811, 0.276811, 0.276811, 1)
-fog_enabled = true
-fog_light_color = Color(1, 1, 1, 1)
-fog_density = 0.005
 
 [sub_resource type="PlaneMesh" id="PlaneMesh_qcwm1"]
 size = Vector2(1000, 1000)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_2ivot"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_t6u3y"]
+size = Vector3(10, 0.9, 24.5)
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_8ch8p"]
+height = 26.4
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_m2xcy"]
+size = Vector3(0.2, 10, 2.3)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_v0gbc"]
+size = Vector3(0.8, 4.8, 0.8)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_1pbn1"]
+size = Vector3(2.2, 3.4, 0.4)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_0j4ea"]
+size = Vector3(3.2, 0.3, 0.4)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_fnye0"]
+render_priority = 0
+shader = ExtResource("3_jk262")
+shader_parameter/fade_out_distance_max = 10.0
+shader_parameter/fade_out_distance_min = 8.0
+shader_parameter/fade_out_colour = Vector4(0, 0, 0, 0)
+
+[sub_resource type="QuadMesh" id="QuadMesh_f2g2a"]
+size = Vector2(3.2, 3.2)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_a23wk"]
+size = Vector3(3.2, 3.1, 0.2)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_7xksm"]
+render_priority = 0
+shader = ExtResource("3_jk262")
+shader_parameter/fade_out_distance_max = 10.0
+shader_parameter/fade_out_distance_min = 8.0
+shader_parameter/fade_out_colour = Vector4(0, 0, 0, 0)
+
+[sub_resource type="QuadMesh" id="QuadMesh_pr5gu"]
+size = Vector2(8.32, 4.6)
 
 [node name="End" type="End"]
 
@@ -36,10 +71,11 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
 shape = SubResource("BoxShape3D_8336w")
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
-environment = SubResource("Environment_61vl4")
+unique_name_in_owner = true
+environment = ExtResource("1_1pfpd")
 
 [node name="BoardMesh" type="BoardMesh" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -550, 0, -550)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -600, -16, -600)
 mesh = SubResource("PlaneMesh_qcwm1")
 skeleton = NodePath("")
 surface_material_override/0 = SubResource("StandardMaterial3D_2ivot")
@@ -47,4 +83,131 @@ surface_material_override/0 = SubResource("StandardMaterial3D_2ivot")
 [node name="SunLight" type="DirectionalLight3D" parent="."]
 unique_name_in_owner = true
 transform = Transform3D(0.965926, 2.85296e-07, -0.258819, 0.224144, 0.5, 0.836516, 0.12941, -0.866025, 0.482963, 0, 10, 0)
+light_energy = 0.2
 shadow_enabled = true
+
+[node name="EntranceBody" type="StaticBody3D" parent="."]
+
+[node name="Entrance" parent="EntranceBody" instance=ExtResource("1_04bcx")]
+transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 0, 0, 15)
+
+[node name="FloorHitbox" type="CollisionShape3D" parent="EntranceBody"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.25, 15.25)
+shape = SubResource("BoxShape3D_t6u3y")
+
+[node name="FloorEdgeHitbox" type="CollisionShape3D" parent="EntranceBody"]
+transform = Transform3D(-4.37114e-08, 4.37114e-08, 1, 1, 1.91069e-15, 4.37114e-08, 0, 1, -4.37114e-08, 5, -0.3, 13.8)
+shape = SubResource("CapsuleShape3D_8ch8p")
+
+[node name="FloorEdgeHitbox2" type="CollisionShape3D" parent="EntranceBody"]
+transform = Transform3D(-4.37114e-08, 4.37114e-08, 1, 1, 1.91069e-15, 4.37114e-08, 0, 1, -4.37114e-08, -5, -0.3, 13.8)
+shape = SubResource("CapsuleShape3D_8ch8p")
+
+[node name="FloorSlopeHitbox" type="CollisionShape3D" parent="EntranceBody"]
+transform = Transform3D(2.98023e-08, 1, 0, -0.984808, 2.93496e-08, 0.173648, 0.173648, -5.17512e-09, 0.984808, 7.45058e-09, -0.0777904, 1.89023)
+shape = SubResource("BoxShape3D_m2xcy")
+
+[node name="PillarHitbox" type="CollisionShape3D" parent="EntranceBody"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.5, 2.6, 3.5)
+shape = SubResource("BoxShape3D_v0gbc")
+
+[node name="PillarHitbox2" type="CollisionShape3D" parent="EntranceBody"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.5, 2.6, 6.8)
+shape = SubResource("BoxShape3D_v0gbc")
+
+[node name="PillarHitbox3" type="CollisionShape3D" parent="EntranceBody"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.5, 2.6, 10)
+shape = SubResource("BoxShape3D_v0gbc")
+
+[node name="PillarHitbox4" type="CollisionShape3D" parent="EntranceBody"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.5, 2.6, 13.3)
+shape = SubResource("BoxShape3D_v0gbc")
+
+[node name="PillarHitbox5" type="CollisionShape3D" parent="EntranceBody"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.5, 2.6, 16.5)
+shape = SubResource("BoxShape3D_v0gbc")
+
+[node name="PillarHitbox6" type="CollisionShape3D" parent="EntranceBody"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.5, 2.6, 19.8)
+shape = SubResource("BoxShape3D_v0gbc")
+
+[node name="PillarHitbox7" type="CollisionShape3D" parent="EntranceBody"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.5, 2.6, 23)
+shape = SubResource("BoxShape3D_v0gbc")
+
+[node name="PillarHitbox8" type="CollisionShape3D" parent="EntranceBody"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.5, 2.6, 26.3)
+shape = SubResource("BoxShape3D_v0gbc")
+
+[node name="PillarHitbox9" type="CollisionShape3D" parent="EntranceBody"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.5, 2.6, 3.5)
+shape = SubResource("BoxShape3D_v0gbc")
+
+[node name="PillarHitbox10" type="CollisionShape3D" parent="EntranceBody"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.5, 2.6, 6.8)
+shape = SubResource("BoxShape3D_v0gbc")
+
+[node name="PillarHitbox11" type="CollisionShape3D" parent="EntranceBody"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.5, 2.6, 10)
+shape = SubResource("BoxShape3D_v0gbc")
+
+[node name="PillarHitbox12" type="CollisionShape3D" parent="EntranceBody"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.5, 2.6, 13.3)
+shape = SubResource("BoxShape3D_v0gbc")
+
+[node name="PillarHitbox13" type="CollisionShape3D" parent="EntranceBody"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.5, 2.6, 16.5)
+shape = SubResource("BoxShape3D_v0gbc")
+
+[node name="PillarHitbox14" type="CollisionShape3D" parent="EntranceBody"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.5, 2.6, 19.8)
+shape = SubResource("BoxShape3D_v0gbc")
+
+[node name="PillarHitbox15" type="CollisionShape3D" parent="EntranceBody"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.5, 2.6, 23)
+shape = SubResource("BoxShape3D_v0gbc")
+
+[node name="PillarHitbox16" type="CollisionShape3D" parent="EntranceBody"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.5, 2.6, 26.3)
+shape = SubResource("BoxShape3D_v0gbc")
+
+[node name="DoorHitbox" type="CollisionShape3D" parent="EntranceBody"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.7, 1.9, 26.8)
+shape = SubResource("BoxShape3D_1pbn1")
+
+[node name="DoorHitbox2" type="CollisionShape3D" parent="EntranceBody"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.7, 1.9, 26.8)
+shape = SubResource("BoxShape3D_1pbn1")
+
+[node name="DoorHitbox3" type="CollisionShape3D" parent="EntranceBody"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.96046e-08, 3.45, 26.8)
+shape = SubResource("BoxShape3D_0j4ea")
+
+[node name="Node3D" type="Node3D" parent="."]
+
+[node name="Portal" type="Portal" parent="Node3D"]
+viewport_vertical_resolution = -1
+viewport_disable_distance = 120.0
+fade_out_distance_max = 120.0
+fade_out_distance_min = 100.0
+exit_portal = NodePath("../ExitPortal")
+entrance_area = NodePath("EntranceArea")
+transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 0, 1.8, 27)
+material_override = SubResource("ShaderMaterial_fnye0")
+mesh = SubResource("QuadMesh_f2g2a")
+
+[node name="EntranceArea" type="Area3D" parent="Node3D/Portal"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.54747e-13, 0, 0)
+collision_layer = 2
+collision_mask = 2
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Node3D/Portal/EntranceArea"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.1921e-07, -0.0500001, 0)
+shape = SubResource("BoxShape3D_a23wk")
+
+[node name="ExitPortal" type="Portal" parent="Node3D"]
+viewport_vertical_resolution = 1024
+exit_portal = NodePath("../Portal")
+transform = Transform3D(1, 0, 1.74846e-07, 0, 1, 0, -1.74846e-07, 0, 1, 0, 1.8, 3)
+material_override = SubResource("ShaderMaterial_7xksm")
+mesh = SubResource("QuadMesh_pr5gu")

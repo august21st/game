@@ -10,7 +10,7 @@ Make sure to clone this project with the --recursive flag to include the godot-c
    ```
 
 2. **Install SCons:**
-To compile the C++ modules, you need the SCons build system. Follow the 
+To compile the C++ modules, you need the SCons build system. Follow the
 [Godot documentation](https://docs.godotengine.org/en/stable/tutorials/scripting/gdextension/gdextension_cpp_example.html)
 to install SCons.
 
@@ -60,5 +60,6 @@ project, [godot-cpp](https://github.com/godotengine/godot-cpp). All modified fil
 including everything under [august21-event/project](./august21-event/godot),
 [august21-event/test-server](./august21-event/server), and
 [august21-event/src](./august21-event/src) are original works that are **NOT** public
-domain, and are licensed under [GNU GPL 3.0](https://www.gnu.org/licenses/gpl-3.0.en.html).
-For the terms of this license, refer to the [license file](./LICENSE) provided.
+domain, and are licensed under [GNU GPL 3.0](https://www.gnu.org/licenses/gpl-3.0.en.html),
+unless stated otherwise. For the terms of this license, refer to the [license file](./LICENSE)
+provided.

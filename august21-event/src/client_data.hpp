@@ -1,3 +1,4 @@
+#pragma once
 #include <godot_cpp/classes/web_socket_peer.hpp>
 
 #include "entity_player.hpp"

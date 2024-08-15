@@ -24,10 +24,10 @@
 #include <godot_cpp/classes/texture_rect.hpp>
 #include <godot_cpp/classes/h_box_container.hpp>
 
+#include "entity_player_base.hpp"
 // WORKAROUND: Forward declare to fix circular dependency
 class PlayerBody;
 #include "player_body.hpp"
-#include "entity_player.hpp"
 
 using namespace godot;
 using namespace dataproto;
@@ -62,6 +62,7 @@ private:
 	void _on_volume_slider_drag_ended(bool value_changed);
 	void _on_volume_slider_value_changed(float value);
 	HSlider* _volume_slider;
+	int _current_volume_ratio;
 	OptionButton* _graphics_options;
 	int _current_graphics_level;
 	void _on_graphics_options_item_selected(int index);
@@ -74,21 +75,22 @@ private:
 	vector<PackedByteArray> poll_next_packets();
 	bool _socket_closed;
 	String _current_phase_scene;
+	void _on_current_scene_ready();
 	String _current_phase_event;
 	int _player_id;
 	PlayerBody* _player_body;
 	HashMap<int, Node*> _entities;
-	HashMap<int, EntityPlayer*> _players;
+	HashMap<int, EntityPlayerBase*> _players;
 	double round_decimal(double value, int places);
 	const String _volume_comments[101] = {
-		"Goes hard on mute 🗣️ 🗣️", // 0
+		String::utf8("Goes hard on mute 🗣️ 🗣️"), // 0
 		"Interesting choice...", // 1
 		"Trucks having se-", // 2
 		"Why only tree who even...", // 3
 		"Stands 4", // 4
 		"Aren't you just checking all?", // 5
 		"Colors gey", // 6
-		"<- IS THAT A $^£&*1NG NUMBER!!!???", // 7
+		String::utf8("<- IS THAT A $^£&*1NG NUMBER!!!???"), // 7
 		"EIGHTEIGHTEIGHTEIGHTEIGHTEIGHTEIGHTEIGHT", // 8
 		"Forget", // 9
 		"Percents of the way as well", // 10
@@ -108,7 +110,7 @@ private:
 		"i like random texts", // 24
 		"1/4", // 25
 		"JK JK here: 8, 44, 80, 88, 98, kinda 9, 11, 20, 21", // 26
-		"🪑🔥", // 27
+		String::utf8("🪑🔥"), // 27
 		"Can we just skip it?", // 28
 		"Please go one up, so unsatisfying", // 29
 		"At least it's a round number", // 30
@@ -120,32 +122,32 @@ private:
 		"6*6", // 36
 		"I think WW2 started this year", // 37
 		"Factual and peer reviewed", // 38
-		"🤫🧏", // 39
+		String::utf8("🤫🧏"), // 39
 		"How many do we have? Fourty, 0_0, thanks you", // 40
 		"I mean what chance of randomly finding this?", // 41
 		"FOURTY TWO", // 42
 		"Mmm... Wat", // 43
 		"Normal", // 44
 		"Fire in the hole", // 45
-		"💶💶😂😂", // 46
+		String::utf8("💶💶😂😂"), // 46
 		"Go one up for spam", // 47
 		"Sksheiamhksnsje (told ya so)", // 48
 		"Just go to 50. Please just go to 50", // 49
 		"Is the glass half empty or half full?", // 50
-		"ВОРОВСТВО", // 51
-		"👁️‍🗨️ Подними", // 52
-		"Я не ебал слонов", // 53
+		String::utf8("ВОРОВСТВО"), // 51
+		String::utf8("👁️‍🗨️ Подними"), // 52
+		String::utf8("Я не ебал слонов"), // 53
 		"54", // 54
 		"fifyfife", // 55
-		"🐳", // 56
-		"Εκ του ασφαλούς και την ανάπτυξη του παιδιού σας", // 57
+		String::utf8("🐳"), // 56
+		String::utf8("Εκ του ασφαλούς και την ανάπτυξη του παιδιού σας"), // 57
 		"Please share 21 AUGUST (ANYTHING)", // 58
 		"What did you expect to be here?", // 59
 		"You thought that something will be here?", // 60
 		"Still kinda low volume", // 61
 		"If you chose this one u love boys", // 62
-		"🐟🧊", // 63
-		"Petition to destroy all 32 bit devices", // 64
+		String::utf8("🐟🧊"), // 63
+		"A full STACK!", // 64
 		"Why 6 afraid of 7?", // 65
 		"666", // 66
 		"666?", // 67
@@ -154,7 +156,7 @@ private:
 		"Seventeen", // 70
 		"Mhm", // 71
 		"Me here", // 72
-		"¢", // 73
+		String::utf8("¢"), // 73
 		"$", // 74
 		"3/4", // 75
 		"Ugh A", // 76
@@ -164,7 +166,7 @@ private:
 		"Can we get much higher?", // 80
 		"Keep going!!!", // 81
 		"The voice in your head says Keep going!!!!", // 82
-		"👁️", // 83
+		String::utf8("👁️"), // 83
 		"The first number 2x the second", // 84
 		"Not zero", // 85
 		"...", // 86
@@ -179,7 +181,7 @@ private:
 		"Few left", // 95
 		"Two left", // 96
 		"Basically max volume", // 96
-		"We losing our hearing with this one 🔥 🔥 🔥", // 98
+		String::utf8("We losing our hearing with this one 🔥 🔥 🔥"), // 98
 		"You are monster if you will stop now", // 99
 		"End." // 100
 	};
@@ -196,12 +198,9 @@ public:
 	Ref<WebSocketPeer> get_socket();
 	Error send(BufWriter* packet);
 	Error send(const char* data, size_t size);
-	template<typename T> T* get_current_scene();
-	template<typename T> T* instance_scene(String scene_path);
-	void orphan_node(Node* node);
+	Node* get_current_scene();
+	template<typename T> T* get_current_scene_strict();
 	void init_socket_client(String url);
-	void set_volume(float volume);
-	Error load_scene(String scene_path, Node** out_scene);
 	Error change_scene(String scene_path);
 	String get_current_phase_scene();
 	String get_current_phase_event();

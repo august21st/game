@@ -18,17 +18,24 @@
 #include <godot_cpp/classes/node3d.hpp>
 #include <godot_cpp/classes/rich_text_label.hpp>
 #include <godot_cpp/templates/hash_map.hpp>
+#include <godot_cpp/classes/file_access.hpp>
+#include <godot_cpp/core/class_db.hpp>
+#include <godot_cpp/templates/cowdata.hpp>
 
 #include "client.hpp"
+#include "godot_cpp/core/math.hpp"
 #include "roof.hpp"
 #include "end.hpp"
 #include "player_body.hpp"
+#include "entity_player_base.hpp"
 #include "entity_player.hpp"
 #include "network_shared.hpp"
+#include "node_shared.hpp"
 
 using namespace godot;
 using namespace dataproto;
 using namespace NetworkShared;
+using namespace NodeShared;
 
 Client::Client() : _socket(Ref<WebSocketPeer>()), _socket_closed(true),
 	_player_body(nullptr), _stats_label(nullptr)
@@ -55,12 +62,16 @@ void Client::_bind_methods()
 		&Client::_on_back_button_pressed);
 	ClassDB::bind_method(D_METHOD("_on_quit_button_pressed"),
 		&Client::_on_quit_button_pressed);
+	ClassDB::bind_method(D_METHOD("_on_current_scene_ready"),
+		&Client::_on_current_scene_ready);
 
 	ADD_SIGNAL(MethodInfo("packet_received",
 		PropertyInfo(Variant::PACKED_BYTE_ARRAY, "packed_packet")));
 	ADD_SIGNAL(MethodInfo("graphics_quality_changed",
 		PropertyInfo(Variant::INT, "level")));
-
+	ADD_SIGNAL(MethodInfo("volume_changed",
+		PropertyInfo(Variant::INT, "volume_ratio")));
+	ADD_SIGNAL(MethodInfo("current_scene_ready"));
 }
 
 void Client::_ready()
@@ -118,17 +129,29 @@ void Client::_ready()
 	}
 	else {
 		UtilityFunctions::print("Starting as client...");
-		_player_body = instance_scene<PlayerBody>("res://scenes/player_body.tscn");
+		PlayerBody* player_body_scene = nullptr;
+		auto load_error = load_scene_strict<PlayerBody>("res://scenes/player_body.tscn", &player_body_scene);
+		if (load_error != Error::OK || player_body_scene == nullptr) {
+			UtilityFunctions::print("Couldn't start client, player body scene failed to load");
+			return;
+		}
+		_player_body = player_body_scene;
 
 		init_socket_client("ws://localhost:8082");
 		change_scene("res://scenes/loading_screen.tscn");
 	}
 }
 
-template<typename T>
-T* Client::get_current_scene()
+Node* Client::get_current_scene()
 {
 	auto scene_node = _client_scene->get_child(0);
+	return scene_node;
+}
+
+template<typename T>
+T* Client::get_current_scene_strict()
+{
+	auto scene_node = get_current_scene();
 	if (scene_node->get_class() != T::get_class_static()) {
 		return nullptr;
 	}
@@ -172,7 +195,7 @@ Error Client::send(const char* data, size_t size)
 		return Error::ERR_UNAVAILABLE;
 	}
 
-	PackedByteArray packed_data;
+	auto packed_data = PackedByteArray();
     packed_data.resize(size);
     memcpy(packed_data.ptrw(), data, size);
     _socket->put_packet(packed_data);
@@ -206,6 +229,10 @@ vector<PackedByteArray> Client::poll_next_packets()
 				.format(Array::make(code, reason, code != -1));
 			UtilityFunctions::printerr(formatted_log);
 			_socket_closed = true;
+
+			// TODO: try to re-establish connection with cooldown
+			//UtilityFunctions::print("Attemping to re-establish WebSocket connection...");
+			//init_socket_client("ws://localhost:8082");
 			break;
 	}
 
@@ -262,9 +289,14 @@ void Client::_process(double delta)
 							// TODO: Apply to self
 						}
 						else {
-							auto player = instance_scene<EntityPlayer>("res://scenes/entity_player.tscn");
-							player->set_chat_name(chat_name);
-							_players.insert(id, player);
+							EntityPlayer* player_entity = nullptr;
+							auto load_error = load_scene_strict<EntityPlayer>("res://scenes/entity_player.tscn", &player_entity);
+							if (load_error != Error::OK || player_entity == nullptr) {
+								UtilityFunctions::print("Failed to insert entity player: entity player scene failed to load.");
+								return;
+							}
+							player_entity->set_chat_name(chat_name);
+							_players.insert(id, player_entity);
 						}
 					}
 					break;
@@ -307,7 +339,7 @@ void Client::_process(double delta)
 					}
 					break;
 				}
-				case ServerPacket::PLAYER_HEALTH: {
+				case ServerPacket::UPDATE_PLAYER_HEALTH: {
 					auto player_id = packet.u32();
 					if (!_players.has(player_id)) {
 						if (player_id != _player_id) {
@@ -327,29 +359,53 @@ void Client::_process(double delta)
 					}
 					break;
 				}
-				case ServerPacket::CREATE_ENTITY: {
-					auto id = packet.u32();
-					auto type_str = (string) packet.str();
-					auto type = String(type_str.c_str());
+				case ServerPacket::ENTITIES_INFO: {
+					auto entity_count = packet.u16();
+					for (auto i = 0; i < entity_count; i++) {
+						auto id = packet.u32();
+						auto parent_scene_str = (string) packet.str();
+						auto parent_scene = String(parent_scene_str.c_str());
+
+						auto entity_node = read_entity_data(&packet);
+						if (entity_node == nullptr) {
+							UtilityFunctions::print("Failed to create entity ", id, ": failed to decode entity data");
+							continue;
+						}
+						// Register entity
+						_entities.insert(id, entity_node);
+
+						// If a scene is defined, spawn the entity in
+						if (parent_scene == "roof" && _current_phase_scene == "roof") {
+							auto roof_scene = get_current_scene_strict<Roof>();
+							roof_scene->add_child(entity_node);
+						}
+						else if (parent_scene == "end" && _current_phase_scene == "end") {
+							auto end_scene = get_current_scene_strict<End>();
+							end_scene->add_child(entity_node);
+						}
+					}
 					break;
 				}
 				case ServerPacket::UPDATE_ENTITY: {
+					break; // TODO: reimplement
 					auto id = packet.u32();
-					if (_entities[id] == nullptr) {
-						UtilityFunctions::print("Couldn't update entity with id {0}: entity not found.",
-							Array::make(id));
+					if (!_entities.has(id)) {
+						UtilityFunctions::print("Couldn't update entity with id ",
+							id, ": entity not found.");
 						break;
 					}
-					auto property_str = (string) packet.str();
-					auto property = String(property_str.c_str());
-					break;
-				}
-				case ServerPacket::DELETE_ENTITY: {
-					auto id = packet.u32();
-					if (_entities[id] == nullptr) {
-						UtilityFunctions::print("Couldn't delete entity with id {0}: entity not found.",
-							Array::make(id));
-						break;
+					auto entity = _entities[id];
+
+					auto property_count = packet.u8();
+					for (auto i = 0; i < property_count; i++) {
+						auto property_str = (string) packet.str();
+						auto property = String(property_str.c_str());
+						auto value_data = packet.str();
+						auto temp_buffer = PackedByteArray();
+						temp_buffer.resize(value_data.size);
+						memcpy(temp_buffer.ptrw(), value_data.data, value_data.size);
+						auto value = packed_packet.decode_var(0);
+						entity->set(property, value);
 					}
 					break;
 				}
@@ -371,10 +427,8 @@ void Client::_process(double delta)
 							change_scene("res://scenes/roof.tscn");
 						}
 
-						auto roof_scene = get_current_scene<Roof>();
+						auto roof_scene = get_current_scene_strict<Roof>();
 						// Remove player from wherever it was and hand it over
-						// TODO: Use a descendant approach, in case scene put
-						// TODO: player somewhere else than directly under
 						if (_player_body->get_parent() != roof_scene) {
 							orphan_node(_player_body);
 							roof_scene->spawn_player(_player_body);
@@ -386,7 +440,7 @@ void Client::_process(double delta)
 							change_scene("res://scenes/end.tscn");
 						}
 
-						auto end_scene = get_current_scene<End>();
+						auto end_scene = get_current_scene_strict<End>();
 						if (_player_body->get_parent() != end_scene) {
 							orphan_node(_player_body);
 							end_scene->spawn_player(_player_body);
@@ -467,25 +521,6 @@ void Client::_on_volume_slider_drag_ended(bool value_changed)
 	_volume_label->set_visible(false);
 }
 
-Error Client::load_scene(String scene_path, Node** out_scene_instance)
-{
-	auto scene_resource = _resource_loader->load(scene_path);
-	if (!scene_resource.is_valid() || !scene_resource->is_class("PackedScene")) {
-		UtilityFunctions::printerr("Failed to load scene scene: file not found");
-		return Error::ERR_FILE_NOT_FOUND;
-	}
-
-	Ref<PackedScene> packed_scene = scene_resource;
-	if (!packed_scene.is_valid() || !packed_scene->can_instantiate()) {
-		UtilityFunctions::printerr("Failed to load scene: resource was invalid");
-		return Error::ERR_INVALID_DATA;
-	}
-
-	auto scene_instance = packed_scene->instantiate();
-	*out_scene_instance = scene_instance;
-	return Error::OK;
-}
-
 Error Client::change_scene(String scene_path)
 {
 	Node* scene_instance;
@@ -498,33 +533,20 @@ Error Client::change_scene(String scene_path)
 		_client_scene->remove_child(_client_scene->get_child(0));
 	}
 
+	// Newly created scene won't be safe to touch until we have guarenteed it,
+	// and all it's nodes have fully loaded
+	scene_instance->connect("ready", Callable(this, "_on_current_scene_ready"));
 	_client_scene->add_child(scene_instance);
-
-	if (!_is_server) {
-		emit_signal("graphics_quality_changed", _current_graphics_level);
-	}
 
 	return Error::OK;
 }
 
-template<typename T>
-T* Client::instance_scene(String scene_path)
+void Client::_on_current_scene_ready()
 {
-	Node* scene_node;
-	auto load_error = load_scene(scene_path, &scene_node);
-	if (load_error != Error::OK || !scene_node->is_class(T::get_class_static())) {
-		return nullptr;
-	}
-
-	return (T*) scene_node;
-}
-
-void Client::orphan_node(Node* node)
-{
-	auto node_parent = node->get_parent();
-	if (node_parent != nullptr) {
-		node_parent->remove_child(node);
-	}
+	auto scene_instance = get_current_scene();
+	emit_signal("graphics_quality_changed", _current_graphics_level);
+	emit_signal("volume_changed", _current_volume_ratio);
+	emit_signal("current_scene_ready");
 }
 
 void Client::_on_volume_slider_value_changed(float value)
@@ -544,16 +566,11 @@ void Client::_on_volume_slider_value_changed(float value)
 	_volume_label->set_global_position(Vector2(
 		slider_position.x + (slide_ratio * slider_size.x) - (volume_label_size.x / 2.0f),
 		slider_position.y - 70.0f));
-	set_volume(slide_ratio);
-}
 
-void Client::set_volume(float volume_ratio)
-{
 	auto master_index = _audio_server->get_bus_index("Master");
-	_audio_server->set_bus_volume_db(master_index, volume_ratio * -60.0f);
-	if (_volume_slider != nullptr) {
-		_volume_slider->set_value(volume_ratio * 100.0f);
-	}
+	_audio_server->set_bus_volume_db(master_index, Math::linear2db(slide_ratio));
+	_current_volume_ratio = slide_ratio;
+	emit_signal("volume_changed", slide_ratio);
 }
 
 void Client::_on_graphics_options_item_selected(int index)
@@ -566,7 +583,6 @@ void Client::_on_back_button_pressed()
 {
 	set_paused(false);
 }
-
 
 void Client::_on_quit_button_pressed()
 {

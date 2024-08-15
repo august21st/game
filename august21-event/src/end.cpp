@@ -12,9 +12,14 @@
 
 #include "client.hpp"
 #include "end.hpp"
+#include "entity_player.hpp"
+#include "godot_cpp/classes/world_environment.hpp"
+#include "server.hpp"
+#include "node_shared.hpp"
 
 using namespace godot;
 using namespace dataproto;
+using namespace NodeShared;
 
 End::End()
 {
@@ -28,6 +33,8 @@ void End::_bind_methods()
 {
 	ClassDB::bind_method(D_METHOD("_on_graphics_quality_changed", "level"),
 		&End::_on_graphics_quality_changed);
+	ClassDB::bind_method(D_METHOD("_server_run_phase_event", "phase_event"),
+		&End::_server_run_phase_event);
 }
 
 void End::_ready()
@@ -45,15 +52,18 @@ void End::_ready()
 	_client->connect("graphics_quality_changed", Callable(this, "_on_graphics_quality_changed"));
 
 	_sun_light = get_node<DirectionalLight3D>("%SunLight");
+	_world_environment = get_node<WorldEnvironment>("%WorldEnvironment");
 }
 
 void End::_on_graphics_quality_changed(int level)
 {
 	if (level == 0) {
 		_sun_light->set_shadow(false);
+		set_environment(_world_environment, "res://assets/end_environment_low.tres");
 	}
 	else if (level == 1) {
 		_sun_light->set_shadow(true);
+		set_environment(_world_environment, "res://assets/end_environment_high.tres");
 	}
 }
 
@@ -76,6 +86,33 @@ void End::run_phase_event(String phase_event)
 	}
 }
 
+void End::_server_run_phase_event(String phase_event)
+{
+	// WORKAROUND: Cursed way to get server singeton but it works
+	auto server = (Server*) get_parent();
+	if (server == nullptr) {
+		UtilityFunctions::print("Couldn't run serverside phase event: server autoload was null");
+		return;
+	}
 
+	// DEBUG: Test entity management
+	// TODO: Remove this!
+	EntityPlayer* test_entity;
+	auto error = load_scene_strict<EntityPlayer>("res://scenes/entity_player.tscn", &test_entity);
+	if (error == Error::OK) {
+		add_child(test_entity);
+		auto info = server->register_entity(test_entity, "end");
+		info->track_property("position");
+		info->track_property("rotation");
+		info->track_property("health");
+		info->track_property("chat_name");
+	}
 
+	if (phase_event == "intro") {
+		return;
+	}
 
+	if (phase_event == "sandbox") {
+		return;
+	}
+}

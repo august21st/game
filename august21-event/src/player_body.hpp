@@ -18,13 +18,14 @@
 #include <godot_cpp/classes/performance.hpp>
 #include <godot_cpp/classes/v_box_container.hpp>
 
+#include "entity_player_base.hpp"
 // WORKAROUND: Forward declare to fix circular dependency
 class Client;
 #include "client.hpp"
 
 using namespace godot;
 
-class PlayerBody : public CharacterBody3D {
+class PlayerBody : public EntityPlayerBase {
 	GDCLASS(PlayerBody, CharacterBody3D);
 
 private:
@@ -33,7 +34,6 @@ private:
 	ProjectSettings* _project_settings;
 	Input* _player_input;
 	float _gravity;
-	int _health;
 	bool _is_dead;
 	Vector3 _velocity;
 	Camera3D* _camera;
@@ -90,4 +90,7 @@ public:
 	void open_chat();
 	void close_chat();
 	void set_spawn_position(Vector3 position);
+
+	// Server calls (should not make server callbacks)
+	void set_health(int value) override;
 };

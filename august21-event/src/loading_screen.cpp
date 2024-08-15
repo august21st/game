@@ -11,9 +11,13 @@
 #include <godot_cpp/variant/callable.hpp>
 #include <godot_cpp/classes/resource_loader.hpp>
 #include <godot_cpp/classes/material.hpp>
+#include <godot_cpp/classes/animation_player.hpp>
+#include <godot_cpp/classes/audio_stream_player.hpp>
+#include <godot_cpp/classes/audio_stream.hpp>
 
 #include "client.hpp"
 #include "loading_screen.hpp"
+#include "godot_cpp/variant/dictionary.hpp"
 #include "network_shared.hpp"
 
 using namespace std;
@@ -35,6 +39,11 @@ void LoadingScreen::_bind_methods()
 		&LoadingScreen::_on_packet_received);
 	ClassDB::bind_method(D_METHOD("_on_graphics_quality_changed", "level"),
 		&LoadingScreen::_on_graphics_quality_changed);
+	ClassDB::bind_method(D_METHOD("_on_flying_objects_player_animation_finished", "anim_name"),
+		&LoadingScreen::_on_flying_objects_player_animation_finished);
+	ClassDB::bind_method(D_METHOD("_on_song_player_finished"),
+		&LoadingScreen::_on_song_player_finished);
+
 }
 
 void LoadingScreen::_ready()
@@ -55,6 +64,15 @@ void LoadingScreen::_ready()
 	_client->connect("graphics_quality_changed", Callable(this, "_on_graphics_quality_changed"));
 
 	_players_label = get_node<Label>("%PlayerCountLabel");
+	_flying_objects_player = get_node<AnimationPlayer>("%FlyingObjectsPlayer");
+	_flying_objects_player->connect("animation_finished", Callable(this, "_on_flying_objects_player_animation_finished"));
+	_flying_objects_player->play("flying_objects");
+
+	_song_player = get_node<AudioStreamPlayer>("%SongPlayer");
+	_song_player->connect("finished", Callable(this, "_on_song_player_finished"));
+	_current_song_label = get_node<Label>("%CurrentSongLabel");
+	_current_loading_song = 0;
+	play_song(_loading_songs[_current_loading_song]);
 
 	_tube = get_node<Node3D>("%Tube");
 }
@@ -95,5 +113,23 @@ void LoadingScreen::_on_graphics_quality_changed(int level)
 			UtilityFunctions::printerr("Failed to load tube material: file not found");
 		}
 	}
+}
 
+void LoadingScreen::_on_flying_objects_player_animation_finished(String anim_name)
+{
+	_flying_objects_player->play("flying_objects");
+}
+
+void LoadingScreen::_on_song_player_finished()
+{
+	_current_loading_song = (_current_loading_song + 1) % size(_loading_songs);
+	play_song(_loading_songs[_current_loading_song]);
+}
+
+void LoadingScreen::play_song(LoadingSong song)
+{
+	_current_song_label->set_text(String::utf8("♪ {0} (by {1})").format(Array::make(song.name, song.author)));
+	auto song_resource = _resource_loader->load(song.path);;
+	_song_player->set_stream(song_resource);
+	_song_player->play();
 }

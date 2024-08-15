@@ -47,10 +47,12 @@ text = "| |"
 unique_name_in_owner = true
 layout_mode = 1
 anchors_preset = -1
-anchor_left = 0.00694444
-anchor_top = 0.0123457
-anchor_right = 0.993056
-anchor_bottom = 0.987654
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 7.99999
+offset_top = 8.00001
+offset_right = -7.99951
+offset_bottom = -8.00024
 theme_override_styles/panel = ExtResource("2_qo466")
 metadata/_edit_use_anchors_ = true
 
@@ -73,7 +75,7 @@ grow_horizontal = 2
 grow_vertical = 2
 texture = ExtResource("4_4pcmh")
 expand_mode = 1
-stretch_mode = 2
+stretch_mode = 6
 
 [node name="VBoxContainer" type="VBoxContainer" parent="ClientGui/PausePanel"]
 layout_mode = 1
@@ -158,6 +160,7 @@ text = "[shake rate=4.0 level=8 connected=0][font_size=24][b]Credits:[/b][/font_
 [p]
 [url=https://github.com/Zekiah-A]Zekiah-A[/url]  - Programming, & development
 [url=https://www.youtube.com/channel/UC1-W2gaSVuAgSJicIKZjfAg]Zubigri[/url] - Textures, art & original lore
+[url=https://x.com/Bushi_Sengoku]Bushi[/url] - Models, art & assets
 [url=https://www.youtube.com/channel/UC8SkDRjigJej02DpkXteGJQ]xv_bez[/url]  - Design, models & assets
 [font_size=12]
 ..and all other authors whose works were included in the project [url=https://github.com/Zekiah-A/august21-event](see readmes)[/url]

@@ -75,6 +75,8 @@ theme_override_font_sizes/normal_font_size = 32
 bbcode_enabled = true
 text = "Rplace HQ, Manhattan"
 scroll_active = false
+visible_characters = 0
+visible_ratio = 0.0
 metadata/_edit_use_anchors_ = true
 
 [node name="RplaceHQ" type="Node3D" parent="."]
@@ -94,9 +96,9 @@ material = ExtResource("1_k6hli")
 transform = Transform3D(2, 0, 0, 0, -8.74228e-08, 2, 0, -2, -8.74228e-08, 0, 140, 32)
 
 [node name="BuildingCamera" type="Camera3D" parent="."]
-transform = Transform3D(-0.0636906, -0.635736, -0.769275, 0.0155358, 0.770115, -0.637716, 0.997849, -0.0525679, -0.0391724, -52.4425, 67.3379, 67.877)
+transform = Transform3D(0.951057, -0.120742, -0.284452, -2.23518e-08, 0.920505, -0.390731, 0.309017, 0.371607, 0.875452, -8, 126, 54.61)
 current = true
-fov = 42.4446
+fov = 31.6
 
 [node name="BuildingAudioPlayer" type="AudioStreamPlayer" parent="."]
 
@@ -185,7 +187,7 @@ rings = 12
 surface_material_override/0 = SubResource("StandardMaterial3D_ambu1")
 
 [node name="Plane" parent="." instance=ExtResource("5_ua2td")]
-transform = Transform3D(-0.886925, -0.445591, -0.121702, -0.454037, 0.889444, 0.0523359, 0.0849269, 0.101675, -0.991185, 62.9044, 130, 91.9289)
+transform = Transform3D(-0.953001, -0.277447, -0.121701, -0.285297, 0.957009, 0.052336, 0.101949, 0.0845975, -0.991185, 67, 130, 105)
 
 [node name="PlaneAudioPlayer" type="AudioStreamPlayer3D" parent="Plane"]
 attenuation_model = 2

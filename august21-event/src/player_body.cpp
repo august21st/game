@@ -490,6 +490,15 @@ void PlayerBody::take_damage(int damage)
 	}
 }
 
+
+void PlayerBody::set_health(int value)
+{
+	_health = value;
+	if (_health <= 0 && !_is_dead) {
+		die();
+	}
+}
+
 void PlayerBody::respawn(Vector3 position)
 {
 	set_position(position);

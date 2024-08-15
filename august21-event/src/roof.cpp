@@ -13,6 +13,7 @@
 #include <godot_cpp/core/method_bind.hpp>
 #include <dataproto_cpp/dataproto.hpp>
 #include <godot_cpp/templates/hash_map.hpp>
+#include <godot_cpp/templates/list.hpp>
 #include <godot_cpp/classes/scene_tree.hpp>
 #include <godot_cpp/classes/window.hpp>
 #include <godot_cpp/classes/directional_light3d.hpp>
@@ -24,13 +25,18 @@
 #include <godot_cpp/classes/texture_rect.hpp>
 #include <godot_cpp/classes/h_box_container.hpp>
 #include <godot_cpp/classes/rich_text_label.hpp>
+#include <godot_cpp/classes/world_environment.hpp>
+#include <godot_cpp/classes/environment.hpp>
 
+#include "node_shared.hpp"
+#include "server.hpp"
 #include "client.hpp"
 #include "board_mesh.hpp"
 #include "roof.hpp"
 
 using namespace godot;
 using namespace dataproto;
+using namespace NodeShared;
 
 Roof::Roof()
 {
@@ -46,6 +52,8 @@ void Roof::_bind_methods()
 		&Roof::_on_floor_area_body_entered);
 	ClassDB::bind_method(D_METHOD("_on_graphics_quality_changed", "level"),
 		&Roof::_on_graphics_quality_changed);
+	ClassDB::bind_method(D_METHOD("_server_run_phase_event", "phase_event"),
+		&Roof::_server_run_phase_event);
 }
 
 void Roof::_ready()
@@ -104,27 +112,12 @@ void Roof::_on_floor_area_body_entered(Node3D* body)
 
 void Roof::_on_graphics_quality_changed(int level)
 {
-	String environment_path;
 	if (level == 0) {
-		environment_path = "res://assets/roof_environment_high.tres";
+		set_environment(_world_environment, "res://assets/roof_environment_low.tres");
 	}
 	else if (level == 1) {
-		environment_path = "res://assets/roof_environment_low.tres";
+		set_environment(_world_environment, "res://assets/roof_environment_high.tres");
 	}
-	auto environment_resource = _resource_loader->load(environment_path);
-	if (environment_resource.is_valid() && environment_resource->is_class("Environment")) {
-		Ref<Environment> environment = environment_resource;
-		if (!environment.is_valid()) {
-			UtilityFunctions::printerr("Failed to load enviromnent: resource was invalid");
-		}
-		else {
-			_world_environment->set_environment(environment);
-		}
-	}
-	else {
-		UtilityFunctions::printerr("Failed to load environment: file not found");
-	}
-
 	_sun_light->set_shadow(level == 0 ? false : true);
 }
 
@@ -172,7 +165,7 @@ void Roof::run_phase_event(String phase_event)
 
 	if (phase_event == "evil_zubigri_sky" || phase_event == "evil_zubigri_platformer") {
 		_event_title_label->set_text(
-			"[shake][center][color=#8a0303]E[color=6c0000]V[/color][color=4e0000]I[/color][color=330002]L[/color] [/color][color=#00FFFF]Z[/color][color=#8a0303]U[color=6c0000]B[/color][color=4e0000]I[/color][color=380002]G[/color][color=#310300]R[/color][color=#110000]I[/color][/color][/center][/shake]");
+			"[center][shake][color=#8a0303]E[color=6c0000]V[/color][color=4e0000]I[/color][color=330002]L[/color] [/color][color=#00FFFF]Z[/color][color=#8a0303]U[color=6c0000]B[/color][color=4e0000]I[/color][color=380002]G[/color][color=#310300]R[/color][color=#110000]I[/color][/color][/shake][/center]");
 	}
 
 	if (phase_event == "evil_zubigri_sky") {
@@ -186,6 +179,18 @@ void Roof::run_phase_event(String phase_event)
 	if (phase_event == "collapse") {
 		_event_title_label->set_text(
 			"[center][color=#d4af37]OPPENHEIMER'S LE BOMB[/color][/center]");
+		return;
+	}
+}
+
+// Serverside run phase event, works similarly to the client counterpart but
+// carries out only the essential server side operations of the event
+void Roof::_server_run_phase_event(String phase_event)
+{
+	// WORKAROUND: Cursed way to get server singeton but it works
+	auto server = (Server*) get_parent();
+	if (server == nullptr) {
+		UtilityFunctions::print("Couldn't run serverside phase event: server autoload was null");
 		return;
 	}
 }

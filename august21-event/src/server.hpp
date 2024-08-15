@@ -1,5 +1,4 @@
 #pragma once
-#include "dataproto_cpp/dataproto.hpp"
 #include <godot_cpp/templates/list.hpp>
 #include <godot_cpp/classes/node.hpp>
 #include <godot_cpp/classes/web_socket_multiplayer_peer.hpp>
@@ -10,8 +9,10 @@
 #include <godot_cpp/variant/utility_functions.hpp>
 #include <godot_cpp/classes/thread.hpp>
 #include <godot_cpp/templates/hash_map.hpp>
+#include <dataproto_cpp/dataproto.hpp>
 
 #include "client_data.hpp"
+#include "entity_info.hpp"
 
 using namespace godot;
 using namespace std;
@@ -21,9 +22,9 @@ class Server : public Node {
 	GDCLASS(Server, Node)
 
 private:
-	OS *_os;
-	Engine *_engine;
-	DisplayServer *_display_server;
+	OS* _os;
+	Engine* _engine;
+	DisplayServer* _display_server;
 	Ref<WebSocketMultiplayerPeer> _socket_server;
 	Ref<Thread> _console_thread;
 	ResourceLoader* _resource_loader;
@@ -31,11 +32,8 @@ private:
 	int _tick_count;
 	HashMap<String, Node*> _phase_scenes;
 	HashMap<int, ClientData*> _clients;
-	List<Node*> _entities;
+	HashMap<int, EntityInfo*> _entities;
 	Error register_phase_scene(String identifier, String path);
-	template<typename T>
-	Error load_scene(String scene_path, T** out_scene_instance);
-	void orphan_node(Node* node);
 
 protected:
 	static void _bind_methods();
@@ -49,6 +47,7 @@ public:
 	void _on_peer_connected(int id);
 	void _on_peer_disconnected(int id);
 	void run_console_loop();
+	EntityInfo* register_entity(Node* entity, String parent_scene);
 	void set_phase(string name);
 	void create_entity(string type);
 	void update_entity(int id, string property, string value);

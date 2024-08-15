@@ -4,14 +4,16 @@
 #include <godot_cpp/godot.hpp>
 
 #include "register_types.hpp"
-#include "loading_screen.hpp"
+#include "entity_player_base.hpp"
 #include "player_body.hpp"
+#include "entity_player.hpp"
+#include "loading_screen.hpp"
 #include "climbable_area.hpp"
+#include "portal.hpp"
 #include "intro.hpp"
 #include "board_mesh.hpp"
 #include "roof.hpp"
 #include "end.hpp"
-#include "entity_player.hpp"
 #include "server.hpp"
 #include "client.hpp"
 
@@ -26,11 +28,13 @@ void initialize_gdextension_types(ModuleInitializationLevel p_level)
 	GDREGISTER_CLASS(Client);
 	GDREGISTER_CLASS(LoadingScreen);
 	GDREGISTER_CLASS(PlayerBody);
+	GDREGISTER_CLASS(EntityPlayerBase);
+	GDREGISTER_CLASS(EntityPlayer);
 	GDREGISTER_CLASS(ClimbableArea);
+	GDREGISTER_CLASS(Portal);
 	GDREGISTER_CLASS(Intro);
 	GDREGISTER_CLASS(Roof);
 	GDREGISTER_CLASS(End);
-	GDREGISTER_CLASS(EntityPlayer);
 	GDREGISTER_CLASS(BoardMesh);
 	GDREGISTER_CLASS(Server);
 }

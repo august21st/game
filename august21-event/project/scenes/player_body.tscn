@@ -33,6 +33,8 @@ _data = {
 }
 
 [node name="PlayerBody" type="PlayerBody"]
+collision_layer = 3
+safe_margin = 0.005
 
 [node name="PlayerCollider" type="CollisionShape3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)

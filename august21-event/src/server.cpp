@@ -7,20 +7,29 @@
 #include <godot_cpp/classes/window.hpp>
 #include <godot_cpp/classes/resource_loader.hpp>
 #include <godot_cpp/classes/packed_scene.hpp>
+#include <godot_cpp/core/class_db.hpp>
+#include <godot_cpp/variant/packed_byte_array.hpp>
+#include <godot_cpp/variant/variant.hpp>
+#include <godot_cpp/classes/node.hpp>
+#include <godot_cpp/classes/resource_saver.hpp>
+#include <godot_cpp/classes/file_access.hpp>
 #include <dataproto_cpp/dataproto.hpp>
 #include <commandIO.hpp>
 
 #include "server.hpp"
-#include "godot_cpp/core/class_db.hpp"
-#include "godot_cpp/variant/packed_byte_array.hpp"
 #include "network_shared.hpp"
+#include "node_shared.hpp"
 #include "entity_player.hpp"
+#include "entity_info.hpp"
+#include "roof.hpp"
+#include "end.hpp"
 
 using namespace commandIO;
 using namespace dataproto;
 using namespace godot;
 using namespace std;
 using namespace NetworkShared;
+using namespace NodeShared;
 
 const int SERVER_PORT = 8082;
 const int TPS = 20;
@@ -82,7 +91,7 @@ void Server::_ready()
 	if (end_err != godot::Error::OK) {
 		return;
 	}
-	UtilityFunctions::print("Sucessfully loaded phase scenes...");
+	UtilityFunctions::print("Sucessfully loaded phase scenes");
 
 	// Initialise CLI
 	_console_thread = Ref<Thread>();
@@ -167,7 +176,7 @@ void Server::_physics_process(double delta)
 					auto health = packet.u32();
 
 					auto health_packet = new BufWriter();
-					health_packet->u8(ServerPacket::PLAYER_HEALTH);
+					health_packet->u8(ServerPacket::UPDATE_PLAYER_HEALTH);
 					health_packet->u32(sender_id);
 					health_packet->u32(health);
 					send_to_all(health_packet);
@@ -196,9 +205,34 @@ void Server::_physics_process(double delta)
 		}
 	}
 
-	// Run game loop
+	// Query new world state & run game loop
+	for (auto &[id, entity_info] : _entities) {
+		auto update_packet = new BufWriter();
+		update_packet->u8(ServerPacket::UPDATE_ENTITY);
+		update_packet->u32(id);
+		auto tracked_properties = entity_info->get_tracked_properties();
+		update_packet->u16(tracked_properties.size());
+		for (auto property : tracked_properties) {
+			if (entity_info->tracked_property_changed(property)) {
+				auto property_utf8 = property.utf8().get_data();
+				update_packet->str(property_utf8);
+				auto value = entity_info->get_property_value(property);
+				auto temp_buffer = PackedByteArray();
+				temp_buffer.encode_var(0, value);
+				update_packet->str(temp_buffer.ptr(), temp_buffer.size());
+			}
+		}
+		send_to_all(update_packet);
+	}
+
 	_game_time += delta;
 	_tick_count++;
+}
+
+void encode_property()
+{
+
+
 }
 
 void Server::_on_peer_connected(int id)
@@ -206,7 +240,7 @@ void Server::_on_peer_connected(int id)
 	// Init client datastructures
 	auto client_socket = _socket_server->get_peer(id);
 	EntityPlayer* client_body = nullptr;
-	auto load_error = load_scene<EntityPlayer>("res://scenes/entity_player.tscn", &client_body);
+	auto load_error = load_scene_strict<EntityPlayer>("res://scenes/entity_player.tscn", &client_body);
 	if (load_error != godot::Error::OK || client_body == nullptr) {
 		UtilityFunctions::print("Failed to connect peer: Player entity scene was invalid");
 		client_socket->close(4000, "Internal server error");
@@ -272,40 +306,38 @@ godot::Error Server::register_phase_scene(String identifier, String path)
 	}
 
 	auto scene_instance = packed_scene->instantiate();
+	add_child(scene_instance);
 	_phase_scenes.insert(identifier, scene_instance);
 	return godot::Error::OK;
 }
 
-template<typename T>
-godot::Error Server::load_scene(String scene_path, T** out_scene_instance)
+EntityInfo* Server::register_entity(Node* entity, String parent_scene)
 {
-	auto scene_resource = _resource_loader->load(scene_path);
-	if (!scene_resource.is_valid() || !scene_resource->is_class("PackedScene")) {
-		UtilityFunctions::printerr("Failed to load scene scene: file not found");
-		return godot::Error::ERR_FILE_NOT_FOUND;
+	// Create new entity locally
+	int max_id = 0;
+	for (auto entity : _entities) {
+		auto id = entity.key;
+		if (id > max_id) {
+			max_id = id;
+		}
 	}
+	int new_id = max_id + 1;
 
-	Ref<PackedScene> packed_scene = scene_resource;
-	if (!packed_scene.is_valid() || !packed_scene->can_instantiate()) {
-		UtilityFunctions::printerr("Failed to load scene: resource was invalid");
-		return godot::Error::ERR_INVALID_DATA;
-	}
+	auto info = new EntityInfo(new_id, entity, parent_scene);
+	_entities.insert(new_id, info);
 
-	auto scene_instance = packed_scene->instantiate();
-	if (scene_instance->get_class() != T::get_class_static()) {
-		UtilityFunctions::printerr("Failed to load scene: expected type did not match scene type");
-		return godot::Error::ERR_INVALID_DATA;
-	}
-	*out_scene_instance = (T*) scene_instance;
-	return godot::Error::OK;
-}
+	// Distribute to all clients
+	auto entity_info_packet = new BufWriter();
+	entity_info_packet->u8(ServerPacket::ENTITIES_INFO); // packet code
+	entity_info_packet->u32(new_id); // entity id
+	auto parent_scene_str = parent_scene.utf8().get_data();
+	entity_info_packet->str(parent_scene_str); // parent_scene
+	// Write node data (properties, children)
+	write_entity_data(entity, entity_info_packet); // entity data
 
-void Server::orphan_node(Node* node)
-{
-	auto node_parent = node->get_parent();
-	if (node_parent != nullptr) {
-		node_parent->remove_child(node);
-	}
+	send_to_all(entity_info_packet);
+	delete entity_info_packet;
+	return info;
 }
 
 void Server::run_console_loop()
@@ -327,17 +359,41 @@ void Server::run_console_loop()
 			param("id", "Id of player to be killed")),
 		func(pack(this, &Server::kick_player), "kick_player", "Disconnect a specific player",
 			param("id", "Id of player to be disconnected")),
-		func(pack(this, &Server::tp_player), "tp_player", "Teleport a specific playerx",
+		func(pack(this, &Server::tp_player), "tp_player", "Teleport a specific players",
 			param("scene", "String name of scene in which to teleport player"),
 			param("x", "X-coordinate of new location"),
 			param("y", "Y-coordinate of new location"),
 			param("z", "Z-coordinate of new location")),
 		func(pack(this, &Server::announce), "announce", "Send a message to all connected players",
 			param("message", "Chat message to be broadcast"))));
+
+	get_tree()->get_root()->call_deferred(
+		"propagate_notification", NOTIFICATION_WM_CLOSE_REQUEST);
+	get_tree()->quit(0);
 }
 
 void Server::set_phase(string name)
 {
+	auto phase_parts = String(name.c_str()).split(":");
+	auto phase_scene = phase_parts.size() > 0 ? phase_parts[0] : "";
+	auto phase_event = phase_parts.size() > 1 ? phase_parts[1] : "";
+	if (phase_scene == "") {
+		UtilityFunctions::print(
+			"Couldn't set phase to {0}: Invalid phase scene name", String(name.c_str()));
+		return;
+	}
+
+	// Run phase event on server replication scenes
+	if (phase_scene == "roof") {
+		auto roof_scene = (Roof*) _phase_scenes["roof"];
+		roof_scene->call_deferred("_server_run_phase_event", phase_event);
+	}
+	else if (phase_scene == "end") {
+		auto end_scene = (End*) _phase_scenes["end"];
+		end_scene->call_deferred("_server_run_phase_event", phase_event);
+	}
+
+	// Run phase event on clients
 	auto phase_packet = new BufWriter();
 	phase_packet->u8(ServerPacket::SET_PHASE);
 	phase_packet->str(name);
@@ -359,7 +415,7 @@ void Server::update_entity(int id, string property, string value)
 
 void Server::list_players()
 {
-	auto player_list = String("Showing {0} players:")
+	auto player_list = String("Showing {0} players:\n")
 		.format(Array::make(_clients.size()));
 	for (auto &[player_id, client] : _clients) {
 		auto client_entity = client->get_entity();
@@ -374,12 +430,21 @@ void Server::list_players()
 
 void Server::kill_player(int id)
 {
+	if (!_clients.has(id)) {
+		UtilityFunctions::print("Coud not kill player ", id, ": player not found");
+		return;
+	}
+	auto health_packet = new BufWriter();
+	health_packet->u8(ServerPacket::UPDATE_PLAYER_HEALTH);
+	health_packet->u32(id); // player_id
+	health_packet->u32(0); // health
+	send_to_all(health_packet);
 }
 
 void Server::kick_player(int id)
 {
 	if (!_clients.has(id)) {
-		UtilityFunctions::print("Could not kick player ", id, ": Player not found");
+		UtilityFunctions::print("Could not kick player ", id, ": player not found");
 		return;
 	}
 
@@ -407,7 +472,7 @@ void Server::send_to_all(BufWriter* packet)
 
 void Server::send_to_all(const char* data, size_t size)
 {
-	PackedByteArray packed_data;
+	auto packed_data = PackedByteArray();
 	packed_data.resize(size);
 	memcpy(packed_data.ptrw(), data, size);
 
@@ -423,7 +488,7 @@ void Server::send(int id, BufWriter* packet)
 
 void Server::send(int id, const char* data, size_t size)
 {
-	PackedByteArray packed_data;
+	auto packed_data = PackedByteArray();
 	packed_data.resize(size);
 	memcpy(packed_data.ptrw(), data, size);
 	_clients[id]->get_socket()->put_packet(packed_data);

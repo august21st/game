@@ -21,7 +21,3 @@ fog_light_energy = 0.3
 fog_density = 0.001
 fog_height = 140.0
 fog_height_density = 0.005
-adjustment_enabled = true
-adjustment_brightness = 0.83
-adjustment_contrast = 2.14
-adjustment_saturation = 0.49

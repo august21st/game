@@ -16,7 +16,6 @@
 
 #include "entity_player.hpp"
 
-const int DEFAULT_HEALTH = 100;
 
 using namespace godot;
 using namespace dataproto;
@@ -78,4 +77,3 @@ int EntityPlayer::get_health()
 {
 	return _health;
 }
-
