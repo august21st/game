@@ -23,6 +23,7 @@
 #include <godot_cpp/templates/hash_map.hpp>
 #include <godot_cpp/classes/texture_rect.hpp>
 #include <godot_cpp/classes/h_box_container.hpp>
+#include <godot_cpp/classes/translation_server.hpp>
 
 #include "entity_player_base.hpp"
 // WORKAROUND: Forward declare to fix circular dependency
@@ -41,6 +42,7 @@ private:
 	OS *_os;
 	Engine *_engine;
 	DisplayServer* _display_server;
+	TranslationServer* _translation_server;
 	AudioServer* _audio_server;
 	Performance* _performance;
 	ResourceLoader* _resource_loader;
@@ -52,6 +54,7 @@ private:
 	bool _stats_enabled;
 	void set_stats_enabled(bool enable);
 	void update_stats();
+	// Pause panel
 	Panel* _pause_panel;
 	Button* _pause_button;
 	void _on_pause_button_pressed();
@@ -66,11 +69,23 @@ private:
 	OptionButton* _graphics_options;
 	int _current_graphics_level;
 	void _on_graphics_options_item_selected(int index);
+	OptionButton* _language_options;
+	void _on_language_options_item_selected(int index);
 	Button* _back_button;
 	Button* _close_button;
 	void _on_back_button_pressed();
 	Button* _quit_button;
 	void _on_quit_button_pressed();
+	// Setup panel
+	Panel* _setup_panel;
+	RichTextLabel* _select_preset_label;
+	Button* _mobile_presets_button;
+	Button* _pc_presets_button;
+	void _on_setup_preset_button_pressed();
+	OptionButton* _setup_language_options;
+	Button* _setup_confirm_button;
+	void _on_setup_confirm_button_pressed();
+	// Game
 	Ref<WebSocketPeer> _socket;
 	vector<PackedByteArray> poll_next_packets();
 	bool _socket_closed;

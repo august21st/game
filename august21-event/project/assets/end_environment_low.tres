@@ -4,7 +4,8 @@
 background_mode = 1
 background_color = Color(1, 1, 1, 1)
 ambient_light_source = 3
-ambient_light_color = Color(0.276811, 0.276811, 0.276811, 1)
+ambient_light_color = Color(0.332881, 0.332881, 0.332881, 1)
+glow_intensity = 0.11
 fog_light_color = Color(1, 1, 1, 1)
 fog_density = 0.005
 adjustment_brightness = 1.77

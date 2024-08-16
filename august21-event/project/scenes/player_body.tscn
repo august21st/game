@@ -190,10 +190,10 @@ anchor_right = 0.625001
 anchor_bottom = 0.625001
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_styles/normal = ExtResource("7_1be6h")
+theme_override_styles/focus = ExtResource("8_kdq0u")
 theme_override_styles/hover = ExtResource("8_kdq0u")
 theme_override_styles/pressed = ExtResource("8_kdq0u")
-theme_override_styles/focus = ExtResource("8_kdq0u")
+theme_override_styles/normal = ExtResource("7_1be6h")
 icon_alignment = 1
 expand_icon = true
 metadata/_edit_use_anchors_ = true
@@ -378,3 +378,8 @@ anchor_bottom = 0.197531
 metadata/_edit_use_anchors_ = true
 
 [node name="PlayerModel" parent="." instance=ExtResource("6_ki0f4")]
+
+[node name="Character" parent="PlayerModel/CharacterRig/Skeleton3D" index="0"]
+layers = 5
+
+[editable path="PlayerModel"]

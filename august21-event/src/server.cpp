@@ -138,8 +138,8 @@ void Server::_physics_process(double delta)
 					auto phase_scene_str = (string) packet.str();
 					auto phase_scene = String(phase_scene_str.c_str());
 					if (!_phase_scenes.has(phase_scene)) {
-						UtilityFunctions::print(
-							"Couldn't update movement for client {0}: phase scene doesn't exist", sender_id);
+						//UtilityFunctions::print(
+						//	"Couldn't update movement for client ",  sender_id, ": phase scene doesn't exist");
 						break;
 					}
 

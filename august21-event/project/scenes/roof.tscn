@@ -211,7 +211,7 @@ size = Vector3(2, 1, 6)
 size = Vector3(1, 15.5, 0.2)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_gu0ne"]
-size = Vector3(1, 8.5, 0.1)
+size = Vector3(1, 5.5, 0.1)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_237as"]
 
@@ -576,12 +576,12 @@ material = ExtResource("18_s8krs")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 30, -4, -32)
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="ClimbableArea"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.75, -0.0499992)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.75, -0.0499992)
 shape = SubResource("BoxShape3D_gu0ne")
 
 [node name="CSGBox3D2" type="CSGBox3D" parent="ClimbableArea"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.75, -0.0499992)
-size = Vector3(1, 8.5, 0.1)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.75, -0.0499992)
+size = Vector3(1, 5.5, 0.1)
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="."]
 unique_name_in_owner = true

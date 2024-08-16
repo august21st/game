@@ -1,10 +1,15 @@
-[gd_scene load_steps=6 format=3 uid="uid://dtk5blgx8msq8"]
+[gd_scene load_steps=11 format=3 uid="uid://dtk5blgx8msq8"]
 
 [ext_resource type="Theme" uid="uid://dbwgna8gjqom8" path="res://assets/default_theme.tres" id="1_ce75g"]
 [ext_resource type="StyleBox" uid="uid://b7hyoe2nep4ja" path="res://assets/panel_background_style.tres" id="2_qo466"]
 [ext_resource type="Texture2D" uid="uid://x655ls7qa32w" path="res://assets/corrupted_pyramids.png" id="4_4pcmh"]
 [ext_resource type="StyleBox" uid="uid://d012itce26c0x" path="res://assets/place_text_bubble_style.tres" id="4_gxwos"]
 [ext_resource type="Texture2D" uid="uid://bwf28jy8amyee" path="res://assets/close.svg" id="5_fcvpu"]
+[ext_resource type="Texture2D" uid="uid://fqmn1xxelq0y" path="res://assets/mobile.svg" id="6_3hja0"]
+[ext_resource type="ButtonGroup" uid="uid://xsx553wfxorb" path="res://assets/client_platform_button_group.tres" id="6_482a3"]
+[ext_resource type="StyleBox" uid="uid://dpppvawjrcfm8" path="res://assets/ui/button_toggled.tres" id="6_p0vh3"]
+[ext_resource type="Texture2D" uid="uid://d18et1uyas6rp" path="res://assets/pc.svg" id="7_bg0p2"]
+[ext_resource type="PackedScene" uid="uid://dadh2hra2ui0g" path="res://scenes/language_options.tscn" id="10_di7qi"]
 
 [node name="Client" type="Client"]
 
@@ -19,7 +24,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-mouse_filter = 1
+mouse_filter = 2
 theme = ExtResource("1_ce75g")
 
 [node name="StatsLabel" type="Label" parent="ClientGui"]
@@ -80,10 +85,14 @@ stretch_mode = 6
 [node name="VBoxContainer" type="VBoxContainer" parent="ClientGui/PausePanel"]
 layout_mode = 1
 anchors_preset = -1
-anchor_left = 0.361111
-anchor_top = 0.197531
-anchor_right = 0.638889
-anchor_bottom = 0.790123
+anchor_left = 0.327465
+anchor_top = 0.125156
+anchor_right = 0.672535
+anchor_bottom = 0.862498
+offset_left = 38.222
+offset_top = 45.741
+offset_right = -38.222
+offset_bottom = -45.741
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_constants/separation = 8
@@ -96,7 +105,7 @@ theme_override_colors/font_shadow_color = Color(0, 0, 0, 1)
 theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 1
 theme_override_font_sizes/font_size = 36
-text = "Options:"
+text = "Client::Options:"
 
 [node name="HBoxContainer" type="HBoxContainer" parent="ClientGui/PausePanel/VBoxContainer"]
 layout_mode = 2
@@ -105,7 +114,7 @@ theme_override_constants/separation = 8
 [node name="Label" type="Label" parent="ClientGui/PausePanel/VBoxContainer/HBoxContainer"]
 custom_minimum_size = Vector2(80, 0)
 layout_mode = 2
-text = "Volume:"
+text = "Client::Volume:"
 
 [node name="VolumeSlider" type="HSlider" parent="ClientGui/PausePanel/VBoxContainer/HBoxContainer"]
 unique_name_in_owner = true
@@ -120,35 +129,49 @@ theme_override_constants/separation = 8
 [node name="Label" type="Label" parent="ClientGui/PausePanel/VBoxContainer/HBoxContainer2"]
 custom_minimum_size = Vector2(80, 0)
 layout_mode = 2
-text = "Graphics:"
+text = "Client::Graphics:"
 
 [node name="GraphicsOptions" type="OptionButton" parent="ClientGui/PausePanel/VBoxContainer/HBoxContainer2"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_colors/font_color = Color(0, 0, 0, 1)
-theme_override_colors/font_pressed_color = Color(0, 0, 0, 1)
-theme_override_colors/font_hover_color = Color(0, 0, 0, 1)
 theme_override_colors/font_hover_pressed_color = Color(0, 0, 0, 1)
+theme_override_colors/font_hover_color = Color(0, 0, 0, 1)
+theme_override_colors/font_pressed_color = Color(0, 0, 0, 1)
 theme_override_colors/font_focus_color = Color(0, 0, 0, 1)
+theme_override_colors/font_color = Color(0, 0, 0, 1)
 theme_override_constants/modulate_arrow = 1
-item_count = 2
 selected = 1
 fit_to_longest_item = false
-popup/item_0/text = "Potato qualiy"
+item_count = 2
+popup/item_0/text = "Client::Potato quality"
 popup/item_0/id = 1
-popup/item_1/text = "High quality"
-popup/item_1/id = 0
+popup/item_1/text = "Client::High quality"
+popup/item_1/id = 1
+
+[node name="HBoxContainer3" type="HBoxContainer" parent="ClientGui/PausePanel/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Label" type="Label" parent="ClientGui/PausePanel/VBoxContainer/HBoxContainer3"]
+custom_minimum_size = Vector2(80, 0)
+layout_mode = 2
+text = "Client::Language:"
+
+[node name="LanguageOptions" parent="ClientGui/PausePanel/VBoxContainer/HBoxContainer3" instance=ExtResource("10_di7qi")]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
 
 [node name="BackButton" type="Button" parent="ClientGui/PausePanel/VBoxContainer"]
 unique_name_in_owner = true
 layout_mode = 2
-text = "Back to game"
+text = "Client::Back to game"
 
 [node name="QuitButton" type="Button" parent="ClientGui/PausePanel/VBoxContainer"]
 unique_name_in_owner = true
 layout_mode = 2
-text = "Quit"
+text = "Client::Quit"
 
 [node name="HSeparator" type="HSeparator" parent="ClientGui/PausePanel/VBoxContainer"]
 layout_mode = 2
@@ -194,4 +217,150 @@ theme_override_constants/icon_max_width = 24
 icon = ExtResource("5_fcvpu")
 icon_alignment = 1
 expand_icon = true
+metadata/_edit_use_anchors_ = true
+
+[node name="SetupPanel" type="Panel" parent="ClientGui"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 8.0
+offset_top = 8.0
+offset_right = -8.0
+offset_bottom = -8.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = ExtResource("2_qo466")
+
+[node name="PanelBorder" type="Panel" parent="ClientGui/SetupPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Label" type="Label" parent="ClientGui/SetupPanel"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.5
+anchor_top = 0.151899
+anchor_right = 0.5
+anchor_bottom = 0.151899
+offset_left = -192.0
+offset_top = -40.0002
+offset_right = 192.0
+grow_horizontal = 2
+theme_override_font_sizes/font_size = 32
+text = "Client::I am playing on…"
+horizontal_alignment = 1
+vertical_alignment = 1
+metadata/_edit_use_anchors_ = true
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="ClientGui/SetupPanel"]
+layout_mode = 0
+anchor_left = 0.21831
+anchor_top = 0.0632911
+anchor_right = 0.78169
+anchor_bottom = 0.189873
+alignment = 1
+metadata/_edit_use_anchors_ = true
+
+[node name="SelectPreesetLabel" type="RichTextLabel" parent="ClientGui/SetupPanel/HBoxContainer2"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_colors/default_color = Color(1, 0, 0, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 1)
+theme_override_styles/normal = ExtResource("4_gxwos")
+text = "Client::Please select your current device!"
+fit_content = true
+scroll_active = false
+autowrap_mode = 0
+metadata/_edit_use_anchors_ = true
+
+[node name="HBoxContainer" type="HBoxContainer" parent="ClientGui/SetupPanel"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.21831
+anchor_top = 0.189873
+anchor_right = 0.78169
+anchor_bottom = 0.594937
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 12
+alignment = 1
+metadata/_edit_use_anchors_ = true
+
+[node name="MobilePresetsButton" type="Button" parent="ClientGui/SetupPanel/HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_styles/focus = ExtResource("6_p0vh3")
+theme_override_styles/pressed = ExtResource("6_p0vh3")
+toggle_mode = true
+button_group = ExtResource("6_482a3")
+text = "Client::Mobile"
+icon = ExtResource("6_3hja0")
+icon_alignment = 1
+vertical_icon_alignment = 0
+expand_icon = true
+
+[node name="PcPresetsButton" type="Button" parent="ClientGui/SetupPanel/HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_styles/focus = ExtResource("6_p0vh3")
+theme_override_styles/pressed = ExtResource("6_p0vh3")
+toggle_mode = true
+button_group = ExtResource("6_482a3")
+text = "Client::PC"
+icon = ExtResource("7_bg0p2")
+icon_alignment = 1
+vertical_icon_alignment = 0
+expand_icon = true
+
+[node name="Label2" type="Label" parent="ClientGui/SetupPanel"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.5
+anchor_top = 0.696203
+anchor_right = 0.5
+anchor_bottom = 0.696203
+offset_left = -192.0
+offset_top = -40.0005
+offset_right = 192.0
+grow_horizontal = 2
+theme_override_font_sizes/font_size = 24
+text = "Client::My preferred language is:"
+horizontal_alignment = 1
+vertical_alignment = 1
+metadata/_edit_use_anchors_ = true
+
+[node name="SetupLanguageOptions" parent="ClientGui/SetupPanel" instance=ExtResource("10_di7qi")]
+unique_name_in_owner = true
+layout_mode = 1
+anchor_left = 0.5
+anchor_top = 0.797
+anchor_right = 0.5
+anchor_bottom = 0.797
+offset_left = -128.0
+offset_top = -47.704
+offset_right = 128.0
+offset_bottom = 0.295776
+
+[node name="SetupConfirmButton" type="Button" parent="ClientGui/SetupPanel"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.5
+anchor_top = 0.911392
+anchor_right = 0.5
+anchor_bottom = 0.911392
+offset_left = -128.0
+offset_top = -48.0
+offset_right = 128.0
+text = "Client::Done"
 metadata/_edit_use_anchors_ = true

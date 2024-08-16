@@ -227,8 +227,8 @@ void PlayerBody::_physics_process(double delta)
 	// Movement
 	auto direction = Vector3(0, 0, 0);
 	if (_dragging_thumbstick) {
-		direction.x = _thumbstick_direction.x;
-		direction.z = _thumbstick_direction.y;
+		direction.x = -_thumbstick_direction.x;
+		direction.z = -_thumbstick_direction.y;
 	}
 	else {
 		direction.x = _player_input->get_action_strength("move_left")

@@ -16,4 +16,4 @@ else
 fi
 
 cd $pwd
-scons platform=web
+scons platform=web "$@"

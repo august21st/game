@@ -1,0 +1,44 @@
+[gd_scene load_steps=4 format=3 uid="uid://dadh2hra2ui0g"]
+
+[ext_resource type="Texture2D" uid="uid://bwecnp4m656r8" path="res://assets/flags/flag_uk.svg" id="1_hbop3"]
+[ext_resource type="Texture2D" uid="uid://ybyq04oylsnx" path="res://assets/flags/flag_ru.svg" id="2_krtfr"]
+[ext_resource type="Texture2D" uid="uid://dqomjj0qfjbbd" path="res://assets/flags/flag_tr.svg" id="3_4jkkg"]
+
+[node name="LanguageOptions" type="OptionButton"]
+anchors_preset = -1
+anchor_left = 0.111
+anchor_top = 0.074
+anchor_right = 0.111
+anchor_bottom = 0.074
+offset_left = -127.872
+offset_top = -47.952
+offset_right = 128.128
+offset_bottom = 0.0478172
+expand_icon = true
+selected = 1
+item_count = 9
+popup/item_0/text = "Client::English:"
+popup/item_0/separator = true
+popup/item_1/text = "English"
+popup/item_1/icon = ExtResource("1_hbop3")
+popup/item_1/id = 1
+popup/item_2/text = "English: Mad edition (18+)"
+popup/item_2/id = 2
+popup/item_3/text = "Client::Russian:"
+popup/item_3/id = 3
+popup/item_3/separator = true
+popup/item_4/text = "Русский"
+popup/item_4/icon = ExtResource("2_krtfr")
+popup/item_4/id = 4
+popup/item_5/text = "Русский: издание Мад (18+)"
+popup/item_5/id = 5
+popup/item_6/text = "Client::Turkish:"
+popup/item_6/id = 6
+popup/item_6/separator = true
+popup/item_7/text = "Türkçe"
+popup/item_7/icon = ExtResource("3_4jkkg")
+popup/item_7/id = 7
+popup/item_8/text = "Türkçe: Mad baskısı"
+popup/item_8/id = 8
+popup/item_8/disabled = true
+metadata/_edit_use_anchors_ = true

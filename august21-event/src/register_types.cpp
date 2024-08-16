@@ -25,18 +25,18 @@ void initialize_gdextension_types(ModuleInitializationLevel p_level)
 		return;
 	}
 
-	GDREGISTER_CLASS(Client);
-	GDREGISTER_CLASS(LoadingScreen);
-	GDREGISTER_CLASS(PlayerBody);
-	GDREGISTER_CLASS(EntityPlayerBase);
-	GDREGISTER_CLASS(EntityPlayer);
-	GDREGISTER_CLASS(ClimbableArea);
-	GDREGISTER_CLASS(Portal);
-	GDREGISTER_CLASS(Intro);
-	GDREGISTER_CLASS(Roof);
-	GDREGISTER_CLASS(End);
-	GDREGISTER_CLASS(BoardMesh);
-	GDREGISTER_CLASS(Server);
+	GDREGISTER_RUNTIME_CLASS(Client);
+	GDREGISTER_RUNTIME_CLASS(LoadingScreen);
+	GDREGISTER_RUNTIME_CLASS(PlayerBody);
+	GDREGISTER_RUNTIME_CLASS(EntityPlayerBase);
+	GDREGISTER_RUNTIME_CLASS(EntityPlayer);
+	GDREGISTER_RUNTIME_CLASS(ClimbableArea);
+	GDREGISTER_RUNTIME_CLASS(Portal);
+	GDREGISTER_RUNTIME_CLASS(Intro);
+	GDREGISTER_RUNTIME_CLASS(Roof);
+	GDREGISTER_RUNTIME_CLASS(End);
+	GDREGISTER_RUNTIME_CLASS(BoardMesh);
+	GDREGISTER_RUNTIME_CLASS(Server);
 }
 
 void uninitialize_gdextension_types(ModuleInitializationLevel p_level)

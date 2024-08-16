@@ -1,0 +1,125 @@
+[gd_scene load_steps=6 format=3 uid="uid://cga330m2tvy5o"]
+
+[ext_resource type="PackedScene" uid="uid://bny3igiueo6ak" path="res://assets/temple_of_gold/temple.glb" id="1_6srbk"]
+[ext_resource type="PackedScene" uid="uid://b6u2gq168cs2c" path="res://assets/aeroplane/united_airlines_boeing_777.glb" id="2_tpc4j"]
+[ext_resource type="PackedScene" uid="uid://cwgp0q1aj5tli" path="res://assets/ataturk/ataturk_head.glb" id="3_3jb2p"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_wsmv0"]
+size = Vector3(18.8, 1, 29.1)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_j6eqw"]
+size = Vector3(0.6, 16, 29.1)
+
+[node name="Temple" instance=ExtResource("1_6srbk")]
+
+[node name="OmniLight3D" type="OmniLight3D" parent="." index="3"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 14, 10)
+omni_range = 50.0
+
+[node name="OmniLight3D2" type="OmniLight3D" parent="." index="4"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 14, -10)
+omni_range = 50.0
+
+[node name="OmniLight3D3" type="OmniLight3D" parent="." index="5"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 14, 0)
+omni_range = 50.0
+
+[node name="PlaneExhibit" type="Node3D" parent="." index="6"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 0, 12)
+
+[node name="Plane" parent="PlaneExhibit" index="0" instance=ExtResource("2_tpc4j")]
+transform = Transform3D(0.0166847, 0.005, -0.00982963, -0.005, 0.0193185, 0.00133975, 0.00982963, 0.00133975, 0.0173662, 0, 1, 0)
+
+[node name="CSGBox3D" type="CSGBox3D" parent="PlaneExhibit" index="1"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.3, 0)
+use_collision = true
+size = Vector3(1, 0.6, 1)
+
+[node name="Label3D" type="Label3D" parent="PlaneExhibit" index="2"]
+transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 0, 1.8, 0)
+billboard = 1
+text = "A boeing plane (1:50 scale)
+\"We should attach a boat  to one of these\"
+- Lutiomni"
+
+[node name="SpotLight3D" type="SpotLight3D" parent="PlaneExhibit" index="3"]
+transform = Transform3D(0.866025, 2.18557e-08, -0.5, 0.5, -3.78552e-08, 0.866025, 0, -1, -4.37114e-08, -1, 2, 0)
+spot_range = 4.0
+spot_angle = 25.0
+
+[node name="AtaturkExhibit" type="Node3D" parent="." index="7"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 0, 9)
+
+[node name="CSGBox3D" type="CSGBox3D" parent="AtaturkExhibit" index="0"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.3, 0)
+use_collision = true
+size = Vector3(1, 0.6, 1)
+
+[node name="Label3D" type="Label3D" parent="AtaturkExhibit" index="1"]
+transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 0, 1.8, 0)
+billboard = 1
+text = "Mustafa Kemal Ataturk's head
+\"ÖMG  iTS  ATATÜRK\"
+- A Turkish patriot"
+
+[node name="ataturk_head" parent="AtaturkExhibit" index="2" instance=ExtResource("3_3jb2p")]
+transform = Transform3D(-8.74228e-10, 0, -0.02, 0, 0.02, 0, 0.02, 0, -8.74228e-10, 0, 0.9, 0)
+
+[node name="SpotLight3D" type="SpotLight3D" parent="AtaturkExhibit" index="3"]
+transform = Transform3D(0.866025, 2.18557e-08, -0.5, 0.5, -3.78552e-08, 0.866025, 0, -1, -4.37114e-08, -1, 2, 0)
+spot_range = 4.0
+spot_angle = 25.0
+
+[node name="NothingExhibit" type="Node3D" parent="." index="8"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 0, 6)
+
+[node name="CSGBox3D" type="CSGBox3D" parent="NothingExhibit" index="0"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.3, 0)
+use_collision = true
+size = Vector3(1, 0.6, 1)
+
+[node name="Label3D" type="Label3D" parent="NothingExhibit" index="1"]
+transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 0, 1.8, 0)
+billboard = 1
+text = "Nothing
+\"Just imagine it in your mind\"
+- Zekiah"
+
+[node name="SpotLight3D" type="SpotLight3D" parent="NothingExhibit" index="2"]
+transform = Transform3D(0.866025, 2.18557e-08, -0.5, 0.5, -3.78552e-08, 0.866025, 0, -1, -4.37114e-08, -1, 2, 0)
+spot_range = 4.0
+spot_angle = 25.0
+
+[node name="NothingExhibit2" type="Node3D" parent="." index="9"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 0, 3)
+
+[node name="CSGBox3D" type="CSGBox3D" parent="NothingExhibit2" index="0"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.3, 0)
+use_collision = true
+size = Vector3(1, 0.6, 1)
+
+[node name="Label3D" type="Label3D" parent="NothingExhibit2" index="1"]
+transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 0, 1.8, 0)
+billboard = 1
+text = "Nothing
+\"Just imagine it in your mind\"
+- Zekiah"
+
+[node name="SpotLight3D" type="SpotLight3D" parent="NothingExhibit2" index="2"]
+transform = Transform3D(0.866025, 2.18557e-08, -0.5, 0.5, -3.78552e-08, 0.866025, 0, -1, -4.37114e-08, -1, 2, 0)
+spot_range = 4.0
+spot_angle = 25.0
+
+[node name="StaticBody3D" type="StaticBody3D" parent="." index="10"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D" index="0"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.43051e-06, -0.5, 0.350001)
+shape = SubResource("BoxShape3D_wsmv0")
+
+[node name="CollisionShape3D2" type="CollisionShape3D" parent="StaticBody3D" index="1"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9.7, 8, 0.350001)
+shape = SubResource("BoxShape3D_j6eqw")
+
+[node name="CollisionShape3D3" type="CollisionShape3D" parent="StaticBody3D" index="2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9.7, 8, 0.350001)
+shape = SubResource("BoxShape3D_j6eqw")

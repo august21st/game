@@ -1,0 +1,5 @@
+[gd_scene format=3 uid="uid://ccjp1c73atohy"]
+
+[node name="RefinedSaw" type="Node3D"]
+
+[node name="RigidBody3D" type="RigidBody3D" parent="."]

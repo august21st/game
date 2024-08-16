@@ -1,16 +1,10 @@
-[gd_scene load_steps=20 format=3 uid="uid://dfkyt1t78dw5b"]
+[gd_scene load_steps=18 format=3 uid="uid://dfkyt1t78dw5b"]
 
-[ext_resource type="Environment" uid="uid://djhbewoalb8be" path="res://assets/end_environment_low.tres" id="1_1pfpd"]
 [ext_resource type="PackedScene" uid="uid://bc1y56yq3m6pk" path="res://assets/temple_of_gold/entrance.glb" id="1_04bcx"]
-[ext_resource type="Shader" path="res://shaders/portal.gdshader" id="3_jk262"]
-
-[sub_resource type="PlaneMesh" id="PlaneMesh_dqln0"]
-size = Vector2(100, 100)
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_5t3v7"]
-
-[sub_resource type="BoxShape3D" id="BoxShape3D_8336w"]
-size = Vector3(100, 1, 100)
+[ext_resource type="Environment" uid="uid://407wdrxv08d6" path="res://assets/end_environment_high.tres" id="1_v6gpa"]
+[ext_resource type="PackedScene" uid="uid://c1bganck1xs20" path="res://scenes/workbench.tscn" id="4_m11tf"]
+[ext_resource type="PackedScene" uid="uid://cga330m2tvy5o" path="res://scenes/temple.tscn" id="5_o8ulc"]
+[ext_resource type="PackedScene" uid="uid://c7b0jdx7gn2ht" path="res://assets/refined_saw/refined_saw.glb" id="5_sv3ui"]
 
 [sub_resource type="PlaneMesh" id="PlaneMesh_qcwm1"]
 size = Vector2(1000, 1000)
@@ -35,55 +29,33 @@ size = Vector3(2.2, 3.4, 0.4)
 [sub_resource type="BoxShape3D" id="BoxShape3D_0j4ea"]
 size = Vector3(3.2, 0.3, 0.4)
 
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_fnye0"]
-render_priority = 0
-shader = ExtResource("3_jk262")
-shader_parameter/fade_out_distance_max = 10.0
-shader_parameter/fade_out_distance_min = 8.0
-shader_parameter/fade_out_colour = Vector4(0, 0, 0, 0)
+[sub_resource type="WorldBoundaryShape3D" id="WorldBoundaryShape3D_87b10"]
 
-[sub_resource type="QuadMesh" id="QuadMesh_f2g2a"]
-size = Vector2(3.2, 3.2)
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_mqw6u"]
+roughness = 0.8
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_a23wk"]
-size = Vector3(3.2, 3.1, 0.2)
+[sub_resource type="PlaneMesh" id="PlaneMesh_lcrr1"]
+size = Vector2(500, 500)
 
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_7xksm"]
-render_priority = 0
-shader = ExtResource("3_jk262")
-shader_parameter/fade_out_distance_max = 10.0
-shader_parameter/fade_out_distance_min = 8.0
-shader_parameter/fade_out_colour = Vector4(0, 0, 0, 0)
-
-[sub_resource type="QuadMesh" id="QuadMesh_pr5gu"]
-size = Vector2(8.32, 4.6)
+[sub_resource type="BoxShape3D" id="BoxShape3D_mk3sg"]
+size = Vector3(11, 53, 1)
 
 [node name="End" type="End"]
 
-[node name="StaticBody3D" type="StaticBody3D" parent="."]
-
-[node name="CSGMesh3D" type="CSGMesh3D" parent="StaticBody3D"]
-mesh = SubResource("PlaneMesh_dqln0")
-material = SubResource("StandardMaterial3D_5t3v7")
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
-shape = SubResource("BoxShape3D_8336w")
-
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 unique_name_in_owner = true
-environment = ExtResource("1_1pfpd")
+environment = ExtResource("1_v6gpa")
 
 [node name="BoardMesh" type="BoardMesh" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -600, -16, -600)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -753)
 mesh = SubResource("PlaneMesh_qcwm1")
 skeleton = NodePath("")
 surface_material_override/0 = SubResource("StandardMaterial3D_2ivot")
 
 [node name="SunLight" type="DirectionalLight3D" parent="."]
 unique_name_in_owner = true
-transform = Transform3D(0.965926, 2.85296e-07, -0.258819, 0.224144, 0.5, 0.836516, 0.12941, -0.866025, 0.482963, 0, 10, 0)
-light_energy = 0.2
+transform = Transform3D(0.89952, 0.224144, -0.375, 0.224144, 0.5, 0.836516, 0.375001, -0.836515, 0.399519, 0, 10, 0)
+light_energy = 0.3
 shadow_enabled = true
 
 [node name="EntranceBody" type="StaticBody3D" parent="."]
@@ -183,31 +155,37 @@ shape = SubResource("BoxShape3D_1pbn1")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.96046e-08, 3.45, 26.8)
 shape = SubResource("BoxShape3D_0j4ea")
 
-[node name="Node3D" type="Node3D" parent="."]
+[node name="Portals" type="Node3D" parent="."]
 
-[node name="Portal" type="Portal" parent="Node3D"]
-viewport_vertical_resolution = -1
-viewport_disable_distance = 120.0
-fade_out_distance_max = 120.0
-fade_out_distance_min = 100.0
-exit_portal = NodePath("../ExitPortal")
-entrance_area = NodePath("EntranceArea")
-transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 0, 1.8, 27)
-material_override = SubResource("ShaderMaterial_fnye0")
-mesh = SubResource("QuadMesh_f2g2a")
+[node name="Workbench" parent="." instance=ExtResource("4_m11tf")]
+transform = Transform3D(-2.94449, 0, 1.7, 0, 3.4, 0, -1.7, 0, -2.94449, -14.8, 0, 29)
 
-[node name="EntranceArea" type="Area3D" parent="Node3D/Portal"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.54747e-13, 0, 0)
-collision_layer = 2
-collision_mask = 2
+[node name="Temple" parent="." instance=ExtResource("5_o8ulc")]
+transform = Transform3D(-1.5, 0, 4.88762e-07, 0, 1.5, 0, -4.88762e-07, 0, -1.5, 0, -9.68575e-08, 60.2)
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Node3D/Portal/EntranceArea"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.1921e-07, -0.0500001, 0)
-shape = SubResource("BoxShape3D_a23wk")
+[node name="StaticBody3D" type="StaticBody3D" parent="."]
 
-[node name="ExitPortal" type="Portal" parent="Node3D"]
-viewport_vertical_resolution = 1024
-exit_portal = NodePath("../Portal")
-transform = Transform3D(1, 0, 1.74846e-07, 0, 1, 0, -1.74846e-07, 0, 1, 0, 1.8, 3)
-material_override = SubResource("ShaderMaterial_7xksm")
-mesh = SubResource("QuadMesh_pr5gu")
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D"]
+shape = SubResource("WorldBoundaryShape3D_87b10")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+material_override = SubResource("StandardMaterial3D_mqw6u")
+mesh = SubResource("PlaneMesh_lcrr1")
+
+[node name="BushiSaw" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 100, 0, 50)
+
+[node name="RefinedSaw" parent="BushiSaw" instance=ExtResource("5_sv3ui")]
+transform = Transform3D(-100, 122.474, 122.474, -173.205, -70.7107, -70.7107, 6.18172e-06, -141.421, 141.421, 15, 31, -2)
+
+[node name="Label3D" type="Label3D" parent="BushiSaw"]
+transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, -6, 2, -6)
+billboard = 1
+text = "It's really big because it's a bushi model,
+Bushi never scales things correctly in blender"
+
+[node name="StaticBody3D" type="StaticBody3D" parent="BushiSaw"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="BushiSaw/StaticBody3D"]
+transform = Transform3D(0.612372, 0.5, -0.612372, -0.353553, 0.866025, 0.353553, 0.707107, -2.98023e-08, 0.707107, 9.33728, 20.4655, -1.64645)
+shape = SubResource("BoxShape3D_mk3sg")

@@ -21,6 +21,7 @@
 #include <godot_cpp/classes/file_access.hpp>
 #include <godot_cpp/core/class_db.hpp>
 #include <godot_cpp/templates/cowdata.hpp>
+#include <godot_cpp/classes/translation_server.hpp>
 
 #include "client.hpp"
 #include "godot_cpp/core/math.hpp"
@@ -64,6 +65,12 @@ void Client::_bind_methods()
 		&Client::_on_quit_button_pressed);
 	ClassDB::bind_method(D_METHOD("_on_current_scene_ready"),
 		&Client::_on_current_scene_ready);
+	ClassDB::bind_method(D_METHOD("_on_setup_preset_button_pressed"),
+		&Client::_on_setup_preset_button_pressed);
+	ClassDB::bind_method(D_METHOD("_on_setup_confirm_button_pressed"),
+		&Client::_on_setup_confirm_button_pressed);
+	ClassDB::bind_method(D_METHOD("_on_language_options_item_selected", "index"),
+		&Client::_on_language_options_item_selected);
 
 	ADD_SIGNAL(MethodInfo("packet_received",
 		PropertyInfo(Variant::PACKED_BYTE_ARRAY, "packed_packet")));
@@ -84,6 +91,7 @@ void Client::_ready()
 
 	_performance = Performance::get_singleton();
 	_display_server = DisplayServer::get_singleton();
+	_translation_server = TranslationServer::get_singleton();
 	_is_server = _os->has_feature("dedicated_server") || _display_server->get_name() == "headless";
 
 	_resource_loader = ResourceLoader::get_singleton();
@@ -113,6 +121,10 @@ void Client::_ready()
 	_graphics_options->connect("item_selected", Callable(this, "_on_graphics_options_item_selected"));
 	_current_graphics_level = 1;
 
+	_language_options = get_node<OptionButton>("%LanguageOptions");
+	_language_options->connect("item_selected", Callable(this, "_on_language_options_item_selected"));
+	_translation_server->set_locale("en");
+
 	_back_button = get_node<Button>("%BackButton");
 	_back_button->connect("pressed", Callable(this, "_on_back_button_pressed"));
 	_close_button = get_node<Button>("%CloseButton");
@@ -120,6 +132,22 @@ void Client::_ready()
 
 	_quit_button = get_node<Button>("%QuitButton");
 	_quit_button->connect("pressed", Callable(this, "_on_quit_button_pressed"));
+
+	_setup_panel = get_node<Panel>("%SetupPanel");
+	_setup_panel->set_visible(true);
+
+	_select_preset_label = get_node<RichTextLabel>("%SelectPreesetLabel");
+	_select_preset_label->set_visible(false);
+	_mobile_presets_button = get_node<Button>("%MobilePresetsButton");
+	_mobile_presets_button->connect("pressed", Callable(this, "_on_setup_preset_button_pressed"));
+	_pc_presets_button = get_node<Button>("%PcPresetsButton");
+	_pc_presets_button->connect("pressed", Callable(this, "_on_setup_preset_button_pressed"));
+
+	_setup_language_options = get_node<OptionButton>("%SetupLanguageOptions");
+	_setup_language_options->connect("item_selected", Callable(this, "_on_language_options_item_selected"));
+
+	_setup_confirm_button = get_node<Button>("%SetupConfirmButton");
+	_setup_confirm_button->connect("pressed", Callable(this, "_on_setup_confirm_button_pressed"));
 
 	_entities = { };
 	_players = { };
@@ -587,6 +615,53 @@ void Client::_on_back_button_pressed()
 void Client::_on_quit_button_pressed()
 {
 	UtilityFunctions::print("Exiting...");
+}
+
+void Client::_on_language_options_item_selected(int index)
+{
+	switch (index) {
+		case 1: // English
+			_translation_server->set_locale("en");
+			break;
+		case 2: // English mad
+			_translation_server->set_locale("en.mad");
+			break;
+		case 4: // Russian
+			_translation_server->set_locale("ru");
+			break;
+		case 5: // Russian mad
+			_translation_server->set_locale("ru.mad");
+			break;
+		case 7: // Turkish
+			_translation_server->set_locale("tr");
+			break;
+		case 8: // Turkish mad
+			_translation_server->set_locale("tr.mad");
+			break;
+	}
+}
+
+void Client::_on_setup_preset_button_pressed()
+{
+	_select_preset_label->set_visible(false);
+}
+
+void Client::_on_setup_confirm_button_pressed()
+{
+	if (_mobile_presets_button->is_pressed()) {
+		// Auto set low graphics
+		_graphics_options->select(0);
+	}
+	else if (_pc_presets_button->is_pressed()) {
+		// Auto set high graphics
+		_graphics_options->select(1);
+	}
+	else {
+		_select_preset_label->set_visible(true);
+		return;
+	}
+
+	_setup_panel->set_visible(false);
 }
 
 int Client::get_player_id()

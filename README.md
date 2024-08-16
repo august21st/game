@@ -32,8 +32,8 @@ This should automatically output the compiled library to `august21-event/project
    scons debug_symbols=yes
    ```
 
-5. **Run with Godot 4.2:**
-The project requires and must be run with the Godot 4.2 editor (non-mono edition).
+5. **Run with Godot 4.3:**
+The project requires and must be run with the Godot 4.3 editor (non-mono edition).
 This version will dynamically link and make use of the compiled C++ module when the project is run.
 
 6. **Building for Web:**
@@ -47,7 +47,9 @@ along with producing a web build with scons, which will automate the process:
    ```
 
 ### Additional notes:
-- Ensure you have the Godot 4.2 editor installed and available in your PATH.
+- Ensure you have the Godot 4.3 editor installed and available in your PATH.
+- For building web without threads, make sure to compile extensions using the
+ threads=no parameter, reference https://github.com/godotengine/godot/issues/94537.
 
 ### Useful links:
  - https://github.com/godotengine/godot-cpp
