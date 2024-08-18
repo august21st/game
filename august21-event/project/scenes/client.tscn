@@ -86,13 +86,9 @@ stretch_mode = 6
 layout_mode = 1
 anchors_preset = -1
 anchor_left = 0.327465
-anchor_top = 0.125156
+anchor_top = 0.125
 anchor_right = 0.672535
-anchor_bottom = 0.862498
-offset_left = 38.222
-offset_top = 45.741
-offset_right = -38.222
-offset_bottom = -45.741
+anchor_bottom = 0.862342
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_constants/separation = 8
@@ -110,6 +106,7 @@ text = "Client::Options:"
 [node name="HBoxContainer" type="HBoxContainer" parent="ClientGui/PausePanel/VBoxContainer"]
 layout_mode = 2
 theme_override_constants/separation = 8
+alignment = 1
 
 [node name="Label" type="Label" parent="ClientGui/PausePanel/VBoxContainer/HBoxContainer"]
 custom_minimum_size = Vector2(80, 0)
@@ -221,7 +218,6 @@ metadata/_edit_use_anchors_ = true
 
 [node name="SetupPanel" type="Panel" parent="ClientGui"]
 unique_name_in_owner = true
-visible = false
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -364,3 +360,24 @@ offset_top = -48.0
 offset_right = 128.0
 text = "Client::Done"
 metadata/_edit_use_anchors_ = true
+
+[node name="AlertLabel" type="Label" parent="ClientGui"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -0.5
+offset_top = -9.75
+offset_right = 0.5
+offset_bottom = 9.75
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 1)
+theme_override_colors/font_outline_color = Color(1, 0, 0, 1)
+theme_override_constants/outline_size = 4
+theme_override_font_sizes/font_size = 24
+horizontal_alignment = 1

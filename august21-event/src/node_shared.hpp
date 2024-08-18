@@ -29,7 +29,9 @@ namespace NodeShared {
 	}
 
 	int node_children_count_recursive(Node* node, int count = 0);
-	void write_entity_data(Node* node, BufWriter* buffer);
-	Node* read_entity_data(BufReader* buffer);
+	void write_compressed_variant(const Variant& variant, BufWriter& buffer);
+	Variant read_compressed_variant(BufReader& buffer);
+	void write_entity_data(Node* node, BufWriter& buffer);
+	Node* read_entity_data(BufReader& buffer);
 	void set_environment(WorldEnvironment* environment_node, String path);
 }

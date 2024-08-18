@@ -49,47 +49,57 @@ namespace NodeShared {
 		return count;
 	}
 
-	void write_entity_data(Node* node, BufWriter* buffer)
+	void write_compressed_variant(const Variant& variant, BufWriter& buffer)
 	{
-		// Write node data
-		auto entity_variant = (const Variant&) node;
-		auto temp_buffer = PackedByteArray();
+		auto variant_buffer = PackedByteArray();
 		// TODO: Investigate better ways to find encoded variant size beforehand
 		auto temp_buffer_reserve = 512;
 		auto entity_size = -1;
 		while (true) {
-			temp_buffer.resize(temp_buffer_reserve);
-			entity_size = temp_buffer.encode_var(0, node, true);
+			variant_buffer.resize(temp_buffer_reserve);
+			entity_size = variant_buffer.encode_var(0, variant, true);
 			if (entity_size != -1) {
 				break;
 			}
 			temp_buffer_reserve *= 2;
 		}
+		variant_buffer = variant_buffer.compress(FileAccess::COMPRESSION_FASTLZ);
+		buffer.flint(entity_size); // uncompressed entity_size
+		buffer.flint(variant_buffer.size()); // compressed entity_data size
+		buffer.arr(variant_buffer.ptrw(), variant_buffer.size()); // compressed entity_data
+	}
 
-		temp_buffer = temp_buffer.compress(FileAccess::COMPRESSION_FASTLZ);
-		buffer->flint(entity_size); // uncompressed entity_size
-		buffer->flint(temp_buffer.size()); // compressed entity_data size
-		buffer->arr(temp_buffer.ptrw(), temp_buffer.size()); // compressed entity_data
+	Variant read_compressed_variant(BufReader& buffer)
+	{
+		auto variant_size = buffer.flint();
+		auto compressed_size = buffer.flint();
+		auto variant_data = buffer.arr(compressed_size);
+		auto temp_buffer = PackedByteArray();
+		temp_buffer.resize(variant_data.size);
+		memcpy(temp_buffer.ptrw(), variant_data.data, variant_data.size);
+		temp_buffer = temp_buffer.decompress(variant_size, FileAccess::COMPRESSION_FASTLZ);
+
+		auto variant = temp_buffer.decode_var(0, true);
+		return variant;
+	}
+
+	void write_entity_data(Node* node, BufWriter& buffer)
+	{
+		// Write node data
+		auto entity_variant = (const Variant&) node;
+		write_compressed_variant(node, buffer);
 
 		// Write children
 		auto child_count = node->get_child_count();
-		buffer->flint(child_count);
-		for (auto  i = 0 ; i < child_count; i++) {
+		buffer.flint(child_count);
+		for (auto i = 0 ; i < child_count; i++) {
 			write_entity_data(node->get_child(i), buffer);
 		}
 	}
 
-	Node* read_entity_data(BufReader* buffer)
+	Node* read_entity_data(BufReader& buffer)
 	{
-		auto entity_size = buffer->flint();
-		auto compressed_size = buffer->flint();
-		auto entity_data = buffer->arr(compressed_size);
-		auto temp_buffer = PackedByteArray();
-		temp_buffer.resize(entity_data.size);
-		memcpy(temp_buffer.ptrw(), entity_data.data, entity_data.size);
-		temp_buffer = temp_buffer.decompress(entity_size, FileAccess::COMPRESSION_FASTLZ);
-
-		auto entity = temp_buffer.decode_var(0, true);
+		auto entity = read_compressed_variant(buffer);
 		if (entity.get_type() != Variant::OBJECT) {
 			UtilityFunctions::print("Couldn't read entity: decoded variant was not an Object.");
 			return nullptr;
@@ -100,7 +110,7 @@ namespace NodeShared {
 			return nullptr;
 		}
 
-		auto child_count = buffer->flint();
+		auto child_count = buffer.flint();
 		for (auto i =  0; i < child_count; i++) {
 			auto child_node = read_entity_data(buffer);
 			if (child_node != nullptr) {

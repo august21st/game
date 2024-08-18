@@ -15,6 +15,7 @@ protected:
 	const int DEFAULT_HEALTH = 100;
 	String _chat_name;
 	int _health;
+	String _model_variant;
 
 protected:
 	static void _bind_methods();
@@ -26,4 +27,6 @@ public:
 	virtual String get_chat_name();
 	virtual void set_health(int value);
 	virtual int get_health();
+	virtual void set_model_variant(String value);
+	virtual String get_model_variant();
 };

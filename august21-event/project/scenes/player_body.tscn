@@ -83,7 +83,7 @@ pivot_offset = Vector2(8, 8)
 texture = ExtResource("1_hyn0r")
 expand_mode = 1
 
-[node name="GrabButton" type="Button" parent="PlayerGui"]
+[node name="ActionButton" type="Button" parent="PlayerGui"]
 unique_name_in_owner = true
 layout_mode = 1
 anchors_preset = -1
@@ -95,7 +95,7 @@ grow_horizontal = 2
 grow_vertical = 0
 metadata/_edit_use_anchors_ = true
 
-[node name="HBoxContainer" type="HBoxContainer" parent="PlayerGui/GrabButton"]
+[node name="HBoxContainer" type="HBoxContainer" parent="PlayerGui/ActionButton"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -104,14 +104,14 @@ grow_horizontal = 2
 grow_vertical = 2
 alignment = 1
 
-[node name="MarginContainer" type="MarginContainer" parent="PlayerGui/GrabButton/HBoxContainer"]
+[node name="MarginContainer" type="MarginContainer" parent="PlayerGui/ActionButton/HBoxContainer"]
 layout_mode = 2
 theme_override_constants/margin_left = 8
 theme_override_constants/margin_top = 8
 theme_override_constants/margin_right = 8
 theme_override_constants/margin_bottom = 8
 
-[node name="TextureRect" type="TextureRect" parent="PlayerGui/GrabButton/HBoxContainer/MarginContainer"]
+[node name="TextureRect" type="TextureRect" parent="PlayerGui/ActionButton/HBoxContainer/MarginContainer"]
 layout_mode = 2
 texture = ExtResource("4_6pt55")
 expand_mode = 2
@@ -206,6 +206,10 @@ anchor_left = 0.395833
 anchor_top = 0.802469
 anchor_right = 0.604167
 anchor_bottom = 0.884259
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 4
+theme_override_constants/shadow_outline_size = 2
 text = "Health: 100 / Holding: Chair"
 horizontal_alignment = 1
 vertical_alignment = 1

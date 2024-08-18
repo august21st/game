@@ -15,7 +15,6 @@ private:
 	Engine* _engine;
 	Label3D* _chat_name_label;
 	MeshInstance3D* _healthbar_mesh;
-	bool ready_and_connected();
 
 protected:
 	static void _bind_methods();
@@ -28,4 +27,6 @@ public:
 	String get_chat_name() override;
 	void set_health(int value) override;
 	int get_health() override;
+	void set_model_variant(String value) override;
+	String get_model_variant() override;
 };

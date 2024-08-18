@@ -22,9 +22,17 @@
 #include <godot_cpp/core/class_db.hpp>
 #include <godot_cpp/templates/cowdata.hpp>
 #include <godot_cpp/classes/translation_server.hpp>
+#include <godot_cpp/classes/java_script_bridge.hpp>
+#include <godot_cpp/classes/window.hpp>
+#include <godot_cpp/classes/timer.hpp>
+#include <godot_cpp/templates/list.hpp>
 
 #include "client.hpp"
+#include "godot_cpp/classes/object.hpp"
 #include "godot_cpp/core/math.hpp"
+#include "godot_cpp/core/property_info.hpp"
+#include "godot_cpp/variant/array.hpp"
+#include "godot_cpp/variant/string.hpp"
 #include "roof.hpp"
 #include "end.hpp"
 #include "player_body.hpp"
@@ -71,6 +79,12 @@ void Client::_bind_methods()
 		&Client::_on_setup_confirm_button_pressed);
 	ClassDB::bind_method(D_METHOD("_on_language_options_item_selected", "index"),
 		&Client::_on_language_options_item_selected);
+	ClassDB::bind_method(D_METHOD("_on_player_entity_ready", "id", "chat_name", "model_variant"),
+		&Client::_on_player_entity_ready);
+	ClassDB::bind_method(D_METHOD("try_connect_to_socket", "url"),
+		&Client::try_connect_to_socket);
+	ClassDB::bind_method(D_METHOD("_on_socket_status", "status", "code", "reason"),
+		&Client::_on_socket_status);
 
 	ADD_SIGNAL(MethodInfo("packet_received",
 		PropertyInfo(Variant::PACKED_BYTE_ARRAY, "packed_packet")));
@@ -79,20 +93,25 @@ void Client::_bind_methods()
 	ADD_SIGNAL(MethodInfo("volume_changed",
 		PropertyInfo(Variant::INT, "volume_ratio")));
 	ADD_SIGNAL(MethodInfo("current_scene_ready"));
+	ADD_SIGNAL(MethodInfo("socket_status",
+		PropertyInfo(Variant::INT, "status"),
+		PropertyInfo(Variant::INT, "code"),
+		PropertyInfo(Variant::STRING, "reason")));
 }
 
 void Client::_ready()
 {
 	_os = OS::get_singleton();
 	_engine = Engine::get_singleton();
-	if (_engine &&_engine->is_editor_hint()) {
+	_display_server = DisplayServer::get_singleton();
+	_is_server = _os->has_feature("dedicated_server") || _display_server->get_name() == "headless";
+	if (_is_server) {
+		set_process(false);
 		return;
 	}
 
 	_performance = Performance::get_singleton();
-	_display_server = DisplayServer::get_singleton();
 	_translation_server = TranslationServer::get_singleton();
-	_is_server = _os->has_feature("dedicated_server") || _display_server->get_name() == "headless";
 
 	_resource_loader = ResourceLoader::get_singleton();
 	_audio_server = AudioServer::get_singleton();
@@ -143,6 +162,19 @@ void Client::_ready()
 	_pc_presets_button = get_node<Button>("%PcPresetsButton");
 	_pc_presets_button->connect("pressed", Callable(this, "_on_setup_preset_button_pressed"));
 
+	_alert_label = get_node<Label>("%AlertLabel");
+	_alert_label->set_visible(false);
+
+	// Try predict platform from feature flags
+	if (_os->has_feature("web_android") || _os->has_feature("web_ios")
+		|| _os->has_feature("android") || _os->has_feature("ios")) {
+		_mobile_presets_button->set_pressed(true);
+	}
+	else if (_os->has_feature("web_linuxbsd") || _os->has_feature("web_windows") || _os->has_feature("web_macos")
+		|| _os->has_feature("linuxbsd") || _os->has_feature("windows") || _os->has_feature("macos"))  {
+		_pc_presets_button->set_pressed(true);
+	}
+
 	_setup_language_options = get_node<OptionButton>("%SetupLanguageOptions");
 	_setup_language_options->connect("item_selected", Callable(this, "_on_language_options_item_selected"));
 
@@ -152,22 +184,25 @@ void Client::_ready()
 	_entities = { };
 	_players = { };
 
-	if (_is_server) {
-		UtilityFunctions::print("Starting loopback client");
+	UtilityFunctions::print("Starting as client...");
+	PlayerBody* player_body_scene = nullptr;
+	auto load_error = load_scene_strict<PlayerBody>("res://scenes/player_body.tscn", &player_body_scene);
+	if (load_error != Error::OK || player_body_scene == nullptr) {
+		UtilityFunctions::print("Couldn't start client, player body scene failed to load");
+		return;
 	}
-	else {
-		UtilityFunctions::print("Starting as client...");
-		PlayerBody* player_body_scene = nullptr;
-		auto load_error = load_scene_strict<PlayerBody>("res://scenes/player_body.tscn", &player_body_scene);
-		if (load_error != Error::OK || player_body_scene == nullptr) {
-			UtilityFunctions::print("Couldn't start client, player body scene failed to load");
-			return;
-		}
-		_player_body = player_body_scene;
+	_player_body = player_body_scene;
 
-		init_socket_client("ws://localhost:8082");
-		change_scene("res://scenes/loading_screen.tscn");
-	}
+	set_process(false);
+
+	// Initialise websocket connection, post-connection logic at _on_socket_status
+	_socket_retry_timer = memnew(Timer());
+	_socket_retry_timer->connect("timeout", Callable(this, "try_connect_to_socket"));
+	_socket = Ref<WebSocketPeer>();
+	_socket.instantiate();
+	connect("socket_status", Callable(this, "_on_socket_status"));
+	try_connect_to_socket("ws://localhost:8082");
+	change_scene("res://scenes/loading_screen.tscn");
 }
 
 Node* Client::get_current_scene()
@@ -192,18 +227,81 @@ double Client::round_decimal(double value, int places)
 	return Math::round(value*Math::pow(10.0, places)) / Math::pow(10.0, places);
 }
 
-void Client::init_socket_client(String url)
+void Client::try_connect_to_socket(String url)
 {
-	_socket = Ref<WebSocketPeer>();
-	_socket.instantiate();
-	_socket->connect_to_url(url);
-	set_fail_function([](const void *reason)
-	{
-		auto str_reason = static_cast<const char*>(reason);
-		UtilityFunctions::printerr(String("dataproto error: {0}").format(Array::make(str_reason)));
-	});
-	_socket_closed = false;
-	set_process(true);
+	auto socket_error = _socket->connect_to_url(url);
+
+	if (socket_error) {
+		_socket_retry_count++;
+		// Exponential backoff
+		int retry_delay = INITIAL_SOCKET_RETRY_DELAY_SECONDS * _socket_retry_count;
+		if (retry_delay > MAX_SOCKET_RETRY_DELAY_SECONDS) {
+			// Client is probably offline or issue is too severe to continue
+			emit_signal("socket_status", SocketStatus::FAILED, socket_error, "");
+			return;
+		}
+
+		UtilityFunctions::print("Websocket connection failed: Retrying in ", retry_delay, " seconds.");
+		_socket_retry_timer->set_wait_time(retry_delay);
+		_socket_retry_timer->start();
+	}
+	else {
+		// Reset retry count on successful connection
+		set_fail_function([](const void* reason_ptr)
+		{
+			auto reason = String(static_cast<const char*>(reason_ptr));
+			UtilityFunctions::printerr(String("dataproto error: {0}").format(Array::make(reason)));
+		});
+		_socket_retry_count = 0;
+		_socket_closed = false;
+		set_process(true);
+	}
+
+	emit_signal("socket_status", SocketStatus::SUCCESS, -1, "");
+}
+
+void Client::_on_socket_status(int status, int code, String reason)
+{
+	if (status == SocketStatus::SUCCESS) {
+		// Accept query params chat name and model variant on web
+		if (_os->has_feature("JavaScript")) {
+			_js_bridge = JavaScriptBridge::get_singleton();
+			auto chat_name_variant = _js_bridge->eval("new URL(window.location.href).searchParams.get(\"chatName\")");
+			if (chat_name_variant.get_type() != Variant::STRING) {
+				auto chat_name = (String) chat_name_variant;
+				auto name_packet = BufWriter();
+				name_packet.u8(ClientPacket::SET_CHAT_NAME);
+				auto chat_name_str = chat_name.utf8().get_data();
+				name_packet.str(chat_name_str);
+				send(name_packet);
+			}
+
+			auto colour_variant = _js_bridge->eval("new URL(window.location.href).searchParams.get(\"colour\")");
+			if (colour_variant.get_type() != Variant::STRING) {
+				auto colour = (String) colour_variant;
+				auto model_packet = BufWriter();
+				model_packet.u8(ClientPacket::SET_MODEL_VARIANT);
+				auto colour_str = colour.utf8().get_data();
+				model_packet.str(colour_str);
+				send(model_packet);
+			}
+		}
+		set_process(true);
+	}
+	else if (status == SocketStatus::FAILED) {
+		change_scene("res://scenes/loading_screen.tscn");
+		_alert_label->set_visible(true);
+		_alert_label->set_text(String("Critical error: Failed to connect to the server after {0} attempts.\n"
+			"Error code: {1}.\nPlease check your network connection or ongoing outages and restart the game to continue.")
+				.format(Array::make(_socket_retry_count, code)));
+	}
+	else if (status == SocketStatus::DISCONNECTED) {
+		change_scene("res://scenes/loading_screen.tscn");
+		_alert_label->set_visible(true);
+		_alert_label->set_text(String("Critical error: You have been disconnected from the server.\n"
+			"Close code {0}, reason: '{1}'.\nPlease restart/reload the game to continue.")
+				.format(Array::make(code, reason)));
+	}
 }
 
 Ref<WebSocketPeer> Client::get_socket()
@@ -211,9 +309,9 @@ Ref<WebSocketPeer> Client::get_socket()
 	return _socket;
 }
 
-Error Client::send(BufWriter* packet)
+Error Client::send(const BufWriter& packet)
 {
-	send(packet->data(), packet->size());
+	send(packet.data(), packet.size());
 	return Error::OK;
 }
 
@@ -230,9 +328,9 @@ Error Client::send(const char* data, size_t size)
     return Error::OK;
 }
 
-vector<PackedByteArray> Client::poll_next_packets()
+List<PackedByteArray> Client::poll_next_packets()
 {
-	auto packets = vector<PackedByteArray>();
+	auto packets = List<PackedByteArray>();
 	if (_socket_closed || !_socket.is_valid()) {
 		return packets;
 	}
@@ -257,10 +355,7 @@ vector<PackedByteArray> Client::poll_next_packets()
 				.format(Array::make(code, reason, code != -1));
 			UtilityFunctions::printerr(formatted_log);
 			_socket_closed = true;
-
-			// TODO: try to re-establish connection with cooldown
-			//UtilityFunctions::print("Attemping to re-establish WebSocket connection...");
-			//init_socket_client("ws://localhost:8082");
+			emit_signal("socket_status", SocketStatus::DISCONNECTED, code, reason);
 			break;
 	}
 
@@ -302,39 +397,45 @@ void Client::_process(double delta)
 				case ServerPacket::GAME_INFO: {
 					auto players_waiting = packet.u32();
 					auto player_id = packet.u32();
+					// Add ourselves into the generic player list
 					_player_id = player_id;
+					_players.insert(_player_id, _player_body);
 					break;
 				}
 				case ServerPacket::PLAYERS_INFO: {
 					auto player_count = packet.u16();
 					for (auto i = 0; i < player_count; i++) {
 						auto id = packet.u32();
-						auto user_int_id = packet.u32();
 						auto chat_name_str = (string) packet.str();
 						auto chat_name = String(chat_name_str.c_str());
+						auto model_variant_str = (string) packet.str();
+						auto model_variant = String(model_variant_str.c_str());
 
-						if (id == _player_id) {
-							// TODO: Apply to self
-						}
-						else {
+						if (!_players.has(id)) {
 							EntityPlayer* player_entity = nullptr;
 							auto load_error = load_scene_strict<EntityPlayer>("res://scenes/entity_player.tscn", &player_entity);
 							if (load_error != Error::OK || player_entity == nullptr) {
 								UtilityFunctions::print("Failed to insert entity player: entity player scene failed to load.");
 								return;
 							}
-							player_entity->set_chat_name(chat_name);
+							player_entity->connect("ready", Callable(this, "_on_player_entity_ready")
+								.bind(id, chat_name, model_variant));
 							_players.insert(id, player_entity);
+						}
+						else {
+							auto player_entity = _players[id];
+							player_entity->set_chat_name(chat_name);
+							player_entity->set_model_variant(model_variant);
 						}
 					}
 					break;
 				}
 				case ServerPacket::UPDATE_PLAYER_MOVEMENT: {
-					auto player_id = packet.u32();
-					if (!_players.has(player_id)) {
-						if (player_id != _player_id) {
+					auto id = packet.u32();
+					if (!_players.has(id)) {
+						if (id != _player_id) {
 							UtilityFunctions::printerr("Could not update player ",
-								player_id, ": player entity not found");
+								id, ": player entity not found");
 						}
 						break;
 					}
@@ -345,26 +446,21 @@ void Client::_process(double delta)
 						break;
 					}
 
-					auto player = _players[player_id];
+					auto player_entity = _players[id];
 					auto position = Vector3(packet.f32(), packet.f32(), packet.f32());
 					auto rotation = Vector3(packet.f32(), packet.f32(), packet.f32());
 					auto current_animation_str = (string) packet.str();
 					auto current_animation = String(current_animation_str.c_str());
 
-					if (player_id == _player_id) {
-						// TODO: Apply changes from server to us
+					auto current_scene_node = _client_scene->get_child(0);
+					auto player_parent = player_entity->get_parent();
+					if (player_parent != current_scene_node) {
+						orphan_node(player_entity);
+						current_scene_node->add_child(player_entity);
 					}
-					else {
-						auto current_scene_node = _client_scene->get_child(0);
-						auto player_parent = player->get_parent();
-						if (player_parent != current_scene_node) {
-							orphan_node(player);
-							current_scene_node->add_child(player);
-						}
 
-						player->set_position(position);
-						player->set_rotation(rotation);
-					}
+					player_entity->set_position(position);
+					player_entity->set_rotation(rotation);
 					break;
 				}
 				case ServerPacket::UPDATE_PLAYER_HEALTH: {
@@ -376,15 +472,10 @@ void Client::_process(double delta)
 						}
 						break;
 					}
-					auto player = _players[player_id];
-					auto health = packet.u32();
 
-					if (player_id == _player_id) {
-						// TODO: Apply changes from server to us
-					}
-					else {
-						player->set_health(health);
-					}
+					auto player_entity = _players[player_id];
+					auto health = packet.u32();
+					player_entity->set_health(health);
 					break;
 				}
 				case ServerPacket::ENTITIES_INFO: {
@@ -394,7 +485,7 @@ void Client::_process(double delta)
 						auto parent_scene_str = (string) packet.str();
 						auto parent_scene = String(parent_scene_str.c_str());
 
-						auto entity_node = read_entity_data(&packet);
+						auto entity_node = read_entity_data(packet);
 						if (entity_node == nullptr) {
 							UtilityFunctions::print("Failed to create entity ", id, ": failed to decode entity data");
 							continue;
@@ -415,11 +506,9 @@ void Client::_process(double delta)
 					break;
 				}
 				case ServerPacket::UPDATE_ENTITY: {
-					break; // TODO: reimplement
 					auto id = packet.u32();
 					if (!_entities.has(id)) {
-						UtilityFunctions::print("Couldn't update entity with id ",
-							id, ": entity not found.");
+						//UtilityFunctions::print("Couldn't update entity with id ", id, ": entity not found.");
 						break;
 					}
 					auto entity = _entities[id];
@@ -428,11 +517,7 @@ void Client::_process(double delta)
 					for (auto i = 0; i < property_count; i++) {
 						auto property_str = (string) packet.str();
 						auto property = String(property_str.c_str());
-						auto value_data = packet.str();
-						auto temp_buffer = PackedByteArray();
-						temp_buffer.resize(value_data.size);
-						memcpy(temp_buffer.ptrw(), value_data.data, value_data.size);
-						auto value = packed_packet.decode_var(0);
+						auto value = read_compressed_variant(packet);
 						entity->set(property, value);
 					}
 					break;
@@ -490,6 +575,17 @@ void Client::_process(double delta)
 			}
 		}
 	}
+}
+
+void Client::_on_player_entity_ready(int id, String chat_name, String model_variant)
+{
+	if (!_players.has(id)) {
+		UtilityFunctions::print("Failed to initialise player ", id, " player was not in _players at time of _ready");
+	}
+
+	auto player_entity = _players[id];
+	player_entity->set_chat_name(chat_name);
+	player_entity->set_model_variant(model_variant);
 }
 
 void Client::set_stats_enabled(bool enable)
@@ -584,16 +680,16 @@ void Client::_on_volume_slider_value_changed(float value)
 	_volume_label->set_size(_volume_label->get_minimum_size());
 	auto slide_ratio = value / 100.0f;
 	auto volume_label_size = _volume_label->get_size();
-	_volume_label->set_pivot_offset(Vector2(
-		volume_label_size.x / 2, volume_label_size.y));
 	_volume_label->set_scale(
 		Vector2(0.4f, 0.4f) * slide_ratio + Vector2(0.8f, 0.8f));
+	_volume_label->set_pivot_offset(Vector2(
+		volume_label_size.x / 2, volume_label_size.y));
 	_volume_label->set_rotation_degrees(20 * slide_ratio - 10.0f);
 	auto slider_position = _volume_slider->get_global_rect().get_position();
 	auto slider_size = _volume_slider->get_size();
 	_volume_label->set_global_position(Vector2(
 		slider_position.x + (slide_ratio * slider_size.x) - (volume_label_size.x / 2.0f),
-		slider_position.y - 70.0f));
+		slider_position.y)); // - _volume_label->get_size().y * _volume_label->get_scale().y
 
 	auto master_index = _audio_server->get_bus_index("Master");
 	_audio_server->set_bus_volume_db(master_index, Math::linear2db(slide_ratio));
@@ -614,7 +710,10 @@ void Client::_on_back_button_pressed()
 
 void Client::_on_quit_button_pressed()
 {
-	UtilityFunctions::print("Exiting...");
+	UtilityFunctions::print("Quit received, exiting...");
+	get_tree()->get_root()->call_deferred(
+		"propagate_notification", NOTIFICATION_WM_CLOSE_REQUEST);
+	get_tree()->quit(0);
 }
 
 void Client::_on_language_options_item_selected(int index)
@@ -649,10 +748,12 @@ void Client::_on_setup_preset_button_pressed()
 void Client::_on_setup_confirm_button_pressed()
 {
 	if (_mobile_presets_button->is_pressed()) {
+		_presets_platform = PresetsPlatform::MOBILE;
 		// Auto set low graphics
 		_graphics_options->select(0);
 	}
 	else if (_pc_presets_button->is_pressed()) {
+		_presets_platform = PresetsPlatform::PC;
 		// Auto set high graphics
 		_graphics_options->select(1);
 	}
@@ -682,4 +783,9 @@ String Client::get_current_phase_scene()
 String Client::get_current_phase_event()
 {
 	return _current_phase_event;
+}
+
+PresetsPlatform Client::get_presets_platform()
+{
+	return _presets_platform;
 }

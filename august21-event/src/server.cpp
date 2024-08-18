@@ -17,6 +17,7 @@
 #include <commandIO.hpp>
 
 #include "server.hpp"
+#include "client_data.hpp"
 #include "network_shared.hpp"
 #include "node_shared.hpp"
 #include "entity_player.hpp"
@@ -129,9 +130,24 @@ void Server::_physics_process(double delta)
 			auto packet = BufReader((char*) data.ptr(), data.size());
 			auto code = packet.u8();
 			switch (code) {
-				case ClientPacket::LINK_KEY: {
-					auto link_key = packet.str();
-					// TODO: Authenticate link key with server, set user int ID, retrieve chat name... etc
+				case ClientPacket::SET_CHAT_NAME: {
+					auto chat_name_str = (string) packet.str();
+					auto chat_name = String(chat_name_str.c_str());
+					sender->get_entity()->set_chat_name(chat_name);
+
+					break;
+				}
+				case ClientPacket::SET_MODEL_VARIANT: {
+					bool valid = false;
+					// TODO: Fix me!
+					/*for (auto i = 0; i < size(MODEL_VARIANTS); i++) {
+						if (MODEL_VARIANTS[i] == colour) {
+							valid = true;
+						}
+						}*/
+					if (valid) {
+
+					}
 					break;
 				}
 				case ClientPacket::UPDATE_MOVEMENT: {
@@ -158,27 +174,27 @@ void Server::_physics_process(double delta)
 					auto current_animation_str = packet.str();
 
 					// Distribute updates to other clients
-					auto update_packet = new BufWriter();
-					update_packet->u8(ServerPacket::UPDATE_PLAYER_MOVEMENT);
-					update_packet->u32(sender_id); // player ID
-					update_packet->str(phase_scene_str); // phase scene
-					update_packet->f32(position.x); // position
-					update_packet->f32(position.y);
-					update_packet->f32(position.z);
-					update_packet->f32(rotation.x); // rotation
-					update_packet->f32(rotation.y);
-					update_packet->f32(rotation.z);
-					update_packet->str(current_animation_str); // current animation
-					send_to_all(update_packet);
+					auto update_packet = BufWriter();
+					update_packet.u8(ServerPacket::UPDATE_PLAYER_MOVEMENT);
+					update_packet.u32(sender_id); // player ID
+					update_packet.str(phase_scene_str); // phase scene
+					update_packet.f32(position.x); // position
+					update_packet.f32(position.y);
+					update_packet.f32(position.z);
+					update_packet.f32(rotation.x); // rotation
+					update_packet.f32(rotation.y);
+					update_packet.f32(rotation.z);
+					update_packet.str(current_animation_str); // current animation
+					send_to_others(sender_id, update_packet);
 					break;
 				}
 				case ClientPacket::ACTION_TAKE_DAMAGE: {
 					auto health = packet.u32();
 
-					auto health_packet = new BufWriter();
-					health_packet->u8(ServerPacket::UPDATE_PLAYER_HEALTH);
-					health_packet->u32(sender_id);
-					health_packet->u32(health);
+					auto health_packet = BufWriter();
+					health_packet.u8(ServerPacket::UPDATE_PLAYER_HEALTH);
+					health_packet.u32(sender_id);
+					health_packet.u32(health);
 					send_to_all(health_packet);
 					break;
 				}
@@ -193,12 +209,11 @@ void Server::_physics_process(double delta)
 				}
 				case ClientPacket::ACTION_CHAT_MESSAGE: {
 					auto message = (string) packet.str();
-					auto chat_packet = new BufWriter();
-					chat_packet->u8(ServerPacket::CHAT_MESSAGE);
-					chat_packet->i32(sender_id);
-					chat_packet->str(message);
+					auto chat_packet = BufWriter();
+					chat_packet.u8(ServerPacket::CHAT_MESSAGE);
+					chat_packet.i32(sender_id);
+					chat_packet.str(message);
 					send_to_all(chat_packet);
-					delete chat_packet;
 					break;
 				}
 			}
@@ -207,19 +222,17 @@ void Server::_physics_process(double delta)
 
 	// Query new world state & run game loop
 	for (auto &[id, entity_info] : _entities) {
-		auto update_packet = new BufWriter();
-		update_packet->u8(ServerPacket::UPDATE_ENTITY);
-		update_packet->u32(id);
+		auto update_packet = BufWriter();
+		update_packet.u8(ServerPacket::UPDATE_ENTITY);
+		update_packet.u32(id);
 		auto tracked_properties = entity_info->get_tracked_properties();
-		update_packet->u16(tracked_properties.size());
+		update_packet.u16(tracked_properties.size());
 		for (auto property : tracked_properties) {
 			if (entity_info->tracked_property_changed(property)) {
 				auto property_utf8 = property.utf8().get_data();
-				update_packet->str(property_utf8);
+				update_packet.str(property_utf8);
 				auto value = entity_info->get_property_value(property);
-				auto temp_buffer = PackedByteArray();
-				temp_buffer.encode_var(0, value);
-				update_packet->str(temp_buffer.ptr(), temp_buffer.size());
+				write_compressed_variant(value, update_packet);
 			}
 		}
 		send_to_all(update_packet);
@@ -229,10 +242,24 @@ void Server::_physics_process(double delta)
 	_tick_count++;
 }
 
-void encode_property()
+int Server::hash_string(String value)
 {
+	int hash = 0;
+	for (auto i = 0; i < value.length(); i++) {
+		hash = hash * 31 + int(value[i]) & 0xffffffff;
+	}
+	return hash;
+}
 
-
+void Server::write_player_info(int id, ClientData* client, BufWriter& buffer)
+{
+	buffer.i32(id); // player_id
+	auto chat_name = client->get_entity()->get_chat_name();
+	auto chat_name_str = chat_name.utf8().get_data();
+	buffer.str(chat_name_str); // chat_name
+	auto model_variant = client->get_entity()->get_model_variant();
+	auto model_variant_str = model_variant.utf8().get_data();
+	buffer.str(model_variant_str); // model_variant
 }
 
 void Server::_on_peer_connected(int id)
@@ -246,43 +273,33 @@ void Server::_on_peer_connected(int id)
 		client_socket->close(4000, "Internal server error");
 		return;
 	}
+	auto chat_name = String("anon");
 	auto client_data = new ClientData(client_socket, client_body);
 	_clients[id] = client_data;
 
 	// Send initial game state info to client
-	auto game_info_packet = new BufWriter();
-	game_info_packet->u8(ServerPacket::GAME_INFO);
+	auto game_info_packet = BufWriter();
+	game_info_packet.u8(ServerPacket::GAME_INFO);
 	// TODO: Implement players waiting
-	game_info_packet->u32((uint32_t) _clients.size()); // players waiting
-	game_info_packet->u32(id); // (their) player id
+	game_info_packet.u32((uint32_t) _clients.size()); // players waiting
+	game_info_packet.u32(id); // (their) player id
 	send(id, game_info_packet);
-	delete game_info_packet;
 
 	// Send initial playerlist to client
-	auto player_info_packet = new BufWriter();
-	player_info_packet->u8(ServerPacket::PLAYERS_INFO);
-	player_info_packet->u16(_clients.size());
-	for (auto &[player_id, client]  : _clients) {
-		// TODO: Implement chat name
-		player_info_packet->i32(player_id); // player_id
-		player_info_packet->i32(0); // user_int_id
-		string chat_name = "anon";
-		player_info_packet->str(chat_name); // chat_name
+	auto player_info_packet = BufWriter();
+	player_info_packet.u8(ServerPacket::PLAYERS_INFO);
+	player_info_packet.u16(_clients.size()); // player_count
+	for (auto &[player_id, client] : _clients) {
+		write_player_info(player_id, client, player_info_packet); // player_info
 	}
 	send(id, player_info_packet);
-	delete player_info_packet;
 
 	// Alert all other clients of the new player
-	auto new_player_info_packet = new BufWriter();
-	new_player_info_packet->u8(ServerPacket::PLAYERS_INFO);
-	new_player_info_packet->u16(1);
-	// TODO: Implement chat name
-	new_player_info_packet->i32(id);
-	new_player_info_packet->i32(0); // user_int_id
-	string chat_name = "anon";
-	new_player_info_packet->str(chat_name); // chat_name
-	send_to_all(new_player_info_packet);
-	delete new_player_info_packet;
+	auto new_player_info_packet = BufWriter();
+	new_player_info_packet.u8(ServerPacket::PLAYERS_INFO);
+	new_player_info_packet.u16(1); // player_count
+	write_player_info(id, client_data, new_player_info_packet); // player_info
+	send_to_others(id, new_player_info_packet);
 }
 
 void Server::_on_peer_disconnected(int id)
@@ -327,16 +344,15 @@ EntityInfo* Server::register_entity(Node* entity, String parent_scene)
 	_entities.insert(new_id, info);
 
 	// Distribute to all clients
-	auto entity_info_packet = new BufWriter();
-	entity_info_packet->u8(ServerPacket::ENTITIES_INFO); // packet code
-	entity_info_packet->u32(new_id); // entity id
+	auto entity_info_packet = BufWriter();
+	entity_info_packet.u8(ServerPacket::ENTITIES_INFO); // packet code
+	entity_info_packet.u32(new_id); // entity id
 	auto parent_scene_str = parent_scene.utf8().get_data();
-	entity_info_packet->str(parent_scene_str); // parent_scene
+	entity_info_packet.str(parent_scene_str); // parent_scene
 	// Write node data (properties, children)
 	write_entity_data(entity, entity_info_packet); // entity data
 
 	send_to_all(entity_info_packet);
-	delete entity_info_packet;
 	return info;
 }
 
@@ -367,8 +383,8 @@ void Server::run_console_loop()
 		func(pack(this, &Server::announce), "announce", "Send a message to all connected players",
 			param("message", "Chat message to be broadcast"))));
 
-	get_tree()->get_root()->call_deferred(
-		"propagate_notification", NOTIFICATION_WM_CLOSE_REQUEST);
+	// Exit
+	get_tree()->get_root()->call_deferred("propagate_notification", NOTIFICATION_WM_CLOSE_REQUEST);
 	get_tree()->quit(0);
 }
 
@@ -394,11 +410,10 @@ void Server::set_phase(string name)
 	}
 
 	// Run phase event on clients
-	auto phase_packet = new BufWriter();
-	phase_packet->u8(ServerPacket::SET_PHASE);
-	phase_packet->str(name);
+	auto phase_packet = BufWriter();
+	phase_packet.u8(ServerPacket::SET_PHASE);
+	phase_packet.str(name);
 	send_to_all(phase_packet);
-	delete phase_packet;
 }
 
 void Server::create_entity(string type)
@@ -434,10 +449,10 @@ void Server::kill_player(int id)
 		UtilityFunctions::print("Coud not kill player ", id, ": player not found");
 		return;
 	}
-	auto health_packet = new BufWriter();
-	health_packet->u8(ServerPacket::UPDATE_PLAYER_HEALTH);
-	health_packet->u32(id); // player_id
-	health_packet->u32(0); // health
+	auto health_packet = BufWriter();
+	health_packet.u8(ServerPacket::UPDATE_PLAYER_HEALTH);
+	health_packet.u32(id); // player_id
+	health_packet.u32(0); // health
 	send_to_all(health_packet);
 }
 
@@ -457,17 +472,34 @@ void Server::tp_player(string scene, int x, int y, int z)
 
 void Server::announce(string message)
 {
-	auto chat_packet = new BufWriter();
-	chat_packet->u8(ServerPacket::CHAT_MESSAGE);
-	chat_packet->i32(0); // player_id
-	chat_packet->str(message);
+	auto chat_packet = BufWriter();
+	chat_packet.u8(ServerPacket::CHAT_MESSAGE);
+	chat_packet.i32(0); // player_id
+	chat_packet.str(message);
 	send_to_all(chat_packet);
-	delete chat_packet;
 }
 
-void Server::send_to_all(BufWriter* packet)
+void Server::send_to_others(int exclude_id, const BufWriter& packet)
 {
-	send_to_all(packet->data(), packet->size());
+	send_to_others(exclude_id, packet.data(), packet.size());
+}
+
+void Server::send_to_others(int exclude_id, const char* data, size_t size)
+{
+	auto packed_data = PackedByteArray();
+	packed_data.resize(size);
+	memcpy(packed_data.ptrw(), data, size);
+
+	for (auto &[id, client] : _clients) {
+		if (id != exclude_id) {
+			client->get_socket()->put_packet(packed_data);
+		}
+	}
+}
+
+void Server::send_to_all(const BufWriter& packet)
+{
+	send_to_all(packet.data(), packet.size());
 }
 
 void Server::send_to_all(const char* data, size_t size)
@@ -481,9 +513,9 @@ void Server::send_to_all(const char* data, size_t size)
 	}
 }
 
-void Server::send(int id, BufWriter* packet)
+void Server::send(int id, const BufWriter& packet)
 {
-	send(id, packet->data(), packet->size());
+	send(id, packet.data(), packet.size());
 }
 
 void Server::send(int id, const char* data, size_t size)

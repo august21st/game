@@ -24,8 +24,11 @@ void EntityPlayerBase::_bind_methods()
 	ClassDB::bind_method(D_METHOD("set_chat_name"), &EntityPlayerBase::set_chat_name);
 	ClassDB::bind_method(D_METHOD("get_health"), &EntityPlayerBase::get_health);
 	ClassDB::bind_method(D_METHOD("set_health"), &EntityPlayerBase::set_health);
+	ClassDB::bind_method(D_METHOD("get_model_variant"), &EntityPlayerBase::get_model_variant);
+	ClassDB::bind_method(D_METHOD("set_model_variant"), &EntityPlayerBase::set_model_variant);
 	ADD_PROPERTY(PropertyInfo(Variant::STRING, "chat_name"), "set_chat_name", "get_chat_name");
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "health"), "set_health", "get_health");
+	ADD_PROPERTY(PropertyInfo(Variant::STRING, "model_variant"), "set_model_variant", "get_model_variant");
 }
 
 void EntityPlayerBase::set_chat_name(String name)
@@ -46,4 +49,14 @@ void EntityPlayerBase::set_health(int value)
 int EntityPlayerBase::get_health()
 {
 	return _health;
+}
+
+void EntityPlayerBase::set_model_variant(String value)
+{
+	_model_variant = value;
+}
+
+String EntityPlayerBase::get_model_variant()
+{
+	return _model_variant;
 }

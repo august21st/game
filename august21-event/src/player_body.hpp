@@ -50,6 +50,7 @@ private:
 	Vector2 _thumbstick_direction;
 	Button* _jump_button;
 	bool _jump_pressed;
+	Button* _action_button;
 	Button* _chat_button;
 	Button* _chat_close_button;
 	Panel* _chat_panel;
@@ -60,6 +61,8 @@ private:
 	bool _climbing;
 	Vector3 _spawn_position;
 	int _update_tick;
+	// Item management
+	Node* _holding;
 	void update_hotbar();
 
 protected:

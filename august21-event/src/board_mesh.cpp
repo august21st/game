@@ -12,6 +12,7 @@
 #include <godot_cpp/variant/utility_functions.hpp>
 
 #include "board_mesh.hpp"
+#include "godot_cpp/variant/packed_color_array.hpp"
 
 using namespace godot;
 
@@ -39,6 +40,10 @@ void BoardMesh::_bind_methods()
 		&BoardMesh::_on_board_request_completed);
 	ClassDB::bind_method(D_METHOD("_on_metadata_request_completed", "result", "response_code", "headers", "body"),
 		&BoardMesh::_on_metadata_request_completed);
+	ADD_SIGNAL(MethodInfo("board_downloaded", PropertyInfo(Variant::INT, "error"),
+		PropertyInfo(Variant::PACKED_BYTE_ARRAY, "board")));
+	ADD_SIGNAL(MethodInfo("palette_downloaded", PropertyInfo(Variant::INT, "error"),
+		PropertyInfo(Variant::PACKED_COLOR_ARRAY, "palette")));
 }
 
 void BoardMesh::_ready()
@@ -56,10 +61,6 @@ void BoardMesh::_ready()
 	_metadata_request = memnew(HTTPRequest);
 	_metadata_request->connect("request_completed", Callable(this, "_on_metadata_request_completed"));
 	add_child(_metadata_request);
-	ADD_SIGNAL(MethodInfo("board_downloaded", PropertyInfo(Variant::INT, "error"),
-		PropertyInfo(Variant::PACKED_BYTE_ARRAY, "board")));
-	ADD_SIGNAL(MethodInfo("palette_downloaded", PropertyInfo(Variant::INT, "error"),
-		PropertyInfo(Variant::PACKED_INT32_ARRAY, "palette")));
 }
 
 Error BoardMesh::load_canvas(String canvas_url, String palette_url)
@@ -143,9 +144,10 @@ void BoardMesh::_on_board_request_completed(int result, int response_code, const
 		return;
 	}
 
-	_board = new vector<uint8_t>();
+	_board = memnew(PackedByteArray());
 	_board->resize(body.size());
-	memcpy(_board->data(), body.ptr(), body.size());
+	memcpy(_board->ptrw(), body.ptr(), body.size());
+	emit_signal("board_downloaded", _board);
 
 	_board_loaded = true;
 	if (_palette_loaded && !_generating_texture) {
@@ -166,7 +168,7 @@ void BoardMesh::_on_metadata_request_completed(int result, int response_code, co
 		return;
 	}
 	auto palette_array = (Array)palette_variant;
-	_palette = new vector<Color>();
+	_palette = memnew(PackedColorArray);
 
 	for (auto i = 0; i < palette_array.size(); i++) {
 		Variant colour_variant = palette_array[i];

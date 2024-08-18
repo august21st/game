@@ -15,7 +15,6 @@
 #include "entity_info.hpp"
 
 using namespace godot;
-using namespace std;
 using namespace dataproto;
 
 class Server : public Node {
@@ -34,6 +33,18 @@ private:
 	HashMap<int, ClientData*> _clients;
 	HashMap<int, EntityInfo*> _entities;
 	Error register_phase_scene(String identifier, String path);
+	int hash_string(String value);
+	void write_player_info(int id, ClientData* client, BufWriter& buffer);
+	/*const String MODEL_VARIANTS[8] = {
+		"lightblue",
+		"navy",
+		"green",
+		"purple",
+		"grey",
+		"brown",
+		"orangered",
+		"gold"
+	};*/
 
 protected:
 	static void _bind_methods();
@@ -57,8 +68,10 @@ public:
 	void kick_player(int id);
 	void tp_player(string scene, int x, int y, int z);
 	void announce(string message);
-	void send_to_all(BufWriter* packet);
+	void send_to_all(const BufWriter& packet);
 	void send_to_all(const char* data, size_t size);
-	void send(int id, BufWriter* packet);
+	void send_to_others(int exclude_id, const BufWriter& packet);
+	void send_to_others(int exclude_id, const char* data, size_t size);
+	void send(int id, const BufWriter& packet);
 	void send(int id, const char* data, size_t size);
 };

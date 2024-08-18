@@ -2,11 +2,10 @@
 
 namespace NetworkShared {
 	enum ServerPacket {
-		LINK_RESPONSE = 0,
 		GAME_INFO = 1,
 		PLAYERS_INFO = 2,
-		SET_PHASE = 15,
-		UPDATE_PLAYER_HEALTH = 19,
+		SET_PHASE = 3,
+		UPDATE_PLAYER_HEALTH = 15,
 		UPDATE_PLAYER_MOVEMENT = 16,
 		TP_PLAYER = 21,
 		ENTITIES_INFO = 22,
@@ -15,7 +14,8 @@ namespace NetworkShared {
 	};
 
 	enum ClientPacket {
-		LINK_KEY = 0,
+		SET_CHAT_NAME = 1,
+		SET_MODEL_VARIANT = 2,
 		UPDATE_MOVEMENT = 16,
 		ACTION_GRAB = 17,
 		ACTION_DROP = 18,
@@ -23,6 +23,4 @@ namespace NetworkShared {
 		ACTION_TAKE_DAMAGE = 20,
 		ACTION_CHAT_MESSAGE = 31
 	};
-
-
 }

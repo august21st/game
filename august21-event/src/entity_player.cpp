@@ -43,15 +43,10 @@ void EntityPlayer::_ready()
 	_healthbar_mesh = get_node<MeshInstance3D>("%HealthbarMesh");
 }
 
-bool EntityPlayer::ready_and_connected()
-{
-	return is_node_ready() && !_engine->is_editor_hint() && get_parent() != nullptr;
-}
-
 void EntityPlayer::set_chat_name(String name)
 {
 	_chat_name = name;
-	if (ready_and_connected()) {
+	if (is_node_ready()) {
 		_chat_name_label->set_text(name);
 	}
 }
@@ -64,7 +59,7 @@ String EntityPlayer::get_chat_name()
 void EntityPlayer::set_health(int value)
 {
 	_health = value;
-	if (ready_and_connected()) {
+	if (is_node_ready()) {
 		Ref<QuadMesh> quad_mesh = _healthbar_mesh->get_mesh();
 		auto health_ratio = (float) value / DEFAULT_HEALTH;
 		auto new_healhbar_width = 0.38f * health_ratio;
@@ -76,4 +71,14 @@ void EntityPlayer::set_health(int value)
 int EntityPlayer::get_health()
 {
 	return _health;
+}
+
+void EntityPlayer::set_model_variant(String value)
+{
+	_model_variant = value;
+}
+
+String EntityPlayer::get_model_variant()
+{
+	return _model_variant;
 }

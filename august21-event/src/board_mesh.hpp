@@ -1,4 +1,5 @@
 #pragma once
+#include <godot_cpp/variant/packed_color_array.hpp>
 #include <godot_cpp/variant/color.hpp>
 #include <godot_cpp/variant/packed_byte_array.hpp>
 #include <godot_cpp/classes/http_request.hpp>
@@ -7,7 +8,6 @@
 #include <godot_cpp/classes/mesh_instance3d.hpp>
 #include <godot_cpp/variant/utility_functions.hpp>
 
-using namespace std;
 using namespace godot;
 
 #define DEFAULT_CANVAS_URL "https://raw.githubusercontent.com/rplacetk/canvas1/main/place"
@@ -26,8 +26,8 @@ protected:
     bool _generating_texture;
 	HTTPRequest* _board_request;
     HTTPRequest* _metadata_request;
-    vector<uint8_t>* _board;
-    vector<Color>* _palette;
+    PackedByteArray* _board;
+    PackedColorArray* _palette;
     void generate_texture();
 
 public:

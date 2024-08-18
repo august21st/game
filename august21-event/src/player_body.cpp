@@ -69,7 +69,7 @@ static Vector2 circular_clamp(const Vector2& vector, const Vector2& min, const V
     return vector;
 }
 
-PlayerBody::PlayerBody() : _client(nullptr)
+PlayerBody::PlayerBody() : _client(nullptr), _holding(nullptr)
 {
 }
 
@@ -144,6 +144,7 @@ void PlayerBody::_ready()
 	_jump_button->connect("button_down", Callable(this, "_on_jump_button_down"));
 	_jump_button->connect("button_up", Callable(this, "_on_jump_button_up"));
 	_jump_pressed = false;
+	_action_button = get_node<Button>("%ActionButton");
 	_chat_button = get_node<Button>("%ChatButton");
 	_chat_button->connect("pressed", Callable(this, "_on_chat_button_pressed"));
 	_chat_close_button = get_node<Button>("%ChatCloseButton");
@@ -161,6 +162,13 @@ void PlayerBody::_ready()
 	_climbing = false;
 	_spawn_position = Vector3(0, 0, 0);
 	_update_tick = 0;
+
+	if (_client->get_presets_platform() != PresetsPlatform::MOBILE) {
+		_thumbstick_panel->set_visible(false);
+		_jump_button->set_visible(false);
+		_action_button->set_visible(false);
+	}
+
 	set_process_input(true);
 	set_process_unhandled_input(true);
 	set_process(true);
@@ -202,6 +210,9 @@ void PlayerBody::_input(const Ref<InputEvent> &event)
 	else if (event->is_action_pressed("unfocus")) {
 		// Release pointer lock
 		_player_input->set_mouse_mode(godot::Input::MOUSE_MODE_VISIBLE);
+	}
+	else if (event->is_action_pressed("pause")) {
+		close_chat();
 	}
 }
 
@@ -312,26 +323,25 @@ void PlayerBody::_physics_process(double delta)
 
 	// Update player on server
 	if (_update_tick % 3 == 0) { // 20 tps
-		auto update_packet = new BufWriter();
-		update_packet->u8(ClientPacket::UPDATE_MOVEMENT);
+		auto update_packet = BufWriter();
+		update_packet.u8(ClientPacket::UPDATE_MOVEMENT);
 		auto phase_scene = _client->get_current_phase_scene();
 		auto phase_scene_utf8 = phase_scene.utf8().get_data();
-		update_packet->str(phase_scene_utf8);
+		update_packet.str(phase_scene_utf8);
 		auto position = get_position();
-		update_packet->f32(position.x);
-		update_packet->f32(position.y);
-		update_packet->f32(position.z);
+		update_packet.f32(position.x);
+		update_packet.f32(position.y);
+		update_packet.f32(position.z);
 		auto rotation = get_rotation();
-		update_packet->f32(rotation.x);
-		update_packet->f32(rotation.y);
-		update_packet->f32(rotation.z);
+		update_packet.f32(rotation.x);
+		update_packet.f32(rotation.y);
+		update_packet.f32(rotation.z);
 		// TODO: Implement current_animation
 		auto current_animation = String("walk");
 		auto current_animation_utf8 = current_animation.utf8().get_data();
-		update_packet->str(current_animation_utf8);
-		update_packet->u32(_health);
+		update_packet.str(current_animation_utf8);
+		update_packet.u32(_health);
 		_client->send(update_packet);
-		delete update_packet;
 	}
 	_update_tick++;
 }
@@ -467,23 +477,21 @@ void PlayerBody::_on_chat_send_button_pressed()
 		return;
 	}
 
-	auto chat_packet = new BufWriter();
-	chat_packet->u8(ClientPacket::ACTION_CHAT_MESSAGE);
+	auto chat_packet = BufWriter();
+	chat_packet.u8(ClientPacket::ACTION_CHAT_MESSAGE);
 	auto chat_message = _chat_input->get_text();
 	auto chat_message_utf8 = chat_message.utf8().get_data();
-	chat_packet->str(chat_message_utf8);
+	chat_packet.str(chat_message_utf8);
 	_client->send(chat_packet);
-	delete chat_packet;
 }
 
 void PlayerBody::take_damage(int damage)
 {
 	_health = Math::max(0, _health - damage);
-	auto damage_packet = new BufWriter();
-	damage_packet->u8(ClientPacket::ACTION_TAKE_DAMAGE);
-	damage_packet->u32(_health);
+	auto damage_packet = BufWriter();
+	damage_packet.u8(ClientPacket::ACTION_TAKE_DAMAGE);
+	damage_packet.u32(_health);
 	_client->send(damage_packet);
-	delete damage_packet;
 
 	if (_health <= 0 && !_is_dead) {
 		die();

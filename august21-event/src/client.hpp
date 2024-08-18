@@ -24,6 +24,9 @@
 #include <godot_cpp/classes/texture_rect.hpp>
 #include <godot_cpp/classes/h_box_container.hpp>
 #include <godot_cpp/classes/translation_server.hpp>
+#include <godot_cpp/classes/java_script_bridge.hpp>
+#include <godot_cpp/classes/timer.hpp>
+#include <godot_cpp/templates/list.hpp>
 
 #include "entity_player_base.hpp"
 // WORKAROUND: Forward declare to fix circular dependency
@@ -32,6 +35,17 @@ class PlayerBody;
 
 using namespace godot;
 using namespace dataproto;
+
+enum PresetsPlatform {
+	MOBILE,
+	PC
+};
+
+enum SocketStatus {
+	SUCCESS = 0,
+	FAILED = 1,
+	DISCONNECTED = 2
+};
 
 // Global autoload singleton for client, manages global
 // client state, like handling websocket connection and settings
@@ -47,8 +61,10 @@ private:
 	Performance* _performance;
 	ResourceLoader* _resource_loader;
 	Input* _player_input;
+	JavaScriptBridge* _js_bridge;
 	bool _is_server;
 	Node3D* _client_scene;
+	// Interface
 	Control* _client_gui;
 	Label* _stats_label;
 	bool _stats_enabled;
@@ -82,12 +98,20 @@ private:
 	Button* _mobile_presets_button;
 	Button* _pc_presets_button;
 	void _on_setup_preset_button_pressed();
+	PresetsPlatform _presets_platform;
 	OptionButton* _setup_language_options;
 	Button* _setup_confirm_button;
 	void _on_setup_confirm_button_pressed();
-	// Game
+	Label* _alert_label;
+	// Networking
+	int _socket_retry_count = 0;
+    const int MAX_SOCKET_RETRY_DELAY_SECONDS = 60;
+    const float INITIAL_SOCKET_RETRY_DELAY_SECONDS = 2.5f;
+	Timer* _socket_retry_timer;
 	Ref<WebSocketPeer> _socket;
-	vector<PackedByteArray> poll_next_packets();
+	void try_connect_to_socket(String url);
+	void _on_socket_status(int state, int code, String reason);
+	List<PackedByteArray> poll_next_packets();
 	bool _socket_closed;
 	String _current_phase_scene;
 	void _on_current_scene_ready();
@@ -96,6 +120,7 @@ private:
 	PlayerBody* _player_body;
 	HashMap<int, Node*> _entities;
 	HashMap<int, EntityPlayerBase*> _players;
+	void _on_player_entity_ready(int id, String chat_name, String model_variant);
 	double round_decimal(double value, int places);
 	const String _volume_comments[101] = {
 		String::utf8("Goes hard on mute 🗣️ 🗣️"), // 0
@@ -211,14 +236,14 @@ public:
 	void _input(const Ref<InputEvent> &event) override;
 	void _process(double delta) override;
 	Ref<WebSocketPeer> get_socket();
-	Error send(BufWriter* packet);
+	Error send(const BufWriter& packet);
 	Error send(const char* data, size_t size);
 	Node* get_current_scene();
 	template<typename T> T* get_current_scene_strict();
-	void init_socket_client(String url);
 	Error change_scene(String scene_path);
 	String get_current_phase_scene();
 	String get_current_phase_event();
+	PresetsPlatform get_presets_platform();
 	int get_player_id();
 	PlayerBody* get_player_body();
 };
