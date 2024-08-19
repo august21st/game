@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://bny3igiueo6ak"
-path="res://.godot/imported/temple.glb-26b80f11fe863b7d1a61da1152e48ba6.scn"
+uid="uid://14do76nbhwal"
+path="res://.godot/imported/garden_planter.glb-b71b48196cee04b8404c61af71989068.scn"
 
 [deps]
 
-source_file="res://assets/temple_of_gold/temple.glb"
-dest_files=["res://.godot/imported/temple.glb-26b80f11fe863b7d1a61da1152e48ba6.scn"]
+source_file="res://assets/garden_planter/garden_planter.glb"
+dest_files=["res://.godot/imported/garden_planter.glb-b71b48196cee04b8404c61af71989068.scn"]
 
 [params]
 
@@ -31,13 +31,6 @@ animation/trimming=false
 animation/remove_immutable_tracks=true
 animation/import_rest_as_RESET=false
 import_script/path=""
-_subresources={
-"materials": {
-"Gold": {
-"use_external/enabled": true,
-"use_external/path": "res://assets/gold/gold_material.tres"
-}
-}
-}
+_subresources={}
 gltf/naming_version=1
 gltf/embedded_image_handling=1

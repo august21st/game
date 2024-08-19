@@ -32,15 +32,25 @@
 #include <godot_cpp/classes/web_socket_peer.hpp>
 #include <godot_cpp/classes/v_box_container.hpp>
 #include <godot_cpp/variant/packed_byte_array.hpp>
+#include <godot_cpp/classes/ray_cast3d.hpp>
+#include <godot_cpp/classes/global_constants.hpp>
 #include <dataproto_cpp/dataproto.hpp>
+#include <godot_cpp/classes/skeleton3d.hpp>
 
 #include "client.hpp"
 #include "player_body.hpp"
+#include "entity_player_base.hpp"
+#include "entity_item_base.hpp"
+#include "godot_cpp/classes/h_box_container.hpp"
+#include "godot_cpp/classes/input_event_mouse.hpp"
+#include "godot_cpp/classes/rigid_body3d.hpp"
 #include "network_shared.hpp"
 #include "client.hpp"
+#include "node_shared.hpp"
 
 using namespace godot;
 using namespace NetworkShared;
+using namespace NodeShared;
 
 const float MAX_SPEED = 6.0f;
 const float MAX_CLIMB_SPEED = 5.0f;
@@ -69,7 +79,7 @@ static Vector2 circular_clamp(const Vector2& vector, const Vector2& min, const V
     return vector;
 }
 
-PlayerBody::PlayerBody() : _client(nullptr), _holding(nullptr)
+PlayerBody::PlayerBody() : _client(nullptr)
 {
 }
 
@@ -79,8 +89,15 @@ PlayerBody::~PlayerBody()
 
 void PlayerBody::update_hotbar()
 {
-	auto health_label = String("Health: {0} / Holding: {1}").format(Array::make(_health, "Nothing"));
+	auto health_label = String("Health: {0}").format(Array::make(_health));
 	_health_label->set_text(health_label);
+
+	_inventory_selector->set_visible(_inventory_current == -1);
+	auto inventory_position = _inventory_box->get_position();
+	auto inventory_size = _inventory_box->get_size();
+	_inventory_selector->set_position(Vector2(
+		inventory_position.x + (_inventory_current / (float) MAX_INVENTORY_SIZE) * inventory_size.x,
+		inventory_position.y + 8));
 }
 
 void PlayerBody::_bind_methods()
@@ -103,8 +120,8 @@ void PlayerBody::_bind_methods()
 		&PlayerBody::_on_chat_close_tween_completed);
 	ClassDB::bind_method(D_METHOD("_on_packet_received", "packed_packet"),
 		&PlayerBody::_on_packet_received);
-	ClassDB::bind_method(D_METHOD("_on_chat_send_button_pressed"),
-		&PlayerBody::_on_chat_send_button_pressed);
+	ClassDB::bind_method(D_METHOD("_on_chat_submit"),
+		&PlayerBody::_on_chat_submit);
 }
 
 void PlayerBody::_ready()
@@ -152,9 +169,15 @@ void PlayerBody::_ready()
 	_chat_panel = get_node<Panel>("%ChatPanel");
 	_chat_panel->set_visible(false);
 	_chat_input = get_node<LineEdit>("%ChatInput");
+	_chat_input->connect("text_submitted", Callable(this, "_on_chat_submit"));
 	_chat_send_button = get_node<Button>("%ChatSendButton");
-	_chat_send_button->connect("pressed", Callable(this, "_on_chat_send_button_pressed"));
+	_chat_send_button->connect("pressed", Callable(this, "_on_chat_submit"));
 	_chat_messages_container = get_node<VBoxContainer>("%ChatMessagesContainer");
+	_grab_ray = get_node<RayCast3D>("%PlayerGrabRay");
+	_player_model = get_node<Node3D>("%PlayerModel");
+	_skeleton = _player_model->get_node<Skeleton3D>("CharacterRig/Skeleton3D");
+	_inventory_box = get_node<HBoxContainer>("%InventoryBox");
+	_inventory_selector = get_node<Panel>("%InventorySelector");
 	_velocity = Vector3(0, 0, 0);
 	_health = DEFAULT_HEALTH;
 	_is_dead = false;
@@ -162,6 +185,8 @@ void PlayerBody::_ready()
 	_climbing = false;
 	_spawn_position = Vector3(0, 0, 0);
 	_update_tick = 0;
+	_inventory = { };
+	_inventory_current = -1;
 
 	if (_client->get_presets_platform() != PresetsPlatform::MOBILE) {
 		_thumbstick_panel->set_visible(false);
@@ -211,7 +236,7 @@ void PlayerBody::_input(const Ref<InputEvent> &event)
 		// Release pointer lock
 		_player_input->set_mouse_mode(godot::Input::MOUSE_MODE_VISIBLE);
 	}
-	else if (event->is_action_pressed("pause")) {
+	else if (event->is_action_pressed("toggle_pause")) {
 		close_chat();
 	}
 }
@@ -225,6 +250,35 @@ void PlayerBody::_unhandled_input(const Ref<InputEvent> &event)
 	if (event->is_class("InputEventMouseButton")) {
 		const Ref<InputEventMouseButton> event_mouse_button = event;
 		_player_input->set_mouse_mode(godot::Input::MOUSE_MODE_CAPTURED);
+
+		switch (event_mouse_button->get_button_index()) {
+			case MouseButton::MOUSE_BUTTON_LEFT:  {
+				auto collider_object = _grab_ray->get_collider();
+
+				// Try to obtain grab of item (if not claimed by something else)
+				// and move the entity item into our inventory (ACTION_GRAB)
+				auto item_entity = Object::cast_to<EntityItemBase>(collider_object);
+				if (_inventory.size() < MAX_INVENTORY_SIZE && item_entity != nullptr && item_entity->try_grab()) {
+					add_child(item_entity);
+					_inventory.push_back(item_entity);
+					_inventory_current = _inventory.size() - 1;
+					auto item_label = memnew(Label());
+					item_label->set_text(item_entity->get_name());
+					_inventory_box->add_child(item_label);
+				}
+				break;
+			}
+			case MouseButton::MOUSE_BUTTON_WHEEL_UP: {
+				_inventory_current = (_inventory_current + 1) % _inventory.size();
+				break;
+			}
+			case MouseButton::MOUSE_BUTTON_WHEEL_DOWN: {
+				_inventory_current = (_inventory_current - 1) % _inventory.size();
+				break;
+			}
+			default:
+				break;
+		}
 	}
 }
 
@@ -352,7 +406,15 @@ void PlayerBody::_process(double delta)
 		return;
 	}
 
+	// Inventory management
 	update_hotbar();
+	if (_inventory_current != -1) {
+		auto inventory_item = _inventory[_inventory_current];
+		auto hand_bone = _skeleton->find_bone("DEF-HandR");
+		auto hand_transform = _skeleton->get_bone_global_pose(hand_bone);
+		inventory_item->set_position(hand_transform.get_origin());
+		inventory_item->set_rotation(hand_transform.basis.get_euler());
+	}
 }
 
 void PlayerBody::set_spawn_position(Vector3 new_spawn_position)
@@ -437,20 +499,25 @@ void PlayerBody::_on_packet_received(PackedByteArray packed_packet)
 	uint8_t code = packet.u8();
 	switch (code) {
 		case ServerPacket::CHAT_MESSAGE: {
-			// TODO: Implement these
 			auto player_id = packet.i32();
 			String chat_name;
 			if (player_id == 0) {
 				chat_name = "SERVER@AUGUST21-EVENT";
 			}
 			else {
-				chat_name = "anon";
+				auto player = _client->get_player(player_id);
+				chat_name = player->get_chat_name();
+				if (chat_name == "") {
+					chat_name = "anon";
+				}
 			}
-			auto message_str = string(packet.str());
+			auto message_str = (string) packet.str();
 			auto message = String(message_str.c_str());
 
-			auto message_label = memnew(RichTextLabel);
+			auto message_label = memnew(RichTextLabel());
 			message_label->set_use_bbcode(true);
+			message_label->set_scroll_active(false);
+			message_label->set_fit_content(true);
 			message_label->set_text(String("[{0}] {1}")
 				.format(Array::make(chat_name, message)));
 			message_label->set_autowrap_mode(TextServer::AutowrapMode::AUTOWRAP_WORD_SMART);
@@ -470,19 +537,12 @@ void PlayerBody::_on_chat_close_button_pressed()
 	close_chat();
 }
 
-void PlayerBody::_on_chat_send_button_pressed()
+void PlayerBody::_on_chat_submit()
 {
-	if (_client == nullptr) {
-		UtilityFunctions::printerr("Could not send chat message: socket was null or closed");
-		return;
+	if (_chat_input->get_text() != "") {
+		send_chat(_chat_input->get_text());
+		_chat_input->clear();
 	}
-
-	auto chat_packet = BufWriter();
-	chat_packet.u8(ClientPacket::ACTION_CHAT_MESSAGE);
-	auto chat_message = _chat_input->get_text();
-	auto chat_message_utf8 = chat_message.utf8().get_data();
-	chat_packet.str(chat_message_utf8);
-	_client->send(chat_packet);
 }
 
 void PlayerBody::take_damage(int damage)
@@ -498,6 +558,19 @@ void PlayerBody::take_damage(int damage)
 	}
 }
 
+void PlayerBody::send_chat(String message)
+{
+	if (_client == nullptr) {
+		UtilityFunctions::printerr("Could not send chat message: client was null");
+		return;
+	}
+
+	auto chat_packet = BufWriter();
+	chat_packet.u8(ClientPacket::ACTION_CHAT_MESSAGE);
+	auto chat_message_utf8 = message.utf8().get_data();
+	chat_packet.str(chat_message_utf8);
+	_client->send(chat_packet);
+}
 
 void PlayerBody::set_health(int value)
 {

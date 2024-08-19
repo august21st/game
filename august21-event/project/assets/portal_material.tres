@@ -1,0 +1,10 @@
+[gd_resource type="ShaderMaterial" load_steps=2 format=3 uid="uid://dhkrruehk8id3"]
+
+[ext_resource type="Shader" path="res://shaders/portal.gdshader" id="1_taejy"]
+
+[resource]
+render_priority = 0
+shader = ExtResource("1_taejy")
+shader_parameter/fade_out_distance_max = 10.0
+shader_parameter/fade_out_distance_min = 8.0
+shader_parameter/fade_out_colour = Vector4(0, 0, 0, 0)

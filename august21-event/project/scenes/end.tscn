@@ -1,15 +1,28 @@
-[gd_scene load_steps=18 format=3 uid="uid://dfkyt1t78dw5b"]
+[gd_scene load_steps=32 format=3 uid="uid://dfkyt1t78dw5b"]
 
 [ext_resource type="PackedScene" uid="uid://bc1y56yq3m6pk" path="res://assets/temple_of_gold/entrance.glb" id="1_04bcx"]
 [ext_resource type="Environment" uid="uid://407wdrxv08d6" path="res://assets/end_environment_high.tres" id="1_v6gpa"]
 [ext_resource type="PackedScene" uid="uid://c1bganck1xs20" path="res://scenes/workbench.tscn" id="4_m11tf"]
-[ext_resource type="PackedScene" uid="uid://cga330m2tvy5o" path="res://scenes/temple.tscn" id="5_o8ulc"]
+[ext_resource type="PackedScene" uid="uid://bny3igiueo6ak" path="res://assets/temple_of_gold/temple.glb" id="4_pfmcr"]
+[ext_resource type="PackedScene" uid="uid://b6u2gq168cs2c" path="res://assets/aeroplane/united_airlines_boeing_777.glb" id="5_rmf6r"]
 [ext_resource type="PackedScene" uid="uid://c7b0jdx7gn2ht" path="res://assets/refined_saw/refined_saw.glb" id="5_sv3ui"]
+[ext_resource type="PackedScene" uid="uid://cwgp0q1aj5tli" path="res://assets/ataturk/ataturk_head.glb" id="6_4aa5u"]
+[ext_resource type="PackedScene" uid="uid://14do76nbhwal" path="res://assets/garden_planter/garden_planter.glb" id="6_y1p2k"]
+[ext_resource type="FontFile" uid="uid://ca14mkoohldct" path="res://assets/reddit/reddit_mono_bold.woff2" id="7_x2l2q"]
+[ext_resource type="PackedScene" uid="uid://dgeqhvrokoqsn" path="res://scenes/short_assault_rifle.tscn" id="10_2uag0"]
 
 [sub_resource type="PlaneMesh" id="PlaneMesh_qcwm1"]
 size = Vector2(1000, 1000)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_2ivot"]
+
+[sub_resource type="WorldBoundaryShape3D" id="WorldBoundaryShape3D_87b10"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_mqw6u"]
+roughness = 0.8
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_lcrr1"]
+size = Vector2(500, 500)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_t6u3y"]
 size = Vector3(10, 0.9, 24.5)
@@ -29,16 +42,38 @@ size = Vector3(2.2, 3.4, 0.4)
 [sub_resource type="BoxShape3D" id="BoxShape3D_0j4ea"]
 size = Vector3(3.2, 0.3, 0.4)
 
-[sub_resource type="WorldBoundaryShape3D" id="WorldBoundaryShape3D_87b10"]
+[sub_resource type="ConcavePolygonShape3D" id="ConcavePolygonShape3D_wdgjd"]
+data = PackedVector3Array(-15, 11.25, 22, -15, 23.25, -22, -15, 23.25, 22, -15, 11.25, 22, -15, 11.25, -22, -15, 23.25, -22, 5, 11.25, -22, 15, 23.25, -22, 5, 23.25, -22, 5, 11.25, -22, 15, 11.25, -22, 15, 23.25, -22, 15, 11.25, -22, 15, 23.25, 22, 15, 23.25, -22, 15, 11.25, -22, 15, 11.25, 22, 15, 23.25, 22, -5, 11.25, 22, -15, 23.25, 22, -5, 23.25, 22, -5, 11.25, 22, -15, 11.25, 22, -15, 23.25, 22, 5, -0.75, -22, 15, -0.75, 22, 15, -0.75, -22, 5, -0.75, -22, 5, -0.75, 22, 15, -0.75, 22, -5, 23.25, -22, -15, 23.25, 22, -15, 23.25, -22, -5, 23.25, -22, -5, 23.25, 22, -15, 23.25, 22, -14, 11.25, 20, -14, 23.25, -20, -14, 11.25, -20, -14, 11.25, 20, -14, 23.25, 20, -14, 23.25, -20, 5, 11.25, -20, 14, 23.25, -20, 14, 11.25, -20, 5, 11.25, -20, 5, 23.25, -20, 14, 23.25, -20, 14, 11.25, -20, 14, 23.25, 20, 14, 11.25, 20, 14, 11.25, -20, 14, 23.25, -20, 14, 23.25, 20, -5, 11.25, 20, -14, 23.25, 20, -14, 11.25, 20, -5, 11.25, 20, -5, 23.25, 20, -14, 23.25, 20, 5, -0.75, -20, 14, -0.75, 20, 5, -0.75, 20, 5, -0.75, -20, 14, -0.75, -20, 14, -0.75, 20, -5, 23.25, -20, -14, 23.25, 20, -5, 23.25, 20, -5, 23.25, -20, -14, 23.25, -20, -14, 23.25, 20, 15, 23.25, -22, 5, 23.25, 22, 5, 23.25, -22, 15, 23.25, -22, 15, 23.25, 22, 5, 23.25, 22, 5, 23.25, -22, -5, 23.25, 22, -5, 23.25, -22, 5, 23.25, -22, 5, 23.25, 22, -5, 23.25, 22, -15, -0.75, -22, -5, -0.75, 22, -5, -0.75, -22, -15, -0.75, -22, -15, -0.75, 22, -5, -0.75, 22, -5, -0.75, -22, 5, -0.75, 22, 5, -0.75, -22, -5, -0.75, -22, -5, -0.75, 22, 5, -0.75, 22, 15, 11.25, 22, 5, 23.25, 22, 15, 23.25, 22, 15, 11.25, 22, 5, 11.25, 22, 5, 23.25, 22, 5, 11.25, 22, -5, 23.25, 22, 5, 23.25, 22, 5, 11.25, 22, -5, 11.25, 22, -5, 23.25, 22, -15, 11.25, -22, -5, 23.25, -22, -15, 23.25, -22, -15, 11.25, -22, -5, 11.25, -22, -5, 23.25, -22, -5, 11.25, -22, 5, 23.25, -22, -5, 23.25, -22, -5, 11.25, -22, 5, 11.25, -22, 5, 23.25, -22, -5, -0.75, -22, 5, 11.25, -22, -5, 11.25, -22, -5, -0.75, -22, 5, -0.75, -22, 5, 11.25, -22, -15, -0.75, -22, -5, 11.25, -22, -15, 11.25, -22, -15, -0.75, -22, -5, -0.75, -22, -5, 11.25, -22, 15, -0.75, 22, 5, 11.25, 22, 15, 11.25, 22, 15, -0.75, 22, 5, -0.75, 22, 5, 11.25, 22, -5, -0.75, 22, -15, 11.25, 22, -5, 11.25, 22, -5, -0.75, 22, -15, -0.75, 22, -15, 11.25, 22, 15, -0.75, -22, 15, 11.25, 22, 15, 11.25, -22, 15, -0.75, -22, 15, -0.75, 22, 15, 11.25, 22, 5, -0.75, -22, 15, 11.25, -22, 5, 11.25, -22, 5, -0.75, -22, 15, -0.75, -22, 15, 11.25, -22, -15, -0.75, 22, -15, 11.25, -22, -15, 11.25, 22, -15, -0.75, 22, -15, -0.75, -22, -15, 11.25, -22, 14, 23.25, -20, 5, 23.25, 20, 14, 23.25, 20, 14, 23.25, -20, 5, 23.25, -20, 5, 23.25, 20, 5, 23.25, -20, -5, 23.25, 20, 5, 23.25, 20, 5, 23.25, -20, -5, 23.25, -20, -5, 23.25, 20, -14, -0.75, -20, -5, -0.75, 20, -14, -0.75, 20, -14, -0.75, -20, -5, -0.75, -20, -5, -0.75, 20, -5, -0.75, -20, 5, -0.75, 20, -5, -0.75, 20, -5, -0.75, -20, 5, -0.75, -20, 5, -0.75, 20, 14, 11.25, 20, 5, 23.25, 20, 5, 11.25, 20, 14, 11.25, 20, 14, 23.25, 20, 5, 23.25, 20, 5, 11.25, 20, -5, 23.25, 20, -5, 11.25, 20, 5, 11.25, 20, 5, 23.25, 20, -5, 23.25, 20, -14, 11.25, -20, -5, 23.25, -20, -5, 11.25, -20, -14, 11.25, -20, -14, 23.25, -20, -5, 23.25, -20, -5, 11.25, -20, 5, 23.25, -20, 5, 11.25, -20, -5, 11.25, -20, -5, 23.25, -20, 5, 23.25, -20, -5, -0.75, -20, 5, 11.25, -20, 5, -0.75, -20, -5, -0.75, -20, -5, 11.25, -20, 5, 11.25, -20, -14, -0.75, -20, -5, 11.25, -20, -5, -0.75, -20, -14, -0.75, -20, -14, 11.25, -20, -5, 11.25, -20, 14, -0.75, 20, 5, 11.25, 20, 5, -0.75, 20, 14, -0.75, 20, 14, 11.25, 20, 5, 11.25, 20, -5, -0.75, 20, -14, 11.25, 20, -14, -0.75, 20, -5, -0.75, 20, -5, 11.25, 20, -14, 11.25, 20, 14, -0.75, -20, 14, 11.25, 20, 14, -0.75, 20, 14, -0.75, -20, 14, 11.25, -20, 14, 11.25, 20, 5, -0.75, -20, 14, 11.25, -20, 14, -0.75, -20, 5, -0.75, -20, 5, 11.25, -20, 14, 11.25, -20, -14, -0.75, 20, -14, 11.25, -20, -14, -0.75, -20, -14, -0.75, 20, -14, 11.25, 20, -14, 11.25, -20, 5, 11.25, 22, 5, -0.75, 20, 5, 11.25, 20, 5, 11.25, 22, 5, -0.75, 22, 5, -0.75, 20, 5, 11.25, 22, -5, 11.25, 20, -5, 11.25, 22, 5, 11.25, 22, 5, 11.25, 20, -5, 11.25, 20, -5, 11.25, 22, -5, -0.75, 20, -5, -0.75, 22, -5, 11.25, 22, -5, 11.25, 20, -5, -0.75, 20, 5, -0.75, 22, -5, -0.75, 20, 5, -0.75, 20, 5, -0.75, 22, -5, -0.75, 22, -5, -0.75, 20)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_mqw6u"]
-roughness = 0.8
+[sub_resource type="ConcavePolygonShape3D" id="ConcavePolygonShape3D_2d05g"]
+data = PackedVector3Array(-20, -1, 26, -1, 4, -26, -1, 4, 26, -20, -1, 26, -20, -1, -26, -1, 4, -26, 0.9353, 3.5, -26, 16.1353, -0.5, -25.6, 16.1353, -0.5, -26, 0.9353, 3.5, -26, 0.9353, 3.5, -25.6, 16.1353, -0.5, -25.6, 20, -1, -26, 1, 4, 26, 1, 4, -26, 20, -1, -26, 20, -1, 26, 1, 4, 26, -16.1353, -0.5, 26, 16.1353, -0.5, 25.6, 16.1353, -0.5, 26, -16.1353, -0.5, 26, -16.1353, -0.5, 25.6, 16.1353, -0.5, 25.6, -20, -1, -26, 20, -2, -26, 20, -1, -26, -20, -1, -26, -20, -2, -26, 20, -2, -26, 1, 4, -26, -1, 4, 26, -1, 4, -26, 1, 4, -26, 1, 4, 26, -1, 4, 26, -16.1353, -0.5, 26, -1, 4, 26, -0.9353, 3.5, 26, -16.1353, -0.5, 26, -20, -1, 26, -1, 4, 26, -0.9353, 3.5, -26, -20, -1, -26, -16.1353, -0.5, -26, -0.9353, 3.5, -26, -1, 4, -26, -20, -1, -26, -16.1353, -0.5, -26, 20, -1, -26, 16.1353, -0.5, -26, -16.1353, -0.5, -26, -20, -1, -26, 20, -1, -26, 0.9353, 3.5, -26, -1, 4, -26, -0.9353, 3.5, -26, 0.9353, 3.5, -26, 1, 4, -26, -1, 4, -26, 16.1353, -0.5, -26, 1, 4, -26, 0.9353, 3.5, -26, 16.1353, -0.5, -26, 20, -1, -26, 1, 4, -26, 0.9353, 3.5, 26, 20, -1, 26, 16.1353, -0.5, 26, 0.9353, 3.5, 26, 1, 4, 26, 20, -1, 26, 16.1353, -0.5, 26, -20, -1, 26, -16.1353, -0.5, 26, 16.1353, -0.5, 26, 20, -1, 26, -20, -1, 26, -0.9353, 3.5, 26, 1, 4, 26, 0.9353, 3.5, 26, -0.9353, 3.5, 26, -1, 4, 26, 1, 4, 26, -16.1353, -0.5, -25.6, 0.9353, 3.5, -25.6, -0.9353, 3.5, -25.6, -16.1353, -0.5, -25.6, 16.1353, -0.5, -25.6, 0.9353, 3.5, -25.6, 16.1353, -0.5, 25.6, -0.9353, 3.5, 25.6, 0.9353, 3.5, 25.6, 16.1353, -0.5, 25.6, -16.1353, -0.5, 25.6, -0.9353, 3.5, 25.6, 16.1353, -0.5, -26, -16.1353, -0.5, -25.6, -16.1353, -0.5, -26, 16.1353, -0.5, -26, 16.1353, -0.5, -25.6, -16.1353, -0.5, -25.6, -0.9353, 3.5, 26, -16.1353, -0.5, 25.6, -16.1353, -0.5, 26, -0.9353, 3.5, 26, -0.9353, 3.5, 25.6, -16.1353, -0.5, 25.6, 0.9353, 3.5, 26, -0.9353, 3.5, 25.6, -0.9353, 3.5, 26, 0.9353, 3.5, 26, 0.9353, 3.5, 25.6, -0.9353, 3.5, 25.6, 16.1353, -0.5, 26, 0.9353, 3.5, 25.6, 0.9353, 3.5, 26, 16.1353, -0.5, 26, 16.1353, -0.5, 25.6, 0.9353, 3.5, 25.6, -0.9353, 3.5, -26, 0.9353, 3.5, -25.6, 0.9353, 3.5, -26, -0.9353, 3.5, -26, -0.9353, 3.5, -25.6, 0.9353, 3.5, -25.6, -16.1353, -0.5, -26, -0.9353, 3.5, -25.6, -0.9353, 3.5, -26, -16.1353, -0.5, -26, -16.1353, -0.5, -25.6, -0.9353, 3.5, -25.6, -20, -2, -26, 20, -2, 26, 20, -2, -26, -20, -2, -26, -20, -2, 26, 20, -2, 26, -20, -1, 26, -20, -2, -26, -20, -1, -26, -20, -1, 26, -20, -2, 26, -20, -2, -26, 20, -1, -26, 20, -2, 26, 20, -1, 26, 20, -1, -26, 20, -2, -26, 20, -2, 26, 20, -1, 26, -20, -2, 26, -20, -1, 26, 20, -1, 26, 20, -2, 26, -20, -2, 26)
 
-[sub_resource type="PlaneMesh" id="PlaneMesh_lcrr1"]
-size = Vector2(500, 500)
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_rh60v"]
+height = 24.0
+radius = 0.895
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_iusp0"]
+size = Vector3(1, 0.3, 1.3)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_26sm1"]
+size = Vector3(0.6, 0.7, 0.6)
+
+[sub_resource type="ViewportTexture" id="ViewportTexture_6uxpa"]
+viewport_path = NodePath("TempleBody/VideoScreen/SubViewport")
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_e7hfy"]
+resource_local_to_scene = true
+shading_mode = 0
+albedo_texture = SubResource("ViewportTexture_6uxpa")
+
+[sub_resource type="QuadMesh" id="QuadMesh_opo70"]
+size = Vector2(16, 9)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_mk3sg"]
 size = Vector3(11, 53, 1)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_upddo"]
+size = Vector3(1.4, 1, 3.8)
 
 [node name="End" type="End"]
 
@@ -47,7 +82,7 @@ unique_name_in_owner = true
 environment = ExtResource("1_v6gpa")
 
 [node name="BoardMesh" type="BoardMesh" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -753)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -752, 0, -753)
 mesh = SubResource("PlaneMesh_qcwm1")
 skeleton = NodePath("")
 surface_material_override/0 = SubResource("StandardMaterial3D_2ivot")
@@ -57,6 +92,16 @@ unique_name_in_owner = true
 transform = Transform3D(0.89952, 0.224144, -0.375, 0.224144, 0.5, 0.836516, 0.375001, -0.836515, 0.399519, 0, 10, 0)
 light_energy = 0.3
 shadow_enabled = true
+
+[node name="GroundBody" type="StaticBody3D" parent="."]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="GroundBody"]
+shape = SubResource("WorldBoundaryShape3D_87b10")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="GroundBody"]
+material_override = SubResource("StandardMaterial3D_mqw6u")
+mesh = SubResource("PlaneMesh_lcrr1")
+skeleton = NodePath("../..")
 
 [node name="EntranceBody" type="StaticBody3D" parent="."]
 
@@ -158,19 +203,225 @@ shape = SubResource("BoxShape3D_0j4ea")
 [node name="Portals" type="Node3D" parent="."]
 
 [node name="Workbench" parent="." instance=ExtResource("4_m11tf")]
-transform = Transform3D(-2.94449, 0, 1.7, 0, 3.4, 0, -1.7, 0, -2.94449, -14.8, 0, 29)
+transform = Transform3D(-0.866026, 0, 0.5, 0, 1, 0, -0.5, 0, -0.866026, -2.8, 0.2, 25)
 
-[node name="Temple" parent="." instance=ExtResource("5_o8ulc")]
-transform = Transform3D(-1.5, 0, 4.88762e-07, 0, 1.5, 0, -4.88762e-07, 0, -1.5, 0, -9.68575e-08, 60.2)
+[node name="TempleBody" type="StaticBody3D" parent="."]
+transform = Transform3D(-1, 0, 3.89414e-07, 0, 1, 0, -3.89414e-07, 0, -1, 0, -9.68575e-08, 60.2)
 
-[node name="StaticBody3D" type="StaticBody3D" parent="."]
+[node name="Temple" parent="TempleBody" instance=ExtResource("4_pfmcr")]
+transform = Transform3D(1, 0, -2.84217e-14, 0, 1, 0, 2.84217e-14, 0, 1, 0, 0, 0)
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D"]
-shape = SubResource("WorldBoundaryShape3D_87b10")
+[node name="WallsHitbox" type="CollisionShape3D" parent="TempleBody"]
+transform = Transform3D(1, 0, -2.84217e-14, 0, 1, 0, 2.84217e-14, 0, 1, 0, 0.75, 0)
+shape = SubResource("ConcavePolygonShape3D_wdgjd")
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
-material_override = SubResource("StandardMaterial3D_mqw6u")
-mesh = SubResource("PlaneMesh_lcrr1")
+[node name="RoofHitbox" type="CollisionShape3D" parent="TempleBody"]
+transform = Transform3D(1, 0, -2.84217e-14, 0, 1, 0, 2.84217e-14, 0, 1, 0, 26.5, 0)
+shape = SubResource("ConcavePolygonShape3D_2d05g")
+
+[node name="PillarHitbox" type="CollisionShape3D" parent="TempleBody"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -15.88, 12, 23.25)
+shape = SubResource("CylinderShape3D_rh60v")
+
+[node name="PillarHitbox2" type="CollisionShape3D" parent="TempleBody"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.38, 12, 23.25)
+shape = SubResource("CylinderShape3D_rh60v")
+
+[node name="PillarHitbox3" type="CollisionShape3D" parent="TempleBody"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.22, 12, 23.25)
+shape = SubResource("CylinderShape3D_rh60v")
+
+[node name="PillarHitbox4" type="CollisionShape3D" parent="TempleBody"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15.72, 12, 23.25)
+shape = SubResource("CylinderShape3D_rh60v")
+
+[node name="PillarHitbox5" type="CollisionShape3D" parent="TempleBody"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -15.88, 12, -23.4)
+shape = SubResource("CylinderShape3D_rh60v")
+
+[node name="PillarHitbox6" type="CollisionShape3D" parent="TempleBody"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.38002, 12, -23.4)
+shape = SubResource("CylinderShape3D_rh60v")
+
+[node name="PillarHitbox7" type="CollisionShape3D" parent="TempleBody"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.21998, 12, -23.4)
+shape = SubResource("CylinderShape3D_rh60v")
+
+[node name="PillarHitbox8" type="CollisionShape3D" parent="TempleBody"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15.72, 12, -23.4)
+shape = SubResource("CylinderShape3D_rh60v")
+
+[node name="CeilingLight" type="OmniLight3D" parent="TempleBody"]
+transform = Transform3D(1, 0, 5.68434e-14, 0, 1, 0, -5.68434e-14, 0, 1, 1.81899e-12, 23, 10)
+omni_range = 50.0
+
+[node name="CeilingLight2" type="OmniLight3D" parent="TempleBody"]
+transform = Transform3D(1, 0, 5.68434e-14, 0, 1, 0, -5.68434e-14, 0, 1, 0, 23, 0)
+
+[node name="CeilingLight3" type="OmniLight3D" parent="TempleBody"]
+transform = Transform3D(1, 0, 5.68434e-14, 0, 1, 0, -5.68434e-14, 0, 1, 0, 23, -10)
+omni_range = 50.0
+
+[node name="SpotLight" type="SpotLight3D" parent="TempleBody"]
+transform = Transform3D(0.965926, -0.0669869, 0.25, 0.258819, 0.25, -0.933013, -2.75357e-07, 0.965926, 0.258819, 12, 0, 24)
+light_color = Color(0, 1, 1, 1)
+light_energy = 2.0
+spot_range = 28.0
+spot_angle = 30.0
+
+[node name="SpotLight2" type="SpotLight3D" parent="TempleBody"]
+transform = Transform3D(0.965926, 0.0669877, -0.25, -0.258819, 0.25, -0.933013, -2.75357e-07, 0.965926, 0.258819, -12, 0, 24)
+light_color = Color(0, 1, 1, 1)
+light_energy = 2.0
+spot_range = 28.0
+spot_angle = 30.0
+
+[node name="PlaneExhibit" type="Node3D" parent="TempleBody"]
+transform = Transform3D(1.5, 0, 5.68434e-14, 0, 1.5, 0, -5.68434e-14, 0, 1.5, 12, 0, 17)
+
+[node name="Plane" parent="TempleBody/PlaneExhibit" instance=ExtResource("5_rmf6r")]
+transform = Transform3D(0.0166847, 0.00499999, -0.00982964, -0.005, 0.0193185, 0.00133974, 0.00982963, 0.00133974, 0.0173662, 0, 1, 0)
+
+[node name="CSGBox3D" type="CSGBox3D" parent="TempleBody/PlaneExhibit"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.3, 0)
+use_collision = true
+size = Vector3(1, 0.6, 1)
+
+[node name="Label3D" type="Label3D" parent="TempleBody/PlaneExhibit"]
+transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 0, 1.8, 0)
+billboard = 1
+text = "A boeing plane (1:50 scale)
+\"We should attach a boat  to one of these\"
+- Lutiomni"
+
+[node name="SpotLight3D" type="SpotLight3D" parent="TempleBody/PlaneExhibit"]
+transform = Transform3D(0.866025, 2.18557e-08, -0.5, 0.5, -3.78552e-08, 0.866025, 0, -1, -4.37114e-08, -1, 2, 0)
+spot_range = 4.0
+spot_angle = 25.0
+
+[node name="StaticBody3D" type="StaticBody3D" parent="TempleBody/PlaneExhibit"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="TempleBody/PlaneExhibit/StaticBody3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.200001, 0.05, -0.15)
+shape = SubResource("BoxShape3D_iusp0")
+
+[node name="AtaturkExhibit" type="Node3D" parent="TempleBody"]
+transform = Transform3D(1.5, 0, 5.68434e-14, 0, 1.5, 0, -5.68434e-14, 0, 1.5, 12, 0, 10)
+
+[node name="CSGBox3D" type="CSGBox3D" parent="TempleBody/AtaturkExhibit"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.3, 0)
+use_collision = true
+size = Vector3(1, 0.6, 1)
+
+[node name="Label3D" type="Label3D" parent="TempleBody/AtaturkExhibit"]
+transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 0, 1.8, 0)
+billboard = 1
+text = "Mustafa Kemal Ataturk's head
+\"ÖMG  iTS  ATATÜRK\"
+- A Turkish patriot"
+
+[node name="AtaturkHeadBody" type="StaticBody3D" parent="TempleBody/AtaturkExhibit"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="TempleBody/AtaturkExhibit/AtaturkHeadBody"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.15, -9.53674e-07)
+shape = SubResource("BoxShape3D_26sm1")
+
+[node name="AtaturkHead" parent="TempleBody/AtaturkExhibit/AtaturkHeadBody" instance=ExtResource("6_4aa5u")]
+transform = Transform3D(-8.74228e-10, 0, -0.02, 0, 0.02, 0, 0.02, 0, -8.74228e-10, 0, 0, 0)
+
+[node name="SpotLight3D" type="SpotLight3D" parent="TempleBody/AtaturkExhibit"]
+transform = Transform3D(0.866025, 2.18557e-08, -0.5, 0.5, -3.78552e-08, 0.866025, 0, -1, -4.37114e-08, -1, 2, 0)
+spot_range = 4.0
+spot_angle = 25.0
+
+[node name="NothingExhibit" type="Node3D" parent="TempleBody"]
+transform = Transform3D(1.5, 0, 5.68434e-14, 0, 1.5, 0, -5.68434e-14, 0, 1.5, 12, 0, 4)
+
+[node name="CSGBox3D" type="CSGBox3D" parent="TempleBody/NothingExhibit"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.3, 0)
+use_collision = true
+size = Vector3(1, 0.6, 1)
+
+[node name="Label3D" type="Label3D" parent="TempleBody/NothingExhibit"]
+transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 0, 1.8, 0)
+billboard = 1
+text = "Nothing
+\"Just imagine it in your mind\"
+- Zekiah"
+
+[node name="SpotLight3D" type="SpotLight3D" parent="TempleBody/NothingExhibit"]
+transform = Transform3D(0.866025, 2.18557e-08, -0.5, 0.5, -3.78552e-08, 0.866025, 0, -1, -4.37114e-08, -1, 2, 0)
+spot_range = 4.0
+spot_angle = 25.0
+
+[node name="VideoScreen" type="MeshInstance3D" parent="TempleBody"]
+transform = Transform3D(1, 0, 5.68434e-14, 0, 1, 0, -5.68434e-14, 0, 1, -2.7259e-06, 8, -21.1)
+material_override = SubResource("StandardMaterial3D_e7hfy")
+mesh = SubResource("QuadMesh_opo70")
+skeleton = NodePath("SubViewport")
+
+[node name="SubViewport" type="SubViewport" parent="TempleBody/VideoScreen"]
+size = Vector2i(854, 480)
+
+[node name="ScreenGui" type="Control" parent="TempleBody/VideoScreen/SubViewport"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VideoStreamPlayer" type="VideoStreamPlayer" parent="TempleBody/VideoScreen/SubViewport/ScreenGui"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Label" type="Label" parent="TempleBody/VideoScreen/SubViewport/ScreenGui"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.00694444
+anchor_top = 0.0123457
+anchor_right = 0.270833
+anchor_bottom = 0.0570988
+offset_bottom = -6.0
+theme_override_fonts/font = ExtResource("7_x2l2q")
+text = "⏵ Playing: Fr Te by Zubigri"
+metadata/_edit_use_anchors_ = true
+
+[node name="Panel" type="Panel" parent="TempleBody/VideoScreen/SubViewport/ScreenGui"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.777778
+anchor_right = 1.0
+anchor_bottom = 1.0
+metadata/_edit_use_anchors_ = true
+
+[node name="VBoxContainer" type="VBoxContainer" parent="TempleBody/VideoScreen/SubViewport/ScreenGui/Panel"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.0625
+anchor_top = 0.0246914
+anchor_right = 0.9375
+anchor_bottom = 0.975309
+grow_horizontal = 2
+grow_vertical = 2
+metadata/_edit_use_anchors_ = true
+
+[node name="Label" type="Label" parent="TempleBody/VideoScreen/SubViewport/ScreenGui/Panel/VBoxContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_fonts/font = ExtResource("7_x2l2q")
+theme_override_font_sizes/font_size = 24
+text = "Up next..."
+
+[node name="VBoxContainer" type="VBoxContainer" parent="TempleBody/VideoScreen/SubViewport/ScreenGui/Panel/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
 
 [node name="BushiSaw" type="Node3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 100, 0, 50)
@@ -189,3 +440,49 @@ Bushi never scales things correctly in blender"
 [node name="CollisionShape3D" type="CollisionShape3D" parent="BushiSaw/StaticBody3D"]
 transform = Transform3D(0.612372, 0.5, -0.612372, -0.353553, 0.866025, 0.353553, 0.707107, -2.98023e-08, 0.707107, 9.33728, 20.4655, -1.64645)
 shape = SubResource("BoxShape3D_mk3sg")
+
+[node name="GardenPlanterBody" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 0.5, 29.5)
+
+[node name="GardenPlanter" parent="GardenPlanterBody" instance=ExtResource("6_y1p2k")]
+transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 0, 0, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="GardenPlanterBody"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.96046e-08, 0, -1.19209e-07)
+shape = SubResource("BoxShape3D_upddo")
+
+[node name="GardenPlanterBody2" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 0.5, 34.1)
+
+[node name="GardenPlanter" parent="GardenPlanterBody2" instance=ExtResource("6_y1p2k")]
+transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 0, 0, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="GardenPlanterBody2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.96046e-08, 0, -1.19209e-07)
+shape = SubResource("BoxShape3D_upddo")
+
+[node name="GardenPlanterBody3" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 0.5, 29.5)
+
+[node name="GardenPlanter" parent="GardenPlanterBody3" instance=ExtResource("6_y1p2k")]
+transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 0, 0, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="GardenPlanterBody3"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.96046e-08, 0, -1.19209e-07)
+shape = SubResource("BoxShape3D_upddo")
+
+[node name="GardenPlanterBody4" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 0.5, 34.1)
+
+[node name="GardenPlanter" parent="GardenPlanterBody4" instance=ExtResource("6_y1p2k")]
+transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 0, 0, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="GardenPlanterBody4"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.96046e-08, 0, -1.19209e-07)
+shape = SubResource("BoxShape3D_upddo")
+
+[node name="ShortAssaultRifle" parent="." instance=ExtResource("10_2uag0")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.9, 0.9, 0)
+
+[editable path="TempleBody/Temple"]
+[editable path="TempleBody/AtaturkExhibit/AtaturkHeadBody/AtaturkHead"]

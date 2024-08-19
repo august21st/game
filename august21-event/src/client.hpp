@@ -246,4 +246,6 @@ public:
 	PresetsPlatform get_presets_platform();
 	int get_player_id();
 	PlayerBody* get_player_body();
+	HashMap<int, EntityPlayerBase*> get_players();
+	EntityPlayerBase* get_player(int id);
 };

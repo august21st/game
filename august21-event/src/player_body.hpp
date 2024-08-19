@@ -17,7 +17,10 @@
 #include <godot_cpp/classes/animation_player.hpp>
 #include <godot_cpp/classes/performance.hpp>
 #include <godot_cpp/classes/v_box_container.hpp>
+#include <godot_cpp/classes/ray_cast3d.hpp>
+#include <godot_cpp/classes/skeleton3d.hpp>
 
+#include "entity_item_base.hpp"
 #include "entity_player_base.hpp"
 // WORKAROUND: Forward declare to fix circular dependency
 class Client;
@@ -61,9 +64,26 @@ private:
 	bool _climbing;
 	Vector3 _spawn_position;
 	int _update_tick;
+	Node3D* _player_model;
+	Skeleton3D* _skeleton;
+	HBoxContainer* _inventory_box;
+	Panel*  _inventory_selector;
 	// Item management
-	Node* _holding;
+	RayCast3D*  _grab_ray;
+	List<EntityItemBase*> _inventory;
+	int _inventory_current;
 	void update_hotbar();
+	// Signal handlers
+	void _on_revive_pressed();
+	void _on_thumbstick_button_down();
+	void _on_thumbstick_button_up();
+	void _on_jump_button_down();
+	void _on_jump_button_up();
+	void _on_chat_button_pressed();
+	void _on_chat_close_button_pressed();
+	void _on_chat_close_tween_completed();
+	void _on_packet_received(PackedByteArray packed_packet);
+	void _on_chat_submit();
 
 protected:
 	static void _bind_methods();
@@ -76,22 +96,13 @@ public:
 	void _unhandled_input(const Ref<InputEvent> &event) override;
 	void _physics_process(double delta) override;
 	void _process(double delta) override;
-	void _on_revive_pressed();
-	void _on_thumbstick_button_down();
-	void _on_thumbstick_button_up();
-	void _on_jump_button_down();
-	void _on_jump_button_up();
-	void _on_chat_button_pressed();
-	void _on_chat_close_button_pressed();
-	void _on_chat_close_tween_completed();
-	void _on_packet_received(PackedByteArray packed_packet);
-	void _on_chat_send_button_pressed();
 	void die(String death_title = "YOU DIED", String death_message = "[center]Press revive to respawn...[/center]");
 	void respawn(Vector3 position);
 	void take_damage(int damage);
 	void set_climbing(bool climbing);
 	void open_chat();
 	void close_chat();
+	void send_chat(String message);
 	void set_spawn_position(Vector3 position);
 
 	// Server calls (should not make server callbacks)

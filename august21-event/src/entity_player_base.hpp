@@ -1,5 +1,5 @@
 #pragma once
-#include "godot_cpp/classes/character_body3d.hpp"
+#include <godot_cpp/classes/character_body3d.hpp>
 #include <godot_cpp/core/class_db.hpp>
 #include <godot_cpp/classes/node.hpp>
 #include <godot_cpp/classes/engine.hpp>
@@ -13,6 +13,7 @@ class EntityPlayerBase : public CharacterBody3D {
 
 protected:
 	const int DEFAULT_HEALTH = 100;
+	const int MAX_INVENTORY_SIZE = 3;
 	String _chat_name;
 	int _health;
 	String _model_variant;

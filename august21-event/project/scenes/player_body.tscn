@@ -49,6 +49,11 @@ unique_name_in_owner = true
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.12, -0.1)
 fov = 70.0
 
+[node name="PlayerGrabRay" type="RayCast3D" parent="PlayerCameraPivot/PlayerCamera"]
+unique_name_in_owner = true
+transform = Transform3D(1, -8.74228e-08, 8.74228e-08, 8.74228e-08, -2.98023e-08, -1, 8.74228e-08, 1, -2.98023e-08, 0, 0, 0)
+target_position = Vector3(0, -2, 0)
+
 [node name="PlayerCameraAnimationPlayer" type="AnimationPlayer" parent="PlayerCameraPivot"]
 unique_name_in_owner = true
 libraries = {
@@ -198,19 +203,37 @@ icon_alignment = 1
 expand_icon = true
 metadata/_edit_use_anchors_ = true
 
+[node name="InventoryBox" type="HBoxContainer" parent="PlayerGui"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.388889
+anchor_top = 0.777778
+anchor_right = 0.611111
+anchor_bottom = 0.876543
+metadata/_edit_use_anchors_ = true
+
+[node name="InventorySelector" type="Panel" parent="PlayerGui"]
+unique_name_in_owner = true
+layout_mode = 2
+offset_left = 440.0
+offset_top = 496.0
+offset_right = 520.0
+offset_bottom = 576.0
+
 [node name="HealthLabel" type="Label" parent="PlayerGui"]
 unique_name_in_owner = true
 layout_mode = 1
 anchors_preset = -1
 anchor_left = 0.395833
-anchor_top = 0.802469
+anchor_top = 0.728395
 anchor_right = 0.604167
-anchor_bottom = 0.884259
+anchor_bottom = 0.765432
 theme_override_colors/font_shadow_color = Color(0, 0, 0, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 4
 theme_override_constants/shadow_outline_size = 2
-text = "Health: 100 / Holding: Chair"
+text = "Health: 100"
 horizontal_alignment = 1
 vertical_alignment = 1
 metadata/_edit_use_anchors_ = true
@@ -273,14 +296,16 @@ theme_override_constants/shadow_offset_y = 1
 theme_override_font_sizes/font_size = 24
 text = "Live chat:"
 
-[node name="Spacer" type="Control" parent="PlayerGui/ChatPanel/BorderPanel/MarginContainer/VBoxContainer/MarginContainer2/VBoxContainer/HBoxContainer"]
+[node name="MarginContainer" type="MarginContainer" parent="PlayerGui/ChatPanel/BorderPanel/MarginContainer/VBoxContainer/MarginContainer2/VBoxContainer/HBoxContainer"]
 layout_mode = 2
-size_flags_horizontal = 3
+theme_override_constants/margin_left = 8
 
-[node name="ChatCloseButton" type="Button" parent="PlayerGui/ChatPanel/BorderPanel/MarginContainer/VBoxContainer/MarginContainer2/VBoxContainer/HBoxContainer"]
+[node name="ChatCloseButton" type="Button" parent="PlayerGui/ChatPanel/BorderPanel/MarginContainer/VBoxContainer/MarginContainer2/VBoxContainer/HBoxContainer/MarginContainer"]
 unique_name_in_owner = true
 layout_mode = 2
 text = "Close"
+icon_alignment = 2
+expand_icon = true
 
 [node name="ScrollContainer" type="ScrollContainer" parent="PlayerGui/ChatPanel/BorderPanel/MarginContainer/VBoxContainer/MarginContainer2/VBoxContainer"]
 layout_mode = 2
@@ -382,6 +407,14 @@ anchor_bottom = 0.197531
 metadata/_edit_use_anchors_ = true
 
 [node name="PlayerModel" parent="." instance=ExtResource("6_ki0f4")]
+unique_name_in_owner = true
+
+[node name="Skeleton3D" parent="PlayerModel/CharacterRig" index="0"]
+bones/118/scale = Vector3(1, 1, 1)
+bones/120/scale = Vector3(1, 1, 1)
+bones/176/position = Vector3(-8.04003e-08, 0.145379, -2.77741e-08)
+bones/176/rotation = Quaternion(0.0626485, 0.00222794, -0.035458, 0.997403)
+bones/176/scale = Vector3(1, 1, 1)
 
 [node name="Character" parent="PlayerModel/CharacterRig/Skeleton3D" index="0"]
 layers = 5

@@ -5,7 +5,6 @@
 
 using namespace dataproto;
 using namespace godot;
-using namespace std;
 
 class EntityInfo {
 private:

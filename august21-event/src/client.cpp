@@ -789,3 +789,17 @@ PresetsPlatform Client::get_presets_platform()
 {
 	return _presets_platform;
 }
+
+HashMap<int, EntityPlayerBase*> Client::get_players()
+{
+	return _players;
+}
+
+EntityPlayerBase* Client::get_player(int id)
+{
+	if (_players.has(id)) {
+		return _players[id];
+	}
+
+	return nullptr;
+}
