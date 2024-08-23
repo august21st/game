@@ -9,10 +9,11 @@ size = Vector3(0.1, 0.35, 1.18)
 size = Vector3(0.2, 0.48, 1.3)
 
 [node name="ShortAssaultRifle" type="EntityItemBase"]
-can_grab = true
 grab_area_path = NodePath("Area3D")
 item_name = "AR-42"
 item_node_path = NodePath("ShortAssaultRifle")
+hold_animation = "short_assault_rifle_hold"
+thumbnail_path = "res://assets/short_assault_rifle/short_assault_rifle_thumbnail.png"
 freeze_mode = 1
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]

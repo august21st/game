@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://vaxco6tly47g"
-path="res://.godot/imported/chair_gun.glb-48efb14b4b6d871518a8be4bf3b5ab0d.scn"
+uid="uid://ctvdtdod0gcj8"
+path="res://.godot/imported/exhibit_base.glb-98d8350d4d99272b462984b9eb374aa0.scn"
 
 [deps]
 
-source_file="res://assets/chair_gun/chair_gun.glb"
-dest_files=["res://.godot/imported/chair_gun.glb-48efb14b4b6d871518a8be4bf3b5ab0d.scn"]
+source_file="res://assets/exhibit/exhibit_base.glb"
+dest_files=["res://.godot/imported/exhibit_base.glb-98d8350d4d99272b462984b9eb374aa0.scn"]
 
 [params]
 
@@ -33,17 +33,13 @@ animation/import_rest_as_RESET=false
 import_script/path=""
 _subresources={
 "materials": {
-"EnergyGlow": {
+"Bottom": {
 "use_external/enabled": true,
-"use_external/path": "res://assets/chair_gun/cyan_glow_material.tres"
+"use_external/path": "res://assets/chair/plywood.tres"
 },
-"MainBody": {
+"Pillar": {
 "use_external/enabled": true,
-"use_external/path": "res://assets/chair_gun/polished_metal.tres"
-},
-"Microchips": {
-"use_external/enabled": true,
-"use_external/path": "res://assets/chair_gun/chip.tres"
+"use_external/path": "res://assets/gold/gold_material.tres"
 }
 }
 }

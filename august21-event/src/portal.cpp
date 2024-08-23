@@ -10,7 +10,7 @@
  *
  * ### Disclaimer:
  * This adaptation is not endorsed by the original licensor and is provided without warranties,
- * this adaptation is also public domain, and is licensed under the project's primary license
+ * this adaptation is also public domain, and is not licensed under the project's primary license, see
  * ([Creative Commons Zero v1.0 Universal license](https://creativecommons.org/publicdomain/zero/1.0/deed.en)).
  */
 #include <godot_cpp/classes/camera3d.hpp>

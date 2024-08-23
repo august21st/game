@@ -47,6 +47,18 @@ enum SocketStatus {
 	DISCONNECTED = 2
 };
 
+enum PhaseSceneLoadStatus {
+	UNLOADED,
+	REQUESTED,
+	LOADED
+};
+
+struct PhaseSceneInfo {
+	String scene_path;
+	PhaseSceneLoadStatus load_status;
+	Node* scene;
+};
+
 // Global autoload singleton for client, manages global
 // client state, like handling websocket connection and settings
 class Client : public Node {
@@ -120,6 +132,8 @@ private:
 	PlayerBody* _player_body;
 	HashMap<int, Node*> _entities;
 	HashMap<int, EntityPlayerBase*> _players;
+	HashMap<String, PhaseSceneInfo*> _phase_scenes;
+	Error register_phase_scene(String identifier, String path);
 	void _on_player_entity_ready(int id, String chat_name, String model_variant);
 	double round_decimal(double value, int places);
 	const String _volume_comments[101] = {
@@ -240,7 +254,7 @@ public:
 	Error send(const char* data, size_t size);
 	Node* get_current_scene();
 	template<typename T> T* get_current_scene_strict();
-	Error change_scene(String scene_path);
+	Error change_scene(String identifier);
 	String get_current_phase_scene();
 	String get_current_phase_event();
 	PresetsPlatform get_presets_platform();

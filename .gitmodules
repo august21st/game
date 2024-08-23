@@ -11,6 +11,3 @@
 [submodule "august21-event/commandIO-cpp"]
 	path = august21-event/commandIO-cpp
 	url = https://github.com/Zekiah-A/commandIO-cpp.git
-[submodule "august21-event/Terrain3D"]
-	path = august21-event/Terrain3D
-	url = https://github.com/TokisanGames/Terrain3D

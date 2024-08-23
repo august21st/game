@@ -22,6 +22,9 @@ private:
 	NodePath _item_node_path;
 	bool _grabbed;
 	Node3D* _previous_parent;
+	String _hold_animation;
+	String _thumbnail_path;
+
 	/*Node3D* _handle;
 	NodePath _handle_path;*/
 	//  Editor annd server methods
@@ -35,8 +38,6 @@ private:
 	virtual String get_item_name();
 	virtual void set_item_node_path(const NodePath& path);
 	virtual NodePath get_item_node_path();
-	virtual void set_item_node(Node3D* value);
-	virtual Node3D* get_item_node();
 	virtual void set_grabbed(bool value);
 	virtual bool get_grabbed();
 	/*virtual void set_handle_path(const NodePath& path);
@@ -51,6 +52,12 @@ public:
 	EntityItemBase();
 	~EntityItemBase();
 	void _ready() override;
+	virtual void set_hold_animation(String value);
+	virtual String get_hold_animation();
+	virtual void set_thumbnail_path(String value);
+	virtual String get_thumbnail_path();
+	virtual void set_item_node(Node3D* value);
+	virtual Node3D* get_item_node();
 	// Client methods
 	virtual bool can_grab();
 	virtual bool try_grab();

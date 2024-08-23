@@ -1,4 +1,4 @@
-[gd_scene load_steps=16 format=3 uid="uid://ca11fthwu1qho"]
+[gd_scene load_steps=20 format=3 uid="uid://ca11fthwu1qho"]
 
 [ext_resource type="Texture2D" uid="uid://bpcp8t666sgwn" path="res://assets/rplace_gold.png" id="2_bqd13"]
 [ext_resource type="Shader" path="res://shaders/ripple_warp.gdshader" id="2_kc0ms"]
@@ -8,8 +8,11 @@
 [ext_resource type="Material" uid="uid://b3aaq2cp51dw7" path="res://assets/tube_material_high.tres" id="6_0wwry"]
 [ext_resource type="AudioStream" uid="uid://ddxo0ijvc0xsr" path="res://assets/august_21st.mp3" id="7_qwgri"]
 [ext_resource type="PackedScene" uid="uid://cwgp0q1aj5tli" path="res://assets/ataturk/ataturk_head.glb" id="8_xpof5"]
+[ext_resource type="Texture2D" uid="uid://bqlkjsksubx06" path="res://assets/gold/gold_albedo.png" id="9_5woh5"]
 [ext_resource type="PackedScene" uid="uid://m4hc42l78dri" path="res://assets/chair/wooden_chair.glb" id="9_krnjp"]
 [ext_resource type="PackedScene" uid="uid://557546e284g8" path="res://assets/short_assault_rifle/short_assault_rifle.glb" id="10_cpb0a"]
+[ext_resource type="Texture2D" uid="uid://dvcd2uhy1ay1d" path="res://assets/gold/gold_metallic.png" id="10_h8l0m"]
+[ext_resource type="Texture2D" uid="uid://dmn4wiikt6tfm" path="res://assets/gold/gold_roughness.png" id="11_mty8y"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_3f3t6"]
 shader = ExtResource("2_kc0ms")
@@ -82,6 +85,13 @@ tracks/5/keys = PackedFloat32Array(1.5, 1, 0, 0, 0, 1, 2.5, 1, -0.101737, -0.350
 _data = {
 "flying_objects": SubResource("Animation_fx23w")
 }
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_f4ula"]
+albedo_texture = ExtResource("9_5woh5")
+metallic_texture = ExtResource("10_h8l0m")
+roughness_texture = ExtResource("11_mty8y")
+emission_enabled = true
+emission = Color(0.519151, 0.312871, 9.62615e-08, 1)
 
 [node name="LoadingScreen" type="LoadingScreen"]
 
@@ -246,6 +256,9 @@ libraries = {
 [node name="AtaturkHead" parent="FlyingObjects" instance=ExtResource("8_xpof5")]
 transform = Transform3D(0.0289922, -0.0637138, -1.42618e-07, -0.0512036, -0.0232995, -0.0416572, 0.0379162, 0.0172534, -0.0562554, 2, 0, -45)
 
+[node name="Ataturk_Bustu" parent="FlyingObjects/AtaturkHead" index="0"]
+material_override = SubResource("StandardMaterial3D_f4ula")
+
 [node name="WoodenChair1" parent="FlyingObjects" instance=ExtResource("9_krnjp")]
 transform = Transform3D(0.428739, -0.784082, 0.448773, 0.877397, 0.479763, -2.68221e-07, -0.215304, 0.393752, 0.893646, 0, 0, -45.7953)
 
@@ -253,3 +266,4 @@ transform = Transform3D(0.428739, -0.784082, 0.448773, 0.877397, 0.479763, -2.68
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -43.2389)
 
 [editable path="Tube"]
+[editable path="FlyingObjects/AtaturkHead"]

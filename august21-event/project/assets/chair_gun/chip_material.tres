@@ -1,0 +1,16 @@
+[gd_resource type="StandardMaterial3D" load_steps=5 format=3 uid="uid://cmusxljy64s4"]
+
+[ext_resource type="Texture2D" uid="uid://cmxw5h6rvwn0l" path="res://assets/chair_gun/chip_albedo.png" id="1_8nf4a"]
+[ext_resource type="Texture2D" uid="uid://cmccn2xfjp7o4" path="res://assets/chair_gun/chip_metallic.png" id="2_1vfpr"]
+[ext_resource type="Texture2D" uid="uid://cg3hnsvjhkwln" path="res://assets/chair_gun/chip_normal.png" id="3_sa1vm"]
+[ext_resource type="Texture2D" uid="uid://bymv02bb77av6" path="res://assets/chair_gun/chip_roughness.png" id="4_bdnyx"]
+
+[resource]
+albedo_texture = ExtResource("1_8nf4a")
+metallic = 1.0
+metallic_texture = ExtResource("2_1vfpr")
+roughness_texture = ExtResource("4_bdnyx")
+normal_enabled = true
+normal_texture = ExtResource("3_sa1vm")
+uv1_scale = Vector3(10, 10, 10)
+uv1_triplanar = true

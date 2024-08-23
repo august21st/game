@@ -1,0 +1,69 @@
+[gd_scene load_steps=10 format=3 uid="uid://b7uah4s5t8bsh"]
+
+[ext_resource type="PackedScene" uid="uid://vaxco6tly47g" path="res://assets/chair_gun/chair_gun.glb" id="1_eirjo"]
+[ext_resource type="Material" uid="uid://cmusxljy64s4" path="res://assets/chair_gun/chip_material.tres" id="2_dm33s"]
+[ext_resource type="Texture2D" uid="uid://bqff3c57jrk53" path="res://assets/circular_vortex/circular_vortex.png" id="2_nawup"]
+
+[sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_b1pa0"]
+points = PackedVector3Array(0.00447285, 0.1678, -0.302558, -0.0168177, -0.109533, 0.230625, 0.0151291, -0.109533, 0.230625, -0.0168177, -0.0774999, -0.302558, 0.111167, 0.0078501, -0.313317, 0.0627481, 0.117167, 0.120501, -0.100829, 0.0767355, 0.0210957, -0.112833, 0.0078501, -0.302558, -0.0253148, 0.127044, 0.140279, -0.038152, -0.109533, 0.294642, 0.0364635, -0.109533, 0.294642, 0.0995697, 0.0769293, 0.0309129, -0.0488302, 0.0611124, -0.377333, -0.0488302, 0.157131, -0.302558, 0.0829477, 0.12767, -0.282317, -0.038152, 0.0504437, 0.251942, 0.0364635, 0.0185189, 0.273325, 0.0471635, 0.0611124, -0.377333, 0.0151291, -0.0774999, -0.302558, -0.0856742, 0.0889826, 0.12364, -0.105024, 0.0688075, -0.303864, -0.100465, 0.0291333, 0.0303989, 0.0332691, 0.136413, 0.119988, 0.098805, 0.0291333, 0.0399149, 0.07302, -0.0397895, -0.301933, -0.0740033, -0.039133, -0.2994, -0.0349164, 0.13629, 0.110104, 0.0900544, 0.0769594, 0.107501, -0.038152, -0.0348249, 0.294642, 0.103092, 0.078606, -0.303182, 0.0441765, -0.0208397, -0.346002, 0.0364635, 0.0611124, 0.241317)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_3fes7"]
+size = Vector3(0.08, 0.14, 0.08)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_qu2qa"]
+transparency = 1
+shading_mode = 0
+albedo_texture = ExtResource("2_nawup")
+billboard_mode = 3
+particles_anim_h_frames = 1
+particles_anim_v_frames = 1
+particles_anim_loop = false
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_6hvli"]
+angle_min = -360.0
+angle_max = 360.0
+direction = Vector3(0, 0, 0)
+initial_velocity_max = 2.0
+angular_velocity_min = -180.0
+angular_velocity_max = 180.0
+gravity = Vector3(0, 0, 0)
+
+[sub_resource type="QuadMesh" id="QuadMesh_wt5rj"]
+size = Vector2(0.05, 0.05)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_sj76g"]
+size = Vector3(0.4, 0.5, 0.7)
+
+[node name="ChairGun" type="EntityItemBase"]
+grab_area_path = NodePath("Area3D")
+item_name = "Chair Gun"
+item_node_path = NodePath("ChairGun")
+hold_animation = "chair_gun_hold"
+thumbnail_path = "res://assets/chair_gun/chair_gun_thumbnail.png"
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(-1, 0, -3.25841e-07, 0, 1, 0, 3.25841e-07, 0, -1, 0, 0, 0)
+shape = SubResource("ConvexPolygonShape3D_b1pa0")
+
+[node name="CollisionShape3D2" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.98023e-08, 0.2, -0.06)
+shape = SubResource("BoxShape3D_3fes7")
+
+[node name="GPUParticles3D" type="GPUParticles3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.04, 0.35)
+material_override = SubResource("StandardMaterial3D_qu2qa")
+process_material = SubResource("ParticleProcessMaterial_6hvli")
+draw_pass_1 = SubResource("QuadMesh_wt5rj")
+
+[node name="Area3D" type="Area3D" parent="."]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Area3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.49012e-08, 0.05, 0.05)
+shape = SubResource("BoxShape3D_sj76g")
+
+[node name="ChairGun" parent="." instance=ExtResource("1_eirjo")]
+
+[node name="Body" parent="ChairGun" index="0"]
+surface_material_override/2 = ExtResource("2_dm33s")
+
+[editable path="ChairGun"]

@@ -2,7 +2,6 @@
 #include <godot_cpp/variant/packed_byte_array.hpp>
 #include <godot_cpp/classes/http_request.hpp>
 #include <godot_cpp/classes/json.hpp>
-#include <godot_cpp/classes/engine.hpp>
 #include <godot_cpp/core/class_db.hpp>
 #include <godot_cpp/classes/image.hpp>
 #include <godot_cpp/classes/image_texture.hpp>
@@ -18,7 +17,7 @@ using namespace godot;
 
 BoardMesh::BoardMesh() : _board_width(0), _board_height(0), _board_loaded(false),
 	_palette_loaded(false), _generating_texture(false), _board_request(nullptr),
-	_metadata_request(nullptr), _board(nullptr), _palette(nullptr), _engine(nullptr)
+	_metadata_request(nullptr), _board(nullptr), _palette(nullptr)
 {
 }
 
@@ -48,11 +47,6 @@ void BoardMesh::_bind_methods()
 
 void BoardMesh::_ready()
 {
-	_engine = Engine::get_singleton();
-	if (_engine->is_editor_hint()) {
-		return;
-	}
-
 	_board_width = 0;
 	_board_height = 0;
 	_board_request = memnew(HTTPRequest);
@@ -128,7 +122,7 @@ void BoardMesh::generate_texture()
 	}
 	auto texture = ImageTexture::create_from_image(image);
 	auto surface_material = get_surface_override_material(0);
-	if (surface_material->is_class("StandardMaterial3D")) {
+	if (surface_material.is_valid() && surface_material->is_class("StandardMaterial3D")) {
 		const Ref<StandardMaterial3D> standard_material = surface_material;
 		standard_material->set_texture(BaseMaterial3D::TEXTURE_ALBEDO, texture);
 	}

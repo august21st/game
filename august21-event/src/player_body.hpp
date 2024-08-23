@@ -19,6 +19,8 @@
 #include <godot_cpp/classes/v_box_container.hpp>
 #include <godot_cpp/classes/ray_cast3d.hpp>
 #include <godot_cpp/classes/skeleton3d.hpp>
+#include <godot_cpp/classes/nine_patch_rect.hpp>
+#include <godot_cpp/classes/shader_material.hpp>
 
 #include "entity_item_base.hpp"
 #include "entity_player_base.hpp"
@@ -32,7 +34,7 @@ class PlayerBody : public EntityPlayerBase {
 	GDCLASS(PlayerBody, CharacterBody3D);
 
 private:
-	Engine* _engine;
+	ResourceLoader* _resource_loader;
 	Client* _client;
 	ProjectSettings* _project_settings;
 	Input* _player_input;
@@ -66,13 +68,21 @@ private:
 	int _update_tick;
 	Node3D* _player_model;
 	Skeleton3D* _skeleton;
+	AnimationPlayer* _animation_player;
 	HBoxContainer* _inventory_box;
-	Panel*  _inventory_selector;
+	NinePatchRect*  _inventory_selector;
+	Label* _inventory_selector_label;
+	Ref<ShaderMaterial> _item_outline_material;
+
 	// Item management
 	RayCast3D*  _grab_ray;
+	EntityItemBase* _hovered_item_entity;
 	List<EntityItemBase*> _inventory;
 	int _inventory_current;
-	void update_hotbar();
+	int scroll_inventory_current(int by);
+	void set_inventory_current(int value);
+	void set_mesh_next_pass_recursive(Node* root, Ref<Material> material);
+
 	// Signal handlers
 	void _on_revive_pressed();
 	void _on_thumbstick_button_down();

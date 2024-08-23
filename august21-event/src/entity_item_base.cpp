@@ -60,6 +60,15 @@ void EntityItemBase::_bind_methods()
 	ClassDB::bind_method(D_METHOD("get_grabbed"), &EntityItemBase::get_grabbed);
 	ClassDB::bind_method(D_METHOD("set_grabbed", "value"), &EntityItemBase::set_grabbed);
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "grabbed"), "set_grabbed", "get_grabbed");
+
+	ClassDB::bind_method(D_METHOD("get_hold_animation"), &EntityItemBase::get_hold_animation);
+	ClassDB::bind_method(D_METHOD("set_hold_animation", "value"), &EntityItemBase::set_hold_animation);
+	ADD_PROPERTY(PropertyInfo(Variant::STRING, "hold_animation"), "set_hold_animation", "get_hold_animation");
+
+	ClassDB::bind_method(D_METHOD("get_thumbnail_path"), &EntityItemBase::get_thumbnail_path);
+	ClassDB::bind_method(D_METHOD("set_thumbnail_path", "value"), &EntityItemBase::set_thumbnail_path);
+	ADD_PROPERTY(PropertyInfo(Variant::STRING, "thumbnail_path", PROPERTY_HINT_FILE),
+		"set_thumbnail_path", "get_thumbnail_path");
 }
 
 void EntityItemBase::_ready()
@@ -190,6 +199,26 @@ void EntityItemBase::set_grabbed(bool value)
 bool EntityItemBase::get_grabbed()
 {
 	return _grabbed;
+}
+
+void  EntityItemBase::set_hold_animation(String value)
+{
+	_hold_animation = value;
+}
+
+String EntityItemBase::get_hold_animation()
+{
+	return _hold_animation;
+}
+
+void EntityItemBase::set_thumbnail_path(String value)
+{
+	_thumbnail_path = value;
+}
+
+String EntityItemBase::get_thumbnail_path()
+{
+	return _thumbnail_path;
 }
 
 // Client methods

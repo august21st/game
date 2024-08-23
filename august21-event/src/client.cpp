@@ -30,6 +30,7 @@
 #include "client.hpp"
 #include "godot_cpp/classes/object.hpp"
 #include "godot_cpp/core/math.hpp"
+#include "godot_cpp/core/memory.hpp"
 #include "godot_cpp/core/property_info.hpp"
 #include "godot_cpp/variant/array.hpp"
 #include "godot_cpp/variant/string.hpp"
@@ -183,6 +184,11 @@ void Client::_ready()
 
 	_entities = { };
 	_players = { };
+	_phase_scenes = { };
+	register_phase_scene("loading_screen", "res://scenes/loading_screen.tscn");
+	register_phase_scene("intro", "res://scenes/intro.tscn");
+	register_phase_scene("roof", "res://scenes/roof.tscn");
+	register_phase_scene("end", "res://scenes/end.tscn");
 
 	UtilityFunctions::print("Starting as client...");
 	PlayerBody* player_body_scene = nullptr;
@@ -202,7 +208,16 @@ void Client::_ready()
 	_socket.instantiate();
 	connect("socket_status", Callable(this, "_on_socket_status"));
 	try_connect_to_socket("ws://localhost:8082");
-	change_scene("res://scenes/loading_screen.tscn");
+	change_scene("loading_screen");
+}
+
+// Will add phase scene to _phase_scenes and start preloading it
+Error Client::register_phase_scene(String identifier, String path)
+{
+	auto preload_error = _resource_loader->load_threaded_request(path);
+	auto scene_info = memnew(PhaseSceneInfo({ .scene_path = path, .load_status = PhaseSceneLoadStatus::REQUESTED }));
+	_phase_scenes.insert(identifier, scene_info);
+	return preload_error;
 }
 
 Node* Client::get_current_scene()
@@ -289,14 +304,14 @@ void Client::_on_socket_status(int status, int code, String reason)
 		set_process(true);
 	}
 	else if (status == SocketStatus::FAILED) {
-		change_scene("res://scenes/loading_screen.tscn");
+		change_scene("loading_screen");
 		_alert_label->set_visible(true);
 		_alert_label->set_text(String("Critical error: Failed to connect to the server after {0} attempts.\n"
 			"Error code: {1}.\nPlease check your network connection or ongoing outages and restart the game to continue.")
 				.format(Array::make(_socket_retry_count, code)));
 	}
 	else if (status == SocketStatus::DISCONNECTED) {
-		change_scene("res://scenes/loading_screen.tscn");
+		change_scene("loading_screen");
 		_alert_label->set_visible(true);
 		_alert_label->set_text(String("Critical error: You have been disconnected from the server.\n"
 			"Close code {0}, reason: '{1}'.\nPlease restart/reload the game to continue.")
@@ -529,15 +544,21 @@ void Client::_process(double delta)
 					auto phase_scene = phase_parts.size() > 0 ? phase_parts[0] : "";
 					auto phase_event = phase_parts.size() > 1 ? phase_parts[1] : "";
 
+					if (!_phase_scenes.has(phase_scene)) {
+						UtilityFunctions::printerr("Could not set phase to ",
+							phase, ": unknown phase");
+						break;
+					}
+
 					if (phase_scene == "loading_screen") {
-						change_scene("res://scenes/loading_screen.tscn");
+						change_scene("loading_screen");
 					}
 					if (phase_scene == "intro") {
-						change_scene("res://scenes/intro.tscn");
+						change_scene("intro");
 					}
 					else if (phase_scene == "roof") {
 						if (_current_phase_scene != phase_scene) {
-							change_scene("res://scenes/roof.tscn");
+							change_scene("roof");
 						}
 
 						auto roof_scene = get_current_scene_strict<Roof>();
@@ -550,7 +571,7 @@ void Client::_process(double delta)
 					}
 					else if (phase_scene == "end") {
 						if (_current_phase_scene != phase_scene) {
-							change_scene("res://scenes/end.tscn");
+							change_scene("end");
 						}
 
 						auto end_scene = get_current_scene_strict<End>();
@@ -561,8 +582,6 @@ void Client::_process(double delta)
 						end_scene->run_phase_event(phase_event);
 					}
 					else {
-						UtilityFunctions::printerr("Could not set phase to ",
-							phase, ": unknown phase");
 					}
 					_current_phase_scene = phase_scene;
 					_current_phase_event = phase_event;
@@ -603,7 +622,7 @@ void Client::update_stats()
 	}
 
 	auto fps = _engine->get_frames_per_second();
-	auto physics_process = _performance->get_monitor(Performance::Monitor::TIME_PHYSICS_PROCESS);
+	auto physics_process = 1.0f / _performance->get_monitor(Performance::Monitor::TIME_PHYSICS_PROCESS);
 	auto object_count = _performance->get_monitor(Performance::Monitor::OBJECT_COUNT);
 	auto rendered_objects_count = _performance->get_monitor(Performance::Monitor::RENDER_TOTAL_OBJECTS_IN_FRAME);
 	auto memory_static = _performance->get_monitor(Performance::Monitor::MEMORY_STATIC);
@@ -616,7 +635,7 @@ void Client::update_stats()
 		memory_static_unit = "KB";
 		memory_static = Math::floor(memory_static / 1'000);
 	}
-	auto stats_string = String("FPS: {0}\nPhysics process: {1}\nscene objects: "
+	auto stats_string = String("FPS: {0}\nPhysics process: {1}\nScene objects: "
 		"{2}\nRendered objects: {3}\nStatic memory usage: {4}{5}\n")
 		.format(Array::make(fps, physics_process, object_count, rendered_objects_count, memory_static, memory_static_unit));
 	_stats_label->set_text(stats_string);
@@ -645,12 +664,45 @@ void Client::_on_volume_slider_drag_ended(bool value_changed)
 	_volume_label->set_visible(false);
 }
 
-Error Client::change_scene(String scene_path)
+Error Client::change_scene(String identifier)
 {
+	if (!_phase_scenes.has(identifier)) {
+		return Error::ERR_DOES_NOT_EXIST;
+	}
+
+	auto scene_info = _phase_scenes.get(identifier);
 	Node* scene_instance;
-	auto load_error = load_scene(scene_path, &scene_instance);
-	if (load_error != Error::OK) {
-		return load_error;
+	if (scene_info->load_status == PhaseSceneLoadStatus::UNLOADED) {
+		// Slow route, this will cause significant stutter
+		auto load_error = load_scene(scene_info->scene_path, &scene_instance);
+		if (load_error != Error::OK) {
+			return load_error;
+		}
+	}
+	else if (scene_info->load_status == PhaseSceneLoadStatus::REQUESTED) {
+		// Hot route, continue from threaded request
+		auto scene_resource = _resource_loader->load_threaded_get(scene_info->scene_path);
+		if (!scene_resource.is_valid() || !scene_resource->is_class("PackedScene")) {
+			UtilityFunctions::printerr("Failed to load scene from threaded request: file not found");
+			return Error::ERR_FILE_NOT_FOUND;
+		}
+
+		Ref<PackedScene> packed_scene = scene_resource;
+		if (!packed_scene.is_valid() || !packed_scene->can_instantiate()) {
+			UtilityFunctions::printerr("Failed to load scene from threaded request: resource was invalid");
+			return Error::ERR_INVALID_DATA;
+		}
+
+		scene_instance = packed_scene->instantiate();
+	}
+	else if (scene_info->load_status == PhaseSceneLoadStatus::LOADED) {
+		scene_instance = scene_info->scene;
+	}
+
+	// Cache loaded scene to scene info
+	if (scene_info->load_status != PhaseSceneLoadStatus::LOADED) {
+		scene_info->load_status = PhaseSceneLoadStatus::LOADED;
+		scene_info->scene = scene_instance;
 	}
 
 	while (_client_scene->get_child_count() > 0) {

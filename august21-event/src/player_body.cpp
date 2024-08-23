@@ -36,14 +36,17 @@
 #include <godot_cpp/classes/global_constants.hpp>
 #include <dataproto_cpp/dataproto.hpp>
 #include <godot_cpp/classes/skeleton3d.hpp>
+#include <godot_cpp/classes/margin_container.hpp>
+#include <godot_cpp/classes/nine_patch_rect.hpp>
+#include <godot_cpp/classes/rigid_body3d.hpp>
+#include <godot_cpp/classes/resource_loader.hpp>
+#include <godot_cpp/classes/h_box_container.hpp>
+#include <godot_cpp/classes/texture2d.hpp>
 
 #include "client.hpp"
 #include "player_body.hpp"
 #include "entity_player_base.hpp"
 #include "entity_item_base.hpp"
-#include "godot_cpp/classes/h_box_container.hpp"
-#include "godot_cpp/classes/input_event_mouse.hpp"
-#include "godot_cpp/classes/rigid_body3d.hpp"
 #include "network_shared.hpp"
 #include "client.hpp"
 #include "node_shared.hpp"
@@ -87,19 +90,6 @@ PlayerBody::~PlayerBody()
 {
 }
 
-void PlayerBody::update_hotbar()
-{
-	auto health_label = String("Health: {0}").format(Array::make(_health));
-	_health_label->set_text(health_label);
-
-	_inventory_selector->set_visible(_inventory_current == -1);
-	auto inventory_position = _inventory_box->get_position();
-	auto inventory_size = _inventory_box->get_size();
-	_inventory_selector->set_position(Vector2(
-		inventory_position.x + (_inventory_current / (float) MAX_INVENTORY_SIZE) * inventory_size.x,
-		inventory_position.y + 8));
-}
-
 void PlayerBody::_bind_methods()
 {
 	ClassDB::bind_method(D_METHOD("_on_revive_pressed"),
@@ -126,11 +116,6 @@ void PlayerBody::_bind_methods()
 
 void PlayerBody::_ready()
 {
-	_engine = Engine::get_singleton();
-	if (_engine->is_editor_hint()) {
-		return;
-	}
-
 	_client = get_tree()->get_root()->get_node<Client>("/root/GlobalClient");
 	if (_client == nullptr) {
 		UtilityFunctions::printerr("Could not get client: autoload singleton was null");
@@ -138,6 +123,7 @@ void PlayerBody::_ready()
 	}
 	_client->connect("packet_received", Callable(this, "_on_packet_received"));
 
+	_resource_loader = ResourceLoader::get_singleton();
 	_player_input = Input::get_singleton();
 	_project_settings = ProjectSettings::get_singleton();
 	_gravity = _project_settings->get_setting("physics/3d/default_gravity");
@@ -176,8 +162,10 @@ void PlayerBody::_ready()
 	_grab_ray = get_node<RayCast3D>("%PlayerGrabRay");
 	_player_model = get_node<Node3D>("%PlayerModel");
 	_skeleton = _player_model->get_node<Skeleton3D>("CharacterRig/Skeleton3D");
+	_animation_player = _player_model->get_node<AnimationPlayer>("AnimationPlayer");
 	_inventory_box = get_node<HBoxContainer>("%InventoryBox");
-	_inventory_selector = get_node<Panel>("%InventorySelector");
+	_inventory_selector = get_node<NinePatchRect>("%InventorySelector");
+	_inventory_selector_label = get_node<Label>("%InventorySelectorLabel");
 	_velocity = Vector3(0, 0, 0);
 	_health = DEFAULT_HEALTH;
 	_is_dead = false;
@@ -186,7 +174,16 @@ void PlayerBody::_ready()
 	_spawn_position = Vector3(0, 0, 0);
 	_update_tick = 0;
 	_inventory = { };
-	_inventory_current = -1;
+	_hovered_item_entity = nullptr;
+	set_inventory_current(-1);
+
+	auto item_outline_resource = _resource_loader->load("res://assets/item_outline_material.tres");
+	if (item_outline_resource.is_valid() && item_outline_resource->is_class("ShaderMaterial")) {
+		_item_outline_material = item_outline_resource;
+	}
+	else {
+		UtilityFunctions::print("Failed to load outline material: Resource was not a ShaderMaterial");
+	}
 
 	if (_client->get_presets_platform() != PresetsPlatform::MOBILE) {
 		_thumbstick_panel->set_visible(false);
@@ -201,10 +198,6 @@ void PlayerBody::_ready()
 
 void PlayerBody::_input(const Ref<InputEvent> &event)
 {
-	if (_engine->is_editor_hint()) {
-		return;
-	}
-
 	if (event->is_class("InputEventMouseMotion")) {
 		const Ref<InputEventMouseMotion> event_mouse_motion = event;
 		auto mouse_relative = event_mouse_motion->get_relative();
@@ -239,41 +232,138 @@ void PlayerBody::_input(const Ref<InputEvent> &event)
 	else if (event->is_action_pressed("toggle_pause")) {
 		close_chat();
 	}
+	else if (event->is_action_pressed("hotbar_first")) {
+		set_inventory_current(0);
+	}
+	else if (event->is_action_pressed("hotbar_second")) {
+		set_inventory_current(1);
+	}
+	else if (event->is_action_pressed("hotbar_third")) {
+		set_inventory_current(2);
+	}
+	else if (event->is_action_pressed("hotbar_fourth")) {
+		set_inventory_current(3);
+	}
+	else if (event->is_action_pressed("hotbar_fifth")) {
+		set_inventory_current(4);
+	}
+	else if (event->is_action_pressed("hotbar_sixth")) {
+		set_inventory_current(5);
+	}
+	else if (event->is_action_pressed("hotbar_seventh")) {
+		set_inventory_current(6);
+	}
+	else if (event->is_action_pressed("hotbar_eigth")) {
+		set_inventory_current(7);
+	}
+	else if (event->is_action_pressed("hotbar_ninth")) {
+		set_inventory_current(8);
+	}
+	else if (event->is_action_pressed("hotbar_tenth")) {
+		set_inventory_current(9);
+	}
+}
+
+void PlayerBody::set_mesh_next_pass_recursive(Node* root_node, Ref<Material> material)
+{
+	auto meshes = root_node->find_children("*", "MeshInstance3D");
+	for (auto i = 0; i < meshes.size(); i++) {
+		auto mesh_instance = Object::cast_to<MeshInstance3D>(meshes[i]);
+		if (mesh_instance == nullptr) {
+			continue;
+		}
+		auto surface_count = mesh_instance->get_mesh()->get_surface_count();
+		for (auto j = 0; j < surface_count; j++) {
+			auto surface_material = mesh_instance->get_mesh()->surface_get_material(j);
+			surface_material->set_next_pass(material);
+		}
+	}
 }
 
 void PlayerBody::_unhandled_input(const Ref<InputEvent> &event)
 {
-	if (_engine->is_editor_hint()) {
-		return;
+	// Draw outline around items
+	auto collider_object = _grab_ray->get_collider();
+	auto item_entity = Object::cast_to<EntityItemBase>(collider_object);
+	if (item_entity != nullptr && item_entity->can_grab() && _hovered_item_entity != item_entity) {
+		// Clear surface next pass from previous item
+		if (_hovered_item_entity != nullptr) {
+			auto hovered_item_node = _hovered_item_entity->get_item_node();
+			if (hovered_item_node != nullptr) {
+				set_mesh_next_pass_recursive(hovered_item_node, nullptr);
+			}
+		}
+
+		// Apply surface next pass to new item
+		auto item_node = item_entity->get_item_node();
+		if (item_node != nullptr) {
+			set_mesh_next_pass_recursive(item_node, _item_outline_material);
+		}
+		_hovered_item_entity = item_entity;
+	}
+	else if (item_entity == nullptr && _hovered_item_entity != nullptr) {
+		auto hovered_item_node = _hovered_item_entity->get_item_node();
+		set_mesh_next_pass_recursive(hovered_item_node, nullptr);
+		// Hovering nothing
+		_hovered_item_entity = nullptr;
 	}
 
+	// Process item clicks
 	if (event->is_class("InputEventMouseButton")) {
 		const Ref<InputEventMouseButton> event_mouse_button = event;
 		_player_input->set_mouse_mode(godot::Input::MOUSE_MODE_CAPTURED);
 
 		switch (event_mouse_button->get_button_index()) {
 			case MouseButton::MOUSE_BUTTON_LEFT:  {
-				auto collider_object = _grab_ray->get_collider();
-
+				Ref<Texture2D> thumbnail = nullptr;
 				// Try to obtain grab of item (if not claimed by something else)
 				// and move the entity item into our inventory (ACTION_GRAB)
-				auto item_entity = Object::cast_to<EntityItemBase>(collider_object);
 				if (_inventory.size() < MAX_INVENTORY_SIZE && item_entity != nullptr && item_entity->try_grab()) {
 					add_child(item_entity);
 					_inventory.push_back(item_entity);
 					_inventory_current = _inventory.size() - 1;
-					auto item_label = memnew(Label());
-					item_label->set_text(item_entity->get_name());
-					_inventory_box->add_child(item_label);
+					auto item_node = item_entity->get_item_node();
+					if (item_node != nullptr) {
+						set_mesh_next_pass_recursive(item_node, nullptr);
+					}
+
+					// Gui
+					Node* inventory_item = nullptr;
+					auto load_error = load_scene("res://scenes/inventory_item.tscn", &inventory_item);
+					if (load_error == Error::OK) {
+						auto thumbnail_path = item_entity->get_thumbnail_path();
+						if (!thumbnail_path.is_empty()) {
+							auto thumbnail_resource = _resource_loader->load(thumbnail_path);
+							if (thumbnail_resource->is_class("Texture2D")) {
+								thumbnail = thumbnail_resource;
+							}
+							else {
+								UtilityFunctions::print("Failed to read from thumbnail path ",
+									thumbnail_path, ": resource was not a Texture2D");
+							}
+						}
+						if (thumbnail.is_valid()) {
+							auto item_image = inventory_item->get_node<TextureRect>("%ItemImage");
+							item_image->set_texture(thumbnail);
+						}
+						else {
+							auto item_label = inventory_item->get_node<Label>("%ItemLabel");
+							item_label->set_text(item_entity->get_name());
+						}
+					}
+					else {
+						UtilityFunctions::print("Failed to add inventory item: Loading inventory item scene failed with ", load_error);
+					}
+					_inventory_box->add_child(inventory_item);
 				}
 				break;
 			}
 			case MouseButton::MOUSE_BUTTON_WHEEL_UP: {
-				_inventory_current = (_inventory_current + 1) % _inventory.size();
+				scroll_inventory_current(1);
 				break;
 			}
 			case MouseButton::MOUSE_BUTTON_WHEEL_DOWN: {
-				_inventory_current = (_inventory_current - 1) % _inventory.size();
+				scroll_inventory_current(-1);
 				break;
 			}
 			default:
@@ -282,13 +372,8 @@ void PlayerBody::_unhandled_input(const Ref<InputEvent> &event)
 	}
 }
 
-
 void PlayerBody::_physics_process(double delta)
 {
-	if (_engine->is_editor_hint()) {
-		return;
-	}
-
 	// Movement
 	auto direction = Vector3(0, 0, 0);
 	if (_dragging_thumbstick) {
@@ -402,18 +487,29 @@ void PlayerBody::_physics_process(double delta)
 
 void PlayerBody::_process(double delta)
 {
-	if (_engine->is_editor_hint()) {
-		return;
-	}
+	// Process inventory updates
+	// TODO: Refactor as much of this out into methods that do not need to run each frame
+	auto health_label = String("Health: {0}").format(Array::make(_health));
+	_health_label->set_text(health_label);
+	// 3D
+	for (auto i = 0; i < _inventory.size(); i++) {
+		auto inventory_item = _inventory[i];
+		if (i == _inventory_current) {
+			inventory_item->set_visible(true);
+			_animation_player->play(inventory_item->get_hold_animation(), 0.5f);
 
-	// Inventory management
-	update_hotbar();
-	if (_inventory_current != -1) {
-		auto inventory_item = _inventory[_inventory_current];
-		auto hand_bone = _skeleton->find_bone("DEF-HandR");
-		auto hand_transform = _skeleton->get_bone_global_pose(hand_bone);
-		inventory_item->set_position(hand_transform.get_origin());
-		inventory_item->set_rotation(hand_transform.basis.get_euler());
+			auto hand_bone = _skeleton->find_bone("DEF-HandR");
+			auto hand_transform = _skeleton->get_bone_global_pose(hand_bone);
+			//inventory_item->set_position(hand_transform.get_origin());
+			//auto hand_rotation = hand_transform.basis.get_euler();
+			//inventory_item->set_rotation(hand_rotation);
+			// DEBUG: Item positions TODO: Fix this!
+			inventory_item->set_position(Vector3(-0.19, 1.17f, 0.23f));
+			inventory_item->set_rotation(Vector3(0.0f, 0.0f, 0.0f));
+		}
+		else {
+			inventory_item->set_visible(false);
+		}
 	}
 }
 
@@ -604,4 +700,47 @@ void PlayerBody::die(String death_title, String death_mesage)
 void PlayerBody::set_climbing(bool climbing)
 {
 	_climbing = climbing;
+}
+
+int PlayerBody::scroll_inventory_current(int by)
+{
+	int selected = -1;
+	if (_inventory.size() != 0) {
+		auto selected = (_inventory_current + by) % _inventory.size();
+		if (selected < 0) {
+			selected = _inventory.size() + selected;
+		}
+	}
+	set_inventory_current(selected);
+	return selected;
+}
+
+void PlayerBody::set_inventory_current(int index) {
+	_inventory_current = Math::min(index, _inventory.size() - 1);
+
+	// UI
+	if (_inventory_current == -1) {
+		_inventory_selector->set_visible(false);
+		_inventory_selector->set_modulate(Color(1.0f, 1.0f, 1.0f, 0.0f));
+	}
+	else {
+		_inventory_selector->set_visible(true);
+		auto item_node = Object::cast_to<Control>(_inventory_box->get_child(_inventory_current));
+		if (item_node != nullptr) {
+			auto item_position = item_node->get_global_position();
+			auto item_size = item_node->get_size();
+
+			auto selector_tween = create_tween();
+			selector_tween->tween_property(_inventory_selector, "global_position", item_position - Vector2(8, 8), 0.2)
+				->set_trans(Tween::TransitionType::TRANS_QUAD)
+				->set_ease(Tween::EASE_IN);
+			selector_tween->parallel()->tween_property(_inventory_selector, "size", item_size + Vector2(16, 16), 0.2)
+				->set_trans(Tween::TransitionType::TRANS_QUAD)
+				->set_ease(Tween::EASE_IN);
+			selector_tween->parallel()->tween_property(_inventory_selector, "modulate", Color(1.0f, 1.0f, 1.0f, 1.0f), 0.2)
+				->set_trans(Tween::TransitionType::TRANS_QUAD)
+				->set_ease(Tween::EASE_IN);
+			_inventory_selector_label->set_text(String("({0})").format(Array::make(_inventory_current)));
+		}
+	}
 }

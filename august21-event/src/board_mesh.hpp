@@ -3,7 +3,6 @@
 #include <godot_cpp/variant/color.hpp>
 #include <godot_cpp/variant/packed_byte_array.hpp>
 #include <godot_cpp/classes/http_request.hpp>
-#include <godot_cpp/classes/engine.hpp>
 #include <godot_cpp/core/class_db.hpp>
 #include <godot_cpp/classes/mesh_instance3d.hpp>
 #include <godot_cpp/variant/utility_functions.hpp>
@@ -17,7 +16,6 @@ class BoardMesh : public MeshInstance3D {
     GDCLASS(BoardMesh, MeshInstance3D)
 
 protected:
-    Engine* _engine;
     static void _bind_methods();
     int _board_width;
     int _board_height;
