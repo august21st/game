@@ -27,11 +27,25 @@ namespace NodeShared {
 		*out_scene_instance = (T*) scene_instance;
 		return godot::Error::OK;
 	}
-
 	int node_children_count_recursive(Node* node, int count = 0);
+
+	// Serialised properties / can either be defined as a pointer to the filesystem,
+	// or as an inlinne encoded variant. The same case for resource-type properties
+	// on an entity.
+	enum ObjectType {
+		INLINE_NODE,
+		FILESYSTEM_NODE,
+		INLINE_RESOURCE,
+		FILESYSTEM_RESOURCE,
+		COMPRESSED_VARIANT,
+		VARIANT
+	};
 	void write_compressed_variant(const Variant& variant, BufWriter& buffer);
 	Variant read_compressed_variant(BufReader& buffer);
+	void write_variant(const Variant& variant, BufWriter& buffer);
+	Variant read_variant(BufReader& buffer);
 	void write_entity_data(Node* node, BufWriter& buffer);
+	void write_entity_data(String node_path, BufWriter& buffer);
 	Node* read_entity_data(BufReader& buffer);
 	void set_environment(WorldEnvironment* environment_node, String path);
 }

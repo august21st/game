@@ -6,7 +6,6 @@
 #include <godot_cpp/classes/label.hpp>
 #include <godot_cpp/classes/os.hpp>
 #include <godot_cpp/classes/engine.hpp>
-#include <godot_cpp/classes/display_server.hpp>
 #include <godot_cpp/core/class_db.hpp>
 #include <godot_cpp/classes/node.hpp>
 #include <godot_cpp/classes/h_slider.hpp>
@@ -67,7 +66,6 @@ class Client : public Node {
 private:
 	OS *_os;
 	Engine *_engine;
-	DisplayServer* _display_server;
 	TranslationServer* _translation_server;
 	AudioServer* _audio_server;
 	Performance* _performance;

@@ -11,7 +11,6 @@ private:
 	int _id;
 	Node* _entity;
 	String _parent_scene;
-	List<EntityInfo> _children;
 	HashMap<String, Variant> _tracked_properties;
 
 public:

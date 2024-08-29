@@ -23,4 +23,6 @@ namespace NetworkShared {
 		ACTION_TAKE_DAMAGE = 20,
 		ACTION_CHAT_MESSAGE = 31
 	};
+
+	bool is_server();
 }

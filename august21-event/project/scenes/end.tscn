@@ -128,6 +128,9 @@ data = PackedVector3Array(1.2948, 1, -7.7512, 2.6283, 1, -8.3945, 3.0943, 1, -6.
 
 [node name="End" type="End"]
 
+[node name="ServerCamera" type="Camera3D" parent="."]
+transform = Transform3D(-1, 8.74228e-08, 3.82137e-15, 0, -4.37114e-08, 1, 8.74228e-08, 1, 4.37114e-08, 0, 40, 0)
+
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 unique_name_in_owner = true
 environment = ExtResource("1_v6gpa")

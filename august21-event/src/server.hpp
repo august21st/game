@@ -2,9 +2,7 @@
 #include <godot_cpp/templates/list.hpp>
 #include <godot_cpp/classes/node.hpp>
 #include <godot_cpp/classes/web_socket_multiplayer_peer.hpp>
-#include <godot_cpp/classes/os.hpp>
 #include <godot_cpp/classes/engine.hpp>
-#include <godot_cpp/classes/display_server.hpp>
 #include <godot_cpp/classes/resource_loader.hpp>
 #include <godot_cpp/variant/utility_functions.hpp>
 #include <godot_cpp/classes/thread.hpp>
@@ -21,9 +19,7 @@ class Server : public Node {
 	GDCLASS(Server, Node)
 
 private:
-	OS* _os;
 	Engine* _engine;
-	DisplayServer* _display_server;
 	Ref<WebSocketMultiplayerPeer> _socket_server;
 	Ref<Thread> _console_thread;
 	ResourceLoader* _resource_loader;
@@ -35,6 +31,7 @@ private:
 	Error register_phase_scene(String identifier, String path);
 	int hash_string(String value);
 	void write_player_info(int id, ClientData* client, BufWriter& buffer);
+	int next_entity_id();
 	/*const String MODEL_VARIANTS[8] = {
 		"lightblue",
 		"navy",
@@ -59,8 +56,9 @@ public:
 	void _on_peer_disconnected(int id);
 	void run_console_loop();
 	EntityInfo* register_entity(Node* entity, String parent_scene);
-	void set_phase(string name);
-	void create_entity(string type);
+	EntityInfo* create_entity(String node_path, String parent_scene);
+	void repl_set_phase(string name);
+	void set_phase(String name);
 	void update_entity(int id, string property, string value);
 	void delete_entity(int id);
 	void list_players();

@@ -26,6 +26,7 @@
 #include <godot_cpp/classes/window.hpp>
 #include <godot_cpp/classes/timer.hpp>
 #include <godot_cpp/templates/list.hpp>
+#include <godot_cpp/classes/display_server.hpp>
 
 #include "client.hpp"
 #include "godot_cpp/classes/object.hpp"
@@ -104,9 +105,7 @@ void Client::_ready()
 {
 	_os = OS::get_singleton();
 	_engine = Engine::get_singleton();
-	_display_server = DisplayServer::get_singleton();
-	_is_server = _os->has_feature("dedicated_server") || _display_server->get_name() == "headless";
-	if (_is_server) {
+	if (is_server()) {
 		set_process(false);
 		return;
 	}
@@ -379,10 +378,9 @@ List<PackedByteArray> Client::poll_next_packets()
 
 void Client::_input(const Ref<InputEvent> &event)
 {
-	if (_engine->is_editor_hint()) {
+	if (is_server()) {
 		return;
 	}
-
 	auto mouse_mode = _player_input->get_mouse_mode();
 
 	if (event->is_action_pressed("toggle_stats")) {
@@ -395,10 +393,9 @@ void Client::_input(const Ref<InputEvent> &event)
 
 void Client::_process(double delta)
 {
-	if (_engine->is_editor_hint()) {
+	if (is_server()) {
 		return;
 	}
-
 	if (_stats_enabled) {
 		update_stats();
 	}
@@ -503,7 +500,8 @@ void Client::_process(double delta)
 						auto entity_node = read_entity_data(packet);
 						if (entity_node == nullptr) {
 							UtilityFunctions::print("Failed to create entity ", id, ": failed to decode entity data");
-							continue;
+							UtilityFunctions::print("Dumping entity info packet after reading ", i, " entities: BufReader state is corrupted");
+							break;
 						}
 						// Register entity
 						_entities.insert(id, entity_node);

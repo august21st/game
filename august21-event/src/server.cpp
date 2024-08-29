@@ -13,6 +13,8 @@
 #include <godot_cpp/classes/node.hpp>
 #include <godot_cpp/classes/resource_saver.hpp>
 #include <godot_cpp/classes/file_access.hpp>
+#include <godot_cpp/classes/camera3d.hpp>
+#include <godot_cpp/classes/node3d.hpp>
 #include <dataproto_cpp/dataproto.hpp>
 #include <commandIO.hpp>
 
@@ -57,11 +59,8 @@ void Server::_bind_methods()
 
 void Server::_ready()
 {
-	_os = OS::get_singleton();
 	_engine = Engine::get_singleton();
-	_display_server = DisplayServer::get_singleton();
-	bool is_server = _os->has_feature("dedicated_server") || _display_server->get_name() == "headless";
-	if (_engine->is_editor_hint() || !is_server) {
+	if (!is_server()) {
 		set_physics_process(false);
 		return;
 	}
@@ -111,10 +110,6 @@ void Server::_ready()
 
 void Server::_physics_process(double delta)
 {
-	if (_engine->is_editor_hint()) {
-		return;
-	}
-
 	// Handle new WS updates
 	if (_socket_server.is_valid()) {
 		_socket_server->poll();
@@ -308,6 +303,8 @@ void Server::_on_peer_disconnected(int id)
 	_clients.erase(id);
 }
 
+// TODO: BIG - Consider that as multiple scenes are loaded, they will overlap collisions and physics
+// TODO: find a way to isolate phase scenes from interacting with eachother
 godot::Error Server::register_phase_scene(String identifier, String path)
 {
 	auto control_scene_resource = _resource_loader->load(path);
@@ -328,7 +325,7 @@ godot::Error Server::register_phase_scene(String identifier, String path)
 	return godot::Error::OK;
 }
 
-EntityInfo* Server::register_entity(Node* entity, String parent_scene)
+int Server::next_entity_id()
 {
 	// Create new entity locally
 	int max_id = 0;
@@ -339,17 +336,52 @@ EntityInfo* Server::register_entity(Node* entity, String parent_scene)
 		}
 	}
 	int new_id = max_id + 1;
+	return new_id;
+}
 
+// Entities created with create_entity needn't be registed, this method
+// will more efficiently instance an entity from a path, and instruct
+// clients to do so as  well, opposed to encoding the entire node inline
+EntityInfo* Server::create_entity(String node_path, String parent_scene)
+{
+	auto new_id = next_entity_id();
+
+	Node* entity_node;
+	auto load_error = load_scene(node_path, &entity_node);
+	if (load_error != godot::Error::OK) {
+		return nullptr;
+	}
+	auto info = new EntityInfo(new_id, entity_node, parent_scene);
+	_entities.insert(new_id, info);
+
+	// Distribute to all clients
+	auto entity_info_packet = BufWriter();
+	entity_info_packet.u8(ServerPacket::ENTITIES_INFO); // packet code
+	entity_info_packet.u16(1); //entity count
+	entity_info_packet.u32(new_id); // entity id
+	auto parent_scene_str = parent_scene.utf8().get_data();
+	entity_info_packet.str(parent_scene_str); // parent_scene
+	// Write node data (node scene) - ObjectType::FILESYSTEM_NODE
+	write_entity_data(node_path, entity_info_packet); // entity data
+
+	send_to_all(entity_info_packet);
+	return info;
+}
+
+EntityInfo* Server::register_entity(Node* entity, String parent_scene)
+{
+	auto new_id = next_entity_id();
 	auto info = new EntityInfo(new_id, entity, parent_scene);
 	_entities.insert(new_id, info);
 
 	// Distribute to all clients
 	auto entity_info_packet = BufWriter();
 	entity_info_packet.u8(ServerPacket::ENTITIES_INFO); // packet code
+	entity_info_packet.u16(1); //entity count
 	entity_info_packet.u32(new_id); // entity id
 	auto parent_scene_str = parent_scene.utf8().get_data();
 	entity_info_packet.str(parent_scene_str); // parent_scene
-	// Write node data (properties, children)
+	// Write node data (properties, children) - ObjectType::INLINE_NODE
 	write_entity_data(entity, entity_info_packet); // entity data
 
 	send_to_all(entity_info_packet);
@@ -360,16 +392,16 @@ void Server::run_console_loop()
 {
 	ReplIO repl;
 	while (interface(repl,
-		func(pack(this, &Server::set_phase), "set_phase", "Set the game phase to the specified stage",
+		func(pack(this, &Server::repl_set_phase), "set_phase", "Set the game phase to the specified stage",
 			param("name", "String name of phase")),
-		func(pack(this, &Server::create_entity), "create_entity", "Create a new entity of specified type",
+		/*func(pack(this, &Server::create_entity), "create_entity", "parent_scene", "Create a new entity of specified type",
 			param("type", "Node type name of entity to be created")),
 		func(pack(this, &Server::delete_entity), "delete_entity", "Delete a specific entity",
 			param("id", "Id of entity to be deleted")),
 		func(pack(this, &Server::update_entity), "update_entity", "Update a property of a specific entity",
 			param("id", "Id of entity to be created"),
 			param("property", "Name of property to be modified"),
-			param("value", "New value to set of specified property")),
+			param("value", "New value to set of specified property")),*/
 		func(pack(this, &Server::list_players), "list_players", "List all connected players"),
 		func(pack(this, &Server::kill_player), "kill_player", "Kill a specific player",
 			param("id", "Id of player to be killed")),
@@ -388,15 +420,38 @@ void Server::run_console_loop()
 	get_tree()->quit(0);
 }
 
-void Server::set_phase(string name)
+void Server::repl_set_phase(string name)
 {
-	auto phase_parts = String(name.c_str()).split(":");
+	set_phase(String(name.c_str()));
+}
+
+void Server::set_phase(String name)
+{
+	auto phase_parts = name.split(":");
 	auto phase_scene = phase_parts.size() > 0 ? phase_parts[0] : "";
 	auto phase_event = phase_parts.size() > 1 ? phase_parts[1] : "";
-	if (phase_scene == "") {
-		UtilityFunctions::print(
-			"Couldn't set phase to {0}: Invalid phase scene name", String(name.c_str()));
+	if (phase_scene == "" || !_phase_scenes.has(phase_scene)) {
+		UtilityFunctions::print("Couldn't set phase to ", name, ": Invalid phase scene name");
 		return;
+	}
+
+	// Small hack for if a non-server build is started with the --server arg
+	if (!is_server()) {
+		// TODO: Fix this!
+		for (int i = 0; i < get_child_count(); i++) {
+
+			auto scene_3d = Object::cast_to<Node3D>(get_child(i));
+			if (scene_3d == _phase_scenes[phase_scene]) {
+				scene_3d->set_visible(true);
+				auto server_camera = scene_3d->get_node<Camera3D>("ServerCamera");
+				if (server_camera != nullptr) {
+					server_camera->set_current(true);
+				}
+			}
+			else {
+				scene_3d->set_visible(false);
+			}
+		}
 	}
 
 	// Run phase event on server replication scenes
@@ -412,16 +467,15 @@ void Server::set_phase(string name)
 	// Run phase event on clients
 	auto phase_packet = BufWriter();
 	phase_packet.u8(ServerPacket::SET_PHASE);
-	phase_packet.str(name);
+	auto name_str = name.utf8().get_data();
+	phase_packet.str(name_str);
 	send_to_all(phase_packet);
-}
-
-void Server::create_entity(string type)
-{
 }
 
 void Server::delete_entity(int id)
 {
+	_entities.erase(id);
+	// TODO: Distributes to clients
 }
 
 void Server::update_entity(int id, string property, string value)

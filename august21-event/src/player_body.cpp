@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <godot_cpp/classes/engine.hpp>
 #include <godot_cpp/classes/input.hpp>
 #include <godot_cpp/classes/input_event.hpp>
@@ -56,7 +57,7 @@ using namespace NetworkShared;
 using namespace NodeShared;
 
 const float MAX_SPEED = 6.0f;
-const float MAX_CLIMB_SPEED = 5.0f;
+const float MAX_CLIMB_SPEED = 2.0f;
 const float ACCELERATION = 12.0f;
 const float DECELERATION = 10.0f;
 const float JUMP_SPEED = 5.0f;
@@ -388,19 +389,20 @@ void PlayerBody::_physics_process(double delta)
 		direction.normalize();
 	}
 
-	// Move in direction we are looking
-	direction.rotate(Vector3(0, 1, 0), get_rotation().y);
+	// Gravity
+	_velocity.y -= delta * _gravity;
 
 	if (!_climbing) {
-		// Gravity
-		_velocity.y -= delta * _gravity;
+		// Copy direction and rotate to move in direction we are looking
+		auto walk_direction = Vector3(direction.x, direction.y, direction.z);
+		walk_direction.rotate(Vector3(0, 1, 0), get_rotation().y);
 
 		auto horizontal_velocity = _velocity;
 		horizontal_velocity.y = 0;
-		auto target_velocity = direction * MAX_SPEED;
+		auto target_velocity = walk_direction * MAX_SPEED;
 
 		float acceleration;
-		if (direction.dot(horizontal_velocity) > 0) {
+		if (walk_direction.dot(horizontal_velocity) > 0) {
 			acceleration = ACCELERATION;
 		}
 		else {
@@ -433,20 +435,28 @@ void PlayerBody::_physics_process(double delta)
 	}
 	else {
 		// Swizzle forward motion & direction to upward motion & direction
+		// z-direction is into the area
+		auto climb_direction = Vector3(direction.x, direction.y, direction.z);
+		climb_direction.y = direction.z;
+		if (_player_input->is_action_pressed("jump") || _jump_pressed) {
+			climb_direction.y = 1.0f;
+		}
 
-		/*auto horizontal_velocity = _velocity;
-		horizontal_velocity.y = 0;
-		auto target_velocity = direction * MAX_SPEED;
-
-		float acceleration;
-		if (direction.dot(horizontal_velocity) > 0) {
-			acceleration = ACCELERATION;
+		if (climb_direction.y > 0) {
+			// Climb up
+			_velocity.y = climb_direction.y * MAX_CLIMB_SPEED;
+			climb_direction.z = 0.0f;
 		}
 		else {
-			acceleration = DECELERATION;
+			// Descend (& move backward off ladder)
+			_velocity.y = Math::max(_velocity.y, -MAX_CLIMB_SPEED);
 		}
-		horizontal_velocity = horizontal_velocity.lerp(target, ACCELERATION * delta);*/
 
+		// Rotate direction to move in direction we are looking
+		climb_direction.rotate(Vector3(0, 1, 0), get_rotation().y);
+
+		_velocity.x = climb_direction.x * MAX_CLIMB_SPEED;
+		_velocity.z = climb_direction.z * MAX_CLIMB_SPEED;
 	}
 
 	// Camera bob
@@ -476,7 +486,7 @@ void PlayerBody::_physics_process(double delta)
 		update_packet.f32(rotation.y);
 		update_packet.f32(rotation.z);
 		// TODO: Implement current_animation
-		auto current_animation = String("walk");
+		auto current_animation = String("idle");
 		auto current_animation_utf8 = current_animation.utf8().get_data();
 		update_packet.str(current_animation_utf8);
 		update_packet.u32(_health);
@@ -740,7 +750,7 @@ void PlayerBody::set_inventory_current(int index) {
 			selector_tween->parallel()->tween_property(_inventory_selector, "modulate", Color(1.0f, 1.0f, 1.0f, 1.0f), 0.2)
 				->set_trans(Tween::TransitionType::TRANS_QUAD)
 				->set_ease(Tween::EASE_IN);
-			_inventory_selector_label->set_text(String("({0})").format(Array::make(_inventory_current)));
+			_inventory_selector_label->set_text(String("({0})").format(Array::make(_inventory_current + 1)));
 		}
 	}
 }

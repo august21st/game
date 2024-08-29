@@ -24,8 +24,8 @@ buses/default_bus_layout="res://assets/default_bus_layout.tres"
 
 [autoload]
 
-GlobalClient="*res://scenes/client.tscn"
 GlobalServer="*res://scenes/server.tscn"
+GlobalClient="*res://scenes/client.tscn"
 
 [display]
 

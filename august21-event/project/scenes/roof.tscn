@@ -214,7 +214,7 @@ size = Vector3(2, 1, 6)
 size = Vector3(1, 15.5, 0.2)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_gu0ne"]
-size = Vector3(1, 5.5, 0.1)
+size = Vector3(1, 5.5, 6)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_237as"]
 
@@ -1240,7 +1240,7 @@ libraries = {
 transform = Transform3D(-2.88853, -2.0425, -2.0425, -1.75365e-07, 2.88853, -2.88853, 2.88853, -2.0425, -2.0425, 143, 116, 114)
 
 [node name="InvisiblePlatform" type="StaticBody3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 30, -4, -40)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 30, -6, -37)
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="InvisiblePlatform"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -2.5)
@@ -1287,6 +1287,9 @@ shape = SubResource("BoxShape3D_gu0ne")
 [node name="CSGBox3D2" type="CSGBox3D" parent="ClimbableArea"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.75, -0.0499992)
 size = Vector3(1, 5.5, 0.1)
+
+[node name="ClimbableArea2" type="ClimbableArea" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -26, 0, -24)
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="."]
 unique_name_in_owner = true
