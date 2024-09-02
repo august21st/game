@@ -240,7 +240,7 @@ public:
 	void _ready() override;
 	void _input(const Ref<InputEvent> &event) override;
 	void _process(double delta) override;
-	void start_with_socket(Ref<WebSocketPeer> socket, int player_id);
+	void start_with_socket(Ref<WebSocketPeer> socket);
 	Ref<WebSocketPeer> get_socket();
 	Error send(const BufWriter& packet);
 	Error send(const char* data, size_t size);

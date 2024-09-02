@@ -5,7 +5,6 @@
 #include <godot_cpp/classes/web_socket_peer.hpp>
 #include <godot_cpp/classes/scene_tree.hpp>
 #include <godot_cpp/classes/window.hpp>
-#include <dataproto_cpp/dataproto.hpp>
 #include <godot_cpp/core/class_db.hpp>
 #include <godot_cpp/classes/mesh_instance3d.hpp>
 #include <godot_cpp/variant/callable.hpp>
@@ -18,6 +17,7 @@
 #include <godot_cpp/variant/dictionary.hpp>
 #include <godot_cpp/classes/timer.hpp>
 #include <godot_cpp/templates/list.hpp>
+#include <dataproto_cpp/dataproto.hpp>
 
 #include "client.hpp"
 #include "loading_screen.hpp"
@@ -44,10 +44,12 @@ void LoadingScreen::_bind_methods()
 		&LoadingScreen::_on_flying_objects_player_animation_finished);
 	ClassDB::bind_method(D_METHOD("_on_song_player_finished"),
 		&LoadingScreen::_on_song_player_finished);
-	ClassDB::bind_method(D_METHOD("_on_retry_timer_finished", "server_idx"),
-		&LoadingScreen::_on_retry_timer_finished);
+	ClassDB::bind_method(D_METHOD("_on_retry_timer_timeout", "server_idx"),
+		&LoadingScreen::_on_retry_timer_timeout);
 	ClassDB::bind_method(D_METHOD("_on_packet_received", "packed_packet"),
 		&LoadingScreen::_on_packet_received);
+	ClassDB::bind_method(D_METHOD("_on_server_list_item_activated", "index"),
+		&LoadingScreen::_on_server_list_item_activated);
 }
 
 void LoadingScreen::_ready()
@@ -69,6 +71,7 @@ void LoadingScreen::_ready()
 	_players_label = get_node<Label>("%PlayerCountLabel");
 
 	_server_list = get_node<ItemList>("%ServerList");
+	_server_list->connect("item_activated", Callable(this, "_on_server_list_item_activated"));
 	_servers = List<LoadingServer*>();
 	add_server("ws://localhost:8021");
 
@@ -85,7 +88,7 @@ void LoadingScreen::_ready()
 	_tube = get_node<Node3D>("%Tube");
 }
 
-void LoadingScreen::_on_retry_timer_finished(int server_idx)
+void LoadingScreen::_on_retry_timer_timeout(int server_idx)
 {
 	auto server = _servers[server_idx];
 	try_reconnect_server(server);
@@ -150,7 +153,7 @@ void LoadingScreen::add_server(String url)
 	// Try connect to server and setup reconnections
 	_servers.push_back(server);
 	auto server_index = _servers.size() - 1;
-	retry_timer->connect("finished", Callable(this, "_on_retry_timer_finished")
+	retry_timer->connect("timeout", Callable(this, "_on_retry_timer_timeout")
 		.bind(server_index));
 	auto socket_error = socket->connect_to_url(url);
 	if (socket_error != Error::OK) {
@@ -159,16 +162,33 @@ void LoadingScreen::add_server(String url)
 	server->closed = false;
 }
 
+void LoadingScreen::_on_server_list_item_activated(int index)
+{
+	for (auto server : _servers) {
+		if (server->item_id != index) {
+			continue;
+		}
+
+		server->current = true;
+		_client->start_with_socket(server->socket);
+		break;
+	}
+}
+
 void LoadingScreen::_process(double delta)
 {
 	for (auto i = 0; i < _servers.size(); i++) {
 		auto server = _servers[i];
+		// If we poll from the current server the client is using, we will
+		// steal it's packet
+		if (server->current == true) {
+			continue;
+		}
 		auto socket = server->socket;
-		// Similar to Client::poll_next_packets
 		if (server->closed || !socket.is_valid()) {
 			continue;
 		}
-
+		// Similar implementation to Client::poll_next_packets
 		socket->poll();
 		auto state = socket->get_ready_state();
 		switch (state) {
@@ -182,10 +202,19 @@ void LoadingScreen::_process(double delta)
 					uint8_t code = packet.u8();
 					switch (code) {
 						case ServerPacket::SERVER_INFO: {
-							server->duration_s = packet.u32();
+							auto duration = packet.u32();
+							server->duration_s = duration;
 							server->player_count = packet.u32();
+							server->player_limit = packet.u32();
 							auto phase_str = (string) packet.str();
 							server->phase = String(phase_str.c_str());
+
+							// Update GUI
+							auto hours = duration % 60;
+							auto minutes = duration / 60;
+							auto server_description = String("{0}:{1}, Players: {2}, Phase: {3}")
+								.format(Array::make(hours, minutes, server->player_count, server->player_limit));
+							_server_list->set_item_text(server->item_id, server_description);
 							break;
 						}
 					}
@@ -198,9 +227,8 @@ void LoadingScreen::_process(double delta)
 			case WebSocketPeer::STATE_CLOSED: {
 				auto code = socket->get_close_code();
 				auto reason = socket->get_close_reason();
-				auto formatted_log = String("WebSocket closed with code: {0}, reason \"{1}\". Clean: {2}")
-					.format(Array::make(code, reason, code != -1));
-				UtilityFunctions::printerr(formatted_log);
+				UtilityFunctions::print("Disconnected from serverlist socket ",
+					server->url, ": Code: ", code, ", Reason: ", reason);
 				server->closed = true;
 				break;
 			}

@@ -16,9 +16,9 @@
 using namespace godot;
 
 struct LoadingSong {
-	String name;
-	String author;
-	String path;
+	String name = "";
+	String author = "";
+	String path = "";
 };
 
 struct LoadingServer {
@@ -31,8 +31,10 @@ struct LoadingServer {
 	// Server list
 	int duration_s = 0;
 	int player_count = 0;
+	int player_limit = 512;
 	String phase = "";
 	int item_id = -1;
+	bool current = false;
 };
 
 class LoadingScreen : public Node3D {
@@ -61,7 +63,8 @@ private:
     const float INITIAL_SOCKET_RETRY_DELAY_SECONDS = 0.5f;
 	void add_server(String url);
 	void try_reconnect_server(LoadingServer* server);
-	void _on_retry_timer_finished(int server_idx);
+	void _on_retry_timer_timeout(int server_idx);
+	void _on_server_list_item_activated(int index);
 	void _on_packet_received(PackedByteArray packed_packet);
 	void _on_graphics_quality_changed(int level);
 	void _on_flying_objects_player_animation_finished(String anim_name);

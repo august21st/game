@@ -61,6 +61,7 @@ public:
 	void distribute_server_info();
 	void run_console_loop();
 	EntityInfo* register_entity(Node* entity, String parent_scene);
+	void repl_create_entity(string node_path, string parent_scene);
 	EntityInfo* create_entity(String node_path, String parent_scene);
 	void repl_set_phase(string name);
 	void set_phase(String name);

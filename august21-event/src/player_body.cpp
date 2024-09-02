@@ -395,9 +395,7 @@ void PlayerBody::_physics_process(double delta)
 
 	if (!_climbing) {
 		// Copy direction and rotate to move in direction we are looking
-		auto walk_direction = Vector3(direction.x, direction.y, direction.z);
-		walk_direction.rotate(Vector3(0, 1, 0), get_rotation().y);
-
+		auto walk_direction = direction.rotated(Vector3(0, 1, 0), get_rotation().y);
 		auto horizontal_velocity = _velocity;
 		horizontal_velocity.y = 0;
 		auto target_velocity = walk_direction * MAX_SPEED;

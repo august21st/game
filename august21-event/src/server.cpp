@@ -37,6 +37,7 @@ using namespace NodeShared;
 
 #define INTERVAL_SECONDS(count) (_tick_count / TPS) % count == 0
 
+const int PLAYER_LIMIT = 512;
 const int SERVER_PORT = 8021;
 const int TPS = 20;
 
@@ -58,6 +59,9 @@ void Server::_bind_methods()
 	ClassDB::bind_method(D_METHOD("_on_peer_connected", "id"), &Server::_on_peer_connected);
 	ClassDB::bind_method(D_METHOD("_on_peer_disconnected", "id"), &Server::_on_peer_disconnected);
 	ClassDB::bind_method(D_METHOD("run_console_loop"), &Server::run_console_loop);
+	ClassDB::bind_method(D_METHOD("set_phase", "name"), &Server::set_phase);
+	ClassDB::bind_method(D_METHOD("create_entity", "node_path", "paren_scene"), &Server::create_entity);
+
 }
 
 void Server::_ready()
@@ -330,6 +334,7 @@ void Server::distribute_server_info()
 	server_info_packet.u32(duration_s); // duration_s
 	// TODO: Use authenticated clients size
 	server_info_packet.u32(_clients.size());
+	server_info_packet.u32(512); // player_limit
 	// TODO: Send as phase:event
 	auto phase_str = _current_phase_scene.utf8().get_data();
 	server_info_packet.str(phase_str); // phase
@@ -367,6 +372,11 @@ int Server::next_entity_id()
 	}
 	int new_id = max_id + 1;
 	return new_id;
+}
+
+void Server::repl_create_entity(string node_path, string parent_scene)
+{
+	call_deferred("create_entity", String(node_path.c_str()), String(parent_scene.c_str()));
 }
 
 // Entities created with create_entity needn't be registed, this method
@@ -424,9 +434,9 @@ void Server::run_console_loop()
 	while (interface(repl,
 		func(pack(this, &Server::repl_set_phase), "set_phase", "Set the game phase to the specified stage",
 			param("name", "String name of phase")),
-		/*func(pack(this, &Server::create_entity), "create_entity", "parent_scene", "Create a new entity of specified type",
+		func(pack(this, &Server::repl_create_entity), "create_entity", "node_path", "parent_scene", "Create a new entity of specified type",
 			param("type", "Node type name of entity to be created")),
-		func(pack(this, &Server::delete_entity), "delete_entity", "Delete a specific entity",
+		/*func(pack(this, &Server::delete_entity), "delete_entity", "Delete a specific entity",
 			param("id", "Id of entity to be deleted")),
 		func(pack(this, &Server::repl_update_entity), "update_entity", "Update a property of a specific entity",
 			param("id", "Id of entity to be created"),
@@ -452,7 +462,7 @@ void Server::run_console_loop()
 
 void Server::repl_set_phase(string name)
 {
-	set_phase(String(name.c_str()));
+	call_deferred("set_phase", String(name.c_str()));
 }
 
 void Server::set_phase(String name)
@@ -507,11 +517,12 @@ void Server::set_phase(String name)
 void Server::delete_entity(int id)
 {
 	_entities.erase(id);
-	// TODO: Distributes to clients
+	// TODO: Distribute to clients
 }
 
 void Server::repl_update_entity(int id, string property, string value)
 {
+	// TODO: Implement this!
 }
 
 void Server::list_players()

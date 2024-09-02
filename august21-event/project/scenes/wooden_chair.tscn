@@ -1,0 +1,42 @@
+[gd_scene load_steps=5 format=3 uid="uid://bo1b2d2ls1g1f"]
+
+[ext_resource type="PackedScene" uid="uid://m4hc42l78dri" path="res://assets/chair/wooden_chair.glb" id="1_ise8g"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_aeyg2"]
+size = Vector3(0.7, 0.07, 0.66)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_2a15l"]
+size = Vector3(0.66, 0.81, 0.07)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_0xra4"]
+size = Vector3(0.08, 0.66, 0.07)
+
+[node name="WoodenChairBody" type="RigidBody3D"]
+transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 0, 0, 0)
+mass = 7.0
+
+[node name="SeatHitbox" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.98023e-08, 0.695, 0)
+shape = SubResource("BoxShape3D_aeyg2")
+
+[node name="BackHitbox" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.135, 0.295)
+shape = SubResource("BoxShape3D_2a15l")
+
+[node name="LegHitbox" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.25, 0.33, 0.255)
+shape = SubResource("BoxShape3D_0xra4")
+
+[node name="LegHitbox2" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.25, 0.33, 0.255)
+shape = SubResource("BoxShape3D_0xra4")
+
+[node name="LegHitbox3" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.25, 0.33, -0.255)
+shape = SubResource("BoxShape3D_0xra4")
+
+[node name="LegHitbox4" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.25, 0.33, -0.255)
+shape = SubResource("BoxShape3D_0xra4")
+
+[node name="WoodenChair" parent="." instance=ExtResource("1_ise8g")]

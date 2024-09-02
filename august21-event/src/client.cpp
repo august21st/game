@@ -236,7 +236,7 @@ double Client::round_decimal(double value, int places)
 
 // Player has selected this server (socket) from the loading screen, start
 // the client using this socket instance
-void Client::start_with_socket(Ref<WebSocketPeer> socket, int player_id)
+void Client::start_with_socket(Ref<WebSocketPeer> socket)
 {
 	_socket = socket;
 	_socket_closed = false;
