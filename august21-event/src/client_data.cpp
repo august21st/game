@@ -1,6 +1,7 @@
 #include <godot_cpp/classes/web_socket_peer.hpp>
 
 #include "client_data.hpp"
+#include "entity_info.hpp"
 
 using namespace godot;
 
@@ -26,4 +27,15 @@ Ref<WebSocketPeer> ClientData::get_socket()
 EntityPlayer* ClientData::get_entity()
 {
 	return _player_entity;
+}
+
+void ClientData::authenticate()
+{
+	// TODO: Implement this stub
+	_authenticated = true;
+}
+
+bool ClientData::is_authenticated()
+{
+	return _authenticated;
 }

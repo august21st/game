@@ -15,24 +15,26 @@ using namespace godot;
 class BoardMesh : public MeshInstance3D {
     GDCLASS(BoardMesh, MeshInstance3D)
 
-protected:
-    static void _bind_methods();
-    int _board_width;
-    int _board_height;
-    bool _board_loaded;
-    bool _palette_loaded;
-    bool _generating_texture;
+private:
+	int _board_width;
+	int _board_height;
+	bool _board_loaded;
+	bool _palette_loaded;
+	bool _generating_texture;
 	HTTPRequest* _board_request;
-    HTTPRequest* _metadata_request;
-    PackedByteArray* _board;
-    PackedColorArray* _palette;
-    void generate_texture();
+	HTTPRequest* _metadata_request;
+	PackedByteArray* _board;
+	PackedColorArray* _palette;
+	void generate_texture();
+
+protected:
+	static void _bind_methods();
 
 public:
-    BoardMesh();
-    ~BoardMesh();
-    void _ready() override;
-    Error load_canvas(String canvas_url = DEFAULT_CANVAS_URL, String metadata_url = DEFAULT_METADATA_URL);
-    void _on_board_request_completed(int result, int response_code, const PackedStringArray &headers, const PackedByteArray &body);
-    void _on_metadata_request_completed(int result, int response_code, const PackedStringArray &headers, const PackedByteArray &body);
+	BoardMesh();
+	~BoardMesh();
+	void _ready() override;
+	Error load_canvas(String canvas_url = DEFAULT_CANVAS_URL, String metadata_url = DEFAULT_METADATA_URL);
+	void _on_board_request_completed(int result, int response_code, const PackedStringArray &headers, const PackedByteArray &body);
+	void _on_metadata_request_completed(int result, int response_code, const PackedStringArray &headers, const PackedByteArray &body);
 };

@@ -15,6 +15,7 @@
 #include <godot_cpp/classes/file_access.hpp>
 #include <godot_cpp/classes/camera3d.hpp>
 #include <godot_cpp/classes/node3d.hpp>
+#include <godot_cpp/classes/time.hpp>
 #include <dataproto_cpp/dataproto.hpp>
 #include <commandIO.hpp>
 
@@ -34,7 +35,9 @@ using namespace std;
 using namespace NetworkShared;
 using namespace NodeShared;
 
-const int SERVER_PORT = 8082;
+#define INTERVAL_SECONDS(count) (_tick_count / TPS) % count == 0
+
+const int SERVER_PORT = 8021;
 const int TPS = 20;
 
 Server::Server() : _socket_server(nullptr)
@@ -65,6 +68,8 @@ void Server::_ready()
 		return;
 	}
 	UtilityFunctions::print("Starting as server...");
+
+	_time = Time::get_singleton();
 
 	// Initialise websocket
 	_socket_server = Ref<WebSocketMultiplayerPeer>();
@@ -101,6 +106,7 @@ void Server::_ready()
 	// Initialise properties
 	_clients = { };
 	_entities = { };
+	_start_time = _time->get_unix_time_from_system();
 	_game_time = 0.0L;
 	_tick_count = 0;
 	_engine->set_physics_ticks_per_second(TPS);
@@ -125,6 +131,36 @@ void Server::_physics_process(double delta)
 			auto packet = BufReader((char*) data.ptr(), data.size());
 			auto code = packet.u8();
 			switch (code) {
+				case ClientPacket::AUTHENTICATE: {
+					// Client has choosen us in the server list, and will now
+					// be subscribed to game events
+					sender->authenticate();
+
+					// Send initial game state info to client
+					auto game_info_packet = BufWriter();
+					game_info_packet.u8(ServerPacket::GAME_INFO);
+					// TODO: Implement players waiting
+					game_info_packet.u32((uint32_t) _clients.size()); // players waiting
+					game_info_packet.u32(sender_id); // (their) player id
+					send(sender_id, game_info_packet);
+
+					// Send initial playerlist to client
+					auto player_info_packet = BufWriter();
+					player_info_packet.u8(ServerPacket::PLAYERS_INFO);
+					player_info_packet.u16(_clients.size()); // player_count
+					for (auto &[player_id, client] : _clients) {
+						write_player_info(player_id, client, player_info_packet); // player_info
+					}
+					send(sender_id, player_info_packet);
+
+					// Alert all other clients of the new player
+					auto new_player_info_packet = BufWriter();
+					new_player_info_packet.u8(ServerPacket::PLAYERS_INFO);
+					new_player_info_packet.u16(1); // player_count
+					write_player_info(sender_id, sender, new_player_info_packet); // player_info
+					send_to_others(sender_id, new_player_info_packet);
+					break;
+				}
 				case ClientPacket::SET_CHAT_NAME: {
 					auto chat_name_str = (string) packet.str();
 					auto chat_name = String(chat_name_str.c_str());
@@ -233,6 +269,9 @@ void Server::_physics_process(double delta)
 		send_to_all(update_packet);
 	}
 
+	if (INTERVAL_SECONDS(2)) {
+		distribute_server_info();
+	}
 	_game_time += delta;
 	_tick_count++;
 }
@@ -272,29 +311,7 @@ void Server::_on_peer_connected(int id)
 	auto client_data = new ClientData(client_socket, client_body);
 	_clients[id] = client_data;
 
-	// Send initial game state info to client
-	auto game_info_packet = BufWriter();
-	game_info_packet.u8(ServerPacket::GAME_INFO);
-	// TODO: Implement players waiting
-	game_info_packet.u32((uint32_t) _clients.size()); // players waiting
-	game_info_packet.u32(id); // (their) player id
-	send(id, game_info_packet);
-
-	// Send initial playerlist to client
-	auto player_info_packet = BufWriter();
-	player_info_packet.u8(ServerPacket::PLAYERS_INFO);
-	player_info_packet.u16(_clients.size()); // player_count
-	for (auto &[player_id, client] : _clients) {
-		write_player_info(player_id, client, player_info_packet); // player_info
-	}
-	send(id, player_info_packet);
-
-	// Alert all other clients of the new player
-	auto new_player_info_packet = BufWriter();
-	new_player_info_packet.u8(ServerPacket::PLAYERS_INFO);
-	new_player_info_packet.u16(1); // player_count
-	write_player_info(id, client_data, new_player_info_packet); // player_info
-	send_to_others(id, new_player_info_packet);
+	distribute_server_info();
 }
 
 void Server::_on_peer_disconnected(int id)
@@ -303,8 +320,22 @@ void Server::_on_peer_disconnected(int id)
 	_clients.erase(id);
 }
 
-// TODO: BIG - Consider that as multiple scenes are loaded, they will overlap collisions and physics
-// TODO: find a way to isolate phase scenes from interacting with eachother
+void Server::distribute_server_info()
+{
+	// Server list details
+	auto server_info_packet = BufWriter();
+	server_info_packet.u8(ServerPacket::SERVER_INFO);
+	// TODO: Implement duration
+	auto duration_s = _start_time - _time->get_unix_time_from_system();
+	server_info_packet.u32(duration_s); // duration_s
+	// TODO: Use authenticated clients size
+	server_info_packet.u32(_clients.size());
+	// TODO: Send as phase:event
+	auto phase_str = _current_phase_scene.utf8().get_data();
+	server_info_packet.str(phase_str); // phase
+	send_to_all(server_info_packet);
+}
+
 godot::Error Server::register_phase_scene(String identifier, String path)
 {
 	auto control_scene_resource = _resource_loader->load(path);
@@ -320,7 +351,6 @@ godot::Error Server::register_phase_scene(String identifier, String path)
 	}
 
 	auto scene_instance = packed_scene->instantiate();
-	add_child(scene_instance);
 	_phase_scenes.insert(identifier, scene_instance);
 	return godot::Error::OK;
 }
@@ -398,7 +428,7 @@ void Server::run_console_loop()
 			param("type", "Node type name of entity to be created")),
 		func(pack(this, &Server::delete_entity), "delete_entity", "Delete a specific entity",
 			param("id", "Id of entity to be deleted")),
-		func(pack(this, &Server::update_entity), "update_entity", "Update a property of a specific entity",
+		func(pack(this, &Server::repl_update_entity), "update_entity", "Update a property of a specific entity",
 			param("id", "Id of entity to be created"),
 			param("property", "Name of property to be modified"),
 			param("value", "New value to set of specified property")),*/
@@ -435,22 +465,24 @@ void Server::set_phase(String name)
 		return;
 	}
 
-	// Small hack for if a non-server build is started with the --server arg
-	if (!is_server()) {
-		// TODO: Fix this!
-		for (int i = 0; i < get_child_count(); i++) {
+	// Update current phase scene and event
+	_current_phase_scene = phase_scene;
+	_current_phase_event = phase_event;
 
-			auto scene_3d = Object::cast_to<Node3D>(get_child(i));
-			if (scene_3d == _phase_scenes[phase_scene]) {
-				scene_3d->set_visible(true);
-				auto server_camera = scene_3d->get_node<Camera3D>("ServerCamera");
-				if (server_camera != nullptr) {
-					server_camera->set_current(true);
-				}
+	// If multiple scenes are present, they will overlap physics and cause chaos -
+	// only one scene can be in tree at a time to prevent interference
+	for (auto &[identifier, scene_node] : _phase_scenes) {
+		if (identifier == name) {
+			// current scene
+			add_child(scene_node);
+			auto server_camera = scene_node->get_node<Camera3D>("ServerCamera");
+			if (server_camera != nullptr) {
+				server_camera->set_current(true);
 			}
-			else {
-				scene_3d->set_visible(false);
-			}
+		}
+		else {
+			// Other scene
+			remove_child(scene_node);
 		}
 	}
 
@@ -478,7 +510,7 @@ void Server::delete_entity(int id)
 	// TODO: Distributes to clients
 }
 
-void Server::update_entity(int id, string property, string value)
+void Server::repl_update_entity(int id, string property, string value)
 {
 }
 
@@ -578,4 +610,14 @@ void Server::send(int id, const char* data, size_t size)
 	packed_data.resize(size);
 	memcpy(packed_data.ptrw(), data, size);
 	_clients[id]->get_socket()->put_packet(packed_data);
+}
+
+String Server::get_current_phase_scene()
+{
+	return _current_phase_scene;
+}
+
+String Server::get_current_phase_event()
+{
+	return _current_phase_event;
 }

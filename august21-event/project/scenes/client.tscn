@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=3 uid="uid://dtk5blgx8msq8"]
+[gd_scene load_steps=11 format=3 uid="uid://dtk5blgx8msq8"]
 
 [ext_resource type="Theme" uid="uid://dbwgna8gjqom8" path="res://assets/default_theme.tres" id="1_ce75g"]
 [ext_resource type="StyleBox" uid="uid://b7hyoe2nep4ja" path="res://assets/panel_background_style.tres" id="2_qo466"]
@@ -10,10 +10,6 @@
 [ext_resource type="StyleBox" uid="uid://dpppvawjrcfm8" path="res://assets/ui/button_toggled.tres" id="6_p0vh3"]
 [ext_resource type="Texture2D" uid="uid://d18et1uyas6rp" path="res://assets/pc.svg" id="7_bg0p2"]
 [ext_resource type="PackedScene" uid="uid://dadh2hra2ui0g" path="res://scenes/language_options.tscn" id="10_di7qi"]
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_0s13c"]
-bg_color = Color(0.0784314, 0.0784314, 0.0784314, 0.784314)
-corner_detail = 1
 
 [node name="Client" type="Client"]
 
@@ -369,24 +365,59 @@ offset_right = 128.0
 text = "Client::Done"
 metadata/_edit_use_anchors_ = true
 
-[node name="AlertLabel" type="Label" parent="ClientGui"]
+[node name="AlertPanel" type="Panel" parent="ClientGui"]
 unique_name_in_owner = true
+visible = false
 layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -0.5
-offset_top = -9.75
-offset_right = 0.5
-offset_bottom = 9.75
+anchors_preset = -1
+anchor_left = 0.305556
+anchor_top = 0.412037
+anchor_right = 0.694444
+anchor_bottom = 0.587963
 grow_horizontal = 2
 grow_vertical = 2
+theme_override_styles/panel = ExtResource("2_qo466")
+metadata/_edit_use_anchors_ = true
+
+[node name="BorderPanel" type="Panel" parent="ClientGui/AlertPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="ClientGui/AlertPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 16
+
+[node name="AlertLabel" type="Label" parent="ClientGui/AlertPanel/MarginContainer"]
+unique_name_in_owner = true
+layout_mode = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_shadow_color = Color(0, 0, 0, 1)
 theme_override_colors/font_outline_color = Color(1, 0, 0, 1)
 theme_override_constants/outline_size = 4
 theme_override_font_sizes/font_size = 24
-theme_override_styles/normal = SubResource("StyleBoxFlat_0s13c")
 horizontal_alignment = 1
+
+[node name="AlertCloseButton" type="Button" parent="ClientGui/AlertPanel"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -40.0
+offset_bottom = 45.0
+grow_horizontal = 0
+icon = ExtResource("5_fcvpu")
+icon_alignment = 1
+expand_icon = true

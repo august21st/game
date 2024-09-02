@@ -60,3 +60,13 @@ String EntityPlayerBase::get_model_variant()
 {
 	return _model_variant;
 }
+
+void EntityPlayerBase::set_inventory_current(int value)
+{
+	_inventory_current = value;
+}
+
+int EntityPlayerBase::get_inventory_current()
+{
+	return _inventory_current;
+}

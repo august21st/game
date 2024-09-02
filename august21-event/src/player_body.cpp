@@ -1,4 +1,3 @@
-#include <algorithm>
 #include <godot_cpp/classes/engine.hpp>
 #include <godot_cpp/classes/input.hpp>
 #include <godot_cpp/classes/input_event.hpp>
@@ -35,7 +34,6 @@
 #include <godot_cpp/variant/packed_byte_array.hpp>
 #include <godot_cpp/classes/ray_cast3d.hpp>
 #include <godot_cpp/classes/global_constants.hpp>
-#include <dataproto_cpp/dataproto.hpp>
 #include <godot_cpp/classes/skeleton3d.hpp>
 #include <godot_cpp/classes/margin_container.hpp>
 #include <godot_cpp/classes/nine_patch_rect.hpp>
@@ -43,6 +41,9 @@
 #include <godot_cpp/classes/resource_loader.hpp>
 #include <godot_cpp/classes/h_box_container.hpp>
 #include <godot_cpp/classes/texture2d.hpp>
+#include <godot_cpp/classes/mesh.hpp>
+#include <dataproto_cpp/dataproto.hpp>
+#include <algorithm>
 
 #include "client.hpp"
 #include "player_body.hpp"

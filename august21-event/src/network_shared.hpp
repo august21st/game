@@ -2,6 +2,9 @@
 
 namespace NetworkShared {
 	enum ServerPacket {
+		// Loading screen / serverlist only
+		SERVER_INFO = 0,
+		// Client
 		GAME_INFO = 1,
 		PLAYERS_INFO = 2,
 		SET_PHASE = 3,
@@ -14,6 +17,7 @@ namespace NetworkShared {
 	};
 
 	enum ClientPacket {
+		AUTHENTICATE = 0,
 		SET_CHAT_NAME = 1,
 		SET_MODEL_VARIANT = 2,
 		UPDATE_MOVEMENT = 16,

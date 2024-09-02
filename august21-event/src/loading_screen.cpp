@@ -14,10 +14,13 @@
 #include <godot_cpp/classes/animation_player.hpp>
 #include <godot_cpp/classes/audio_stream_player.hpp>
 #include <godot_cpp/classes/audio_stream.hpp>
+#include <godot_cpp/classes/item_list.hpp>
+#include <godot_cpp/variant/dictionary.hpp>
+#include <godot_cpp/classes/timer.hpp>
+#include <godot_cpp/templates/list.hpp>
 
 #include "client.hpp"
 #include "loading_screen.hpp"
-#include "godot_cpp/variant/dictionary.hpp"
 #include "network_shared.hpp"
 
 using namespace std;
@@ -35,15 +38,16 @@ LoadingScreen::~LoadingScreen()
 
 void LoadingScreen::_bind_methods()
 {
-	ClassDB::bind_method(D_METHOD("_on_packet_received", "packed_packet"),
-		&LoadingScreen::_on_packet_received);
 	ClassDB::bind_method(D_METHOD("_on_graphics_quality_changed", "level"),
 		&LoadingScreen::_on_graphics_quality_changed);
 	ClassDB::bind_method(D_METHOD("_on_flying_objects_player_animation_finished", "anim_name"),
 		&LoadingScreen::_on_flying_objects_player_animation_finished);
 	ClassDB::bind_method(D_METHOD("_on_song_player_finished"),
 		&LoadingScreen::_on_song_player_finished);
-
+	ClassDB::bind_method(D_METHOD("_on_retry_timer_finished", "server_idx"),
+		&LoadingScreen::_on_retry_timer_finished);
+	ClassDB::bind_method(D_METHOD("_on_packet_received", "packed_packet"),
+		&LoadingScreen::_on_packet_received);
 }
 
 void LoadingScreen::_ready()
@@ -60,13 +64,13 @@ void LoadingScreen::_ready()
 		UtilityFunctions::printerr("Could not get client: autoload singleton was null");
 		return;
 	}
-	_client->connect("packet_received", Callable(this, "_on_packet_received"));
 	_client->connect("graphics_quality_changed", Callable(this, "_on_graphics_quality_changed"));
 
 	_players_label = get_node<Label>("%PlayerCountLabel");
-	_flying_objects_player = get_node<AnimationPlayer>("%FlyingObjectsPlayer");
-	_flying_objects_player->connect("animation_finished", Callable(this, "_on_flying_objects_player_animation_finished"));
-	_flying_objects_player->play("flying_objects");
+
+	_server_list = get_node<ItemList>("%ServerList");
+	_servers = List<LoadingServer*>();
+	add_server("ws://localhost:8021");
 
 	_song_player = get_node<AudioStreamPlayer>("%SongPlayer");
 	_song_player->connect("finished", Callable(this, "_on_song_player_finished"));
@@ -74,7 +78,134 @@ void LoadingScreen::_ready()
 	_current_loading_song = 0;
 	play_song(_loading_songs[_current_loading_song]);
 
+	_flying_objects_player = get_node<AnimationPlayer>("%FlyingObjectsPlayer");
+	_flying_objects_player->connect("animation_finished", Callable(this, "_on_flying_objects_player_animation_finished"));
+	_flying_objects_player->play("flying_objects");
+
 	_tube = get_node<Node3D>("%Tube");
+}
+
+void LoadingScreen::_on_retry_timer_finished(int server_idx)
+{
+	auto server = _servers[server_idx];
+	try_reconnect_server(server);
+}
+
+void LoadingScreen::try_reconnect_server(LoadingServer* server)
+{
+	if (server == nullptr) {
+		UtilityFunctions::print("Could not try reconnect to server: Server was null.");
+		return;
+	}
+
+	auto socket = server->socket;
+	auto socket_error = socket->connect_to_url(server->url);
+
+	if (socket_error) {
+		server->closed = true;
+		server->retry_count++;
+
+		// Exponential backoff
+		int retry_delay = INITIAL_SOCKET_RETRY_DELAY_SECONDS * server->retry_count;
+		if (retry_delay > MAX_SOCKET_RETRY_DELAY_SECONDS) {
+			// Client is probably offline or issue is too severe to continue
+			return;
+		}
+
+		UtilityFunctions::print("Websocket connection to ", server->url,
+			" failed: Retrying in ", retry_delay, " seconds.");
+		auto retry_timer = server->retry_timer;
+		retry_timer->set_wait_time(retry_delay);
+		retry_timer->start();
+	}
+	else {
+		// Reset retry count on successful connection
+		server->retry_count = 0;
+		server->closed = false;
+	}
+}
+
+void LoadingScreen::add_server(String url)
+{
+	auto socket = Ref<WebSocketPeer>();
+	socket.instantiate();
+
+	auto retry_timer = memnew(Timer());
+
+	auto server = memnew(LoadingServer({
+		.url = url,
+		.socket = socket,
+		.retry_timer = retry_timer,
+	}));
+
+	// Add to server GUI
+	auto icon_resource = _resource_loader->load("res://assets/rplace_gold.png");
+	if (icon_resource->is_class("Texture2D")) {
+		Ref<Texture2D> server_icon = icon_resource;
+		auto server_description = String("00:00, Players: 0/0, Phase: end");
+		auto id = _server_list->add_item(server_description, server_icon, true);
+		server->item_id = id;
+	}
+
+	// Try connect to server and setup reconnections
+	_servers.push_back(server);
+	auto server_index = _servers.size() - 1;
+	retry_timer->connect("finished", Callable(this, "_on_retry_timer_finished")
+		.bind(server_index));
+	auto socket_error = socket->connect_to_url(url);
+	if (socket_error != Error::OK) {
+		try_reconnect_server(server);
+	}
+	server->closed = false;
+}
+
+void LoadingScreen::_process(double delta)
+{
+	for (auto i = 0; i < _servers.size(); i++) {
+		auto server = _servers[i];
+		auto socket = server->socket;
+		// Similar to Client::poll_next_packets
+		if (server->closed || !socket.is_valid()) {
+			continue;
+		}
+
+		socket->poll();
+		auto state = socket->get_ready_state();
+		switch (state) {
+			case WebSocketPeer::STATE_CONNECTING: {
+				break;
+			}
+			case WebSocketPeer::STATE_OPEN: {
+				while (socket->get_available_packet_count()) {
+					auto packed_packet = socket->get_packet();
+					auto packet = BufReader((char*) packed_packet.ptr(), packed_packet.size());
+					uint8_t code = packet.u8();
+					switch (code) {
+						case ServerPacket::SERVER_INFO: {
+							server->duration_s = packet.u32();
+							server->player_count = packet.u32();
+							auto phase_str = (string) packet.str();
+							server->phase = String(phase_str.c_str());
+							break;
+						}
+					}
+				}
+				break;
+			}
+			case WebSocketPeer::STATE_CLOSING: {
+				break;
+			}
+			case WebSocketPeer::STATE_CLOSED: {
+				auto code = socket->get_close_code();
+				auto reason = socket->get_close_reason();
+				auto formatted_log = String("WebSocket closed with code: {0}, reason \"{1}\". Clean: {2}")
+					.format(Array::make(code, reason, code != -1));
+				UtilityFunctions::printerr(formatted_log);
+				server->closed = true;
+				break;
+			}
+		}
+	}
 }
 
 void LoadingScreen::_on_packet_received(PackedByteArray packed_packet)
@@ -88,8 +219,8 @@ void LoadingScreen::_on_packet_received(PackedByteArray packed_packet)
 				.format(Array::make(players_waiting));
 			_players_label->set_text(formatted_count);
 			break;
-		}
-	}
+        }
+    }
 }
 
 void LoadingScreen::_on_graphics_quality_changed(int level)

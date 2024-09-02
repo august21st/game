@@ -22,7 +22,6 @@
 #include <godot_cpp/classes/nine_patch_rect.hpp>
 #include <godot_cpp/classes/shader_material.hpp>
 
-#include "entity_item_base.hpp"
 #include "entity_player_base.hpp"
 // WORKAROUND: Forward declare to fix circular dependency
 class Client;
@@ -77,8 +76,6 @@ private:
 	// Item management
 	RayCast3D*  _grab_ray;
 	EntityItemBase* _hovered_item_entity;
-	List<EntityItemBase*> _inventory;
-	int _inventory_current;
 	int scroll_inventory_current(int by);
 	void set_inventory_current(int value);
 	void set_mesh_next_pass_recursive(Node* root, Ref<Material> material);

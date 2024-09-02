@@ -10,8 +10,8 @@
 [ext_resource type="PackedScene" uid="uid://ctvdtdod0gcj8" path="res://assets/exhibit/exhibit_base.glb" id="6_awhh8"]
 [ext_resource type="PackedScene" uid="uid://14do76nbhwal" path="res://assets/garden_planter/garden_planter.glb" id="6_y1p2k"]
 [ext_resource type="FontFile" uid="uid://ca14mkoohldct" path="res://assets/reddit/reddit_mono_bold.woff2" id="7_x2l2q"]
-[ext_resource type="PackedScene" uid="uid://dgeqhvrokoqsn" path="res://scenes/short_assault_rifle.tscn" id="10_2uag0"]
-[ext_resource type="PackedScene" uid="uid://b7uah4s5t8bsh" path="res://scenes/chair_gun.tscn" id="11_e7bpe"]
+[ext_resource type="PackedScene" uid="uid://dgeqhvrokoqsn" path="res://scenes/item_short_assault_rifle.tscn" id="10_2uag0"]
+[ext_resource type="PackedScene" uid="uid://b7uah4s5t8bsh" path="res://scenes/item_chair_gun.tscn" id="11_e7bpe"]
 [ext_resource type="PackedScene" uid="uid://bfy6spotyqq6q" path="res://assets/21st_august_monument/21st_august_monument.glb" id="12_08coy"]
 
 [sub_resource type="PlaneMesh" id="PlaneMesh_qcwm1"]

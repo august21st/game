@@ -102,12 +102,10 @@ void End::_server_run_phase_event(String phase_event)
 
 	if (phase_event == "sandbox") {
 		// DEBUG: Serverside test entity spawning, TODO: Remove this!
-		auto info = server->create_entity("res://scenes/short_assault_rifle.tscn", "end");
+		auto info = server->create_entity("res://scenes/item_chair_gun.tscn", "end");
 		if (info != nullptr) {
 			info->track_property("position");
 			info->track_property("rotation");
-			info->track_property("health");
-			info->track_property("chat_name");
 		}
 		auto entity = Object::cast_to<Node3D>(info->get_entity());
 		add_child(entity);

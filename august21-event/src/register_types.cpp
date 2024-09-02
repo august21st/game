@@ -6,6 +6,7 @@
 #include "register_types.hpp"
 #include "entity_player_base.hpp"
 #include "entity_item_base.hpp"
+#include "chair_gun.hpp"
 #include "player_body.hpp"
 #include "entity_player.hpp"
 #include "loading_screen.hpp"
@@ -30,6 +31,7 @@ void initialize_gdextension_types(ModuleInitializationLevel p_level)
 	GDREGISTER_RUNTIME_CLASS(LoadingScreen);
 	GDREGISTER_RUNTIME_CLASS(PlayerBody);
 	GDREGISTER_RUNTIME_CLASS(EntityItemBase);
+	GDREGISTER_RUNTIME_CLASS(ChairGun);
 	GDREGISTER_RUNTIME_CLASS(EntityPlayerBase);
 	GDREGISTER_RUNTIME_CLASS(EntityPlayer);
 	GDREGISTER_RUNTIME_CLASS(ClimbableArea);

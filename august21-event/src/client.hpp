@@ -24,8 +24,8 @@
 #include <godot_cpp/classes/h_box_container.hpp>
 #include <godot_cpp/classes/translation_server.hpp>
 #include <godot_cpp/classes/java_script_bridge.hpp>
-#include <godot_cpp/classes/timer.hpp>
 #include <godot_cpp/templates/list.hpp>
+#include <godot_cpp/classes/timer.hpp>
 
 #include "entity_player_base.hpp"
 // WORKAROUND: Forward declare to fix circular dependency
@@ -38,12 +38,6 @@ using namespace dataproto;
 enum PresetsPlatform {
 	MOBILE,
 	PC
-};
-
-enum SocketStatus {
-	SUCCESS = 0,
-	FAILED = 1,
-	DISCONNECTED = 2
 };
 
 enum PhaseSceneLoadStatus {
@@ -112,15 +106,14 @@ private:
 	OptionButton* _setup_language_options;
 	Button* _setup_confirm_button;
 	void _on_setup_confirm_button_pressed();
+	// Alert panel
+	Panel* _alert_panel;
 	Label* _alert_label;
+	Button* _alert_close_button;
+	void _on_alert_close_button_pressed();
+	void show_alert(String message);
 	// Networking
-	int _socket_retry_count = 0;
-    const int MAX_SOCKET_RETRY_DELAY_SECONDS = 60;
-    const float INITIAL_SOCKET_RETRY_DELAY_SECONDS = 2.5f;
-	Timer* _socket_retry_timer;
 	Ref<WebSocketPeer> _socket;
-	void try_connect_to_socket(String url);
-	void _on_socket_status(int state, int code, String reason);
 	List<PackedByteArray> poll_next_packets();
 	bool _socket_closed;
 	String _current_phase_scene;
@@ -247,6 +240,7 @@ public:
 	void _ready() override;
 	void _input(const Ref<InputEvent> &event) override;
 	void _process(double delta) override;
+	void start_with_socket(Ref<WebSocketPeer> socket, int player_id);
 	Ref<WebSocketPeer> get_socket();
 	Error send(const BufWriter& packet);
 	Error send(const char* data, size_t size);

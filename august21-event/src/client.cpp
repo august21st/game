@@ -24,17 +24,16 @@
 #include <godot_cpp/classes/translation_server.hpp>
 #include <godot_cpp/classes/java_script_bridge.hpp>
 #include <godot_cpp/classes/window.hpp>
-#include <godot_cpp/classes/timer.hpp>
 #include <godot_cpp/templates/list.hpp>
 #include <godot_cpp/classes/display_server.hpp>
+#include <godot_cpp/classes/timer.hpp>
+#include <godot_cpp/core/math.hpp>
+#include <godot_cpp/core/memory.hpp>
+#include <godot_cpp/core/property_info.hpp>
+#include <godot_cpp/variant/array.hpp>
+#include <godot_cpp/variant/string.hpp>
 
 #include "client.hpp"
-#include "godot_cpp/classes/object.hpp"
-#include "godot_cpp/core/math.hpp"
-#include "godot_cpp/core/memory.hpp"
-#include "godot_cpp/core/property_info.hpp"
-#include "godot_cpp/variant/array.hpp"
-#include "godot_cpp/variant/string.hpp"
 #include "roof.hpp"
 #include "end.hpp"
 #include "player_body.hpp"
@@ -83,10 +82,8 @@ void Client::_bind_methods()
 		&Client::_on_language_options_item_selected);
 	ClassDB::bind_method(D_METHOD("_on_player_entity_ready", "id", "chat_name", "model_variant"),
 		&Client::_on_player_entity_ready);
-	ClassDB::bind_method(D_METHOD("try_connect_to_socket", "url"),
-		&Client::try_connect_to_socket);
-	ClassDB::bind_method(D_METHOD("_on_socket_status", "status", "code", "reason"),
-		&Client::_on_socket_status);
+	ClassDB::bind_method(D_METHOD("_on_alert_close_button_pressed"),
+		&Client::_on_alert_close_button_pressed);
 
 	ADD_SIGNAL(MethodInfo("packet_received",
 		PropertyInfo(Variant::PACKED_BYTE_ARRAY, "packed_packet")));
@@ -95,10 +92,6 @@ void Client::_bind_methods()
 	ADD_SIGNAL(MethodInfo("volume_changed",
 		PropertyInfo(Variant::INT, "volume_ratio")));
 	ADD_SIGNAL(MethodInfo("current_scene_ready"));
-	ADD_SIGNAL(MethodInfo("socket_status",
-		PropertyInfo(Variant::INT, "status"),
-		PropertyInfo(Variant::INT, "code"),
-		PropertyInfo(Variant::STRING, "reason")));
 }
 
 void Client::_ready()
@@ -162,8 +155,10 @@ void Client::_ready()
 	_pc_presets_button = get_node<Button>("%PcPresetsButton");
 	_pc_presets_button->connect("pressed", Callable(this, "_on_setup_preset_button_pressed"));
 
+	_alert_panel = get_node<Panel>("%AlertPanel");
+	_alert_panel->set_visible(false);
 	_alert_label = get_node<Label>("%AlertLabel");
-	_alert_label->set_visible(false);
+	_alert_close_button = get_node<Button>("%AlertCloseButton");
 
 	// Try predict platform from feature flags
 	if (_os->has_feature("web_android") || _os->has_feature("web_ios")
@@ -198,15 +193,13 @@ void Client::_ready()
 	}
 	_player_body = player_body_scene;
 
+	// Hand over to loading screen, which will organise selecting a server
 	set_process(false);
-
-	// Initialise websocket connection, post-connection logic at _on_socket_status
-	_socket_retry_timer = memnew(Timer());
-	_socket_retry_timer->connect("timeout", Callable(this, "try_connect_to_socket"));
-	_socket = Ref<WebSocketPeer>();
-	_socket.instantiate();
-	connect("socket_status", Callable(this, "_on_socket_status"));
-	try_connect_to_socket("ws://localhost:8082");
+	set_fail_function([](const void* reason_ptr)
+	{
+		auto reason = String(static_cast<const char*>(reason_ptr));
+		UtilityFunctions::printerr(String("dataproto error: {0}").format(Array::make(reason)));
+	});
 	change_scene("loading_screen");
 }
 
@@ -241,81 +234,38 @@ double Client::round_decimal(double value, int places)
 	return Math::round(value*Math::pow(10.0, places)) / Math::pow(10.0, places);
 }
 
-void Client::try_connect_to_socket(String url)
+// Player has selected this server (socket) from the loading screen, start
+// the client using this socket instance
+void Client::start_with_socket(Ref<WebSocketPeer> socket, int player_id)
 {
-	auto socket_error = _socket->connect_to_url(url);
+	_socket = socket;
+	_socket_closed = false;
 
-	if (socket_error) {
-		_socket_retry_count++;
-		// Exponential backoff
-		int retry_delay = INITIAL_SOCKET_RETRY_DELAY_SECONDS * _socket_retry_count;
-		if (retry_delay > MAX_SOCKET_RETRY_DELAY_SECONDS) {
-			// Client is probably offline or issue is too severe to continue
-			emit_signal("socket_status", SocketStatus::FAILED, socket_error, "");
-			return;
+	// Accept query params chat name and model variant on web
+	if (_os->has_feature("JavaScript")) {
+		_js_bridge = JavaScriptBridge::get_singleton();
+		auto chat_name_variant = _js_bridge->eval("new URL(window.location.href).searchParams.get(\"chatName\")");
+		if (chat_name_variant.get_type() != Variant::STRING) {
+			auto chat_name = (String) chat_name_variant;
+			auto name_packet = BufWriter();
+			name_packet.u8(ClientPacket::SET_CHAT_NAME);
+			auto chat_name_str = chat_name.utf8().get_data();
+			name_packet.str(chat_name_str);
+			send(name_packet);
 		}
 
-		UtilityFunctions::print("Websocket connection failed: Retrying in ", retry_delay, " seconds.");
-		_socket_retry_timer->set_wait_time(retry_delay);
-		_socket_retry_timer->start();
-	}
-	else {
-		// Reset retry count on successful connection
-		set_fail_function([](const void* reason_ptr)
-		{
-			auto reason = String(static_cast<const char*>(reason_ptr));
-			UtilityFunctions::printerr(String("dataproto error: {0}").format(Array::make(reason)));
-		});
-		_socket_retry_count = 0;
-		_socket_closed = false;
-		set_process(true);
-	}
-
-	emit_signal("socket_status", SocketStatus::SUCCESS, -1, "");
-}
-
-void Client::_on_socket_status(int status, int code, String reason)
-{
-	if (status == SocketStatus::SUCCESS) {
-		// Accept query params chat name and model variant on web
-		if (_os->has_feature("JavaScript")) {
-			_js_bridge = JavaScriptBridge::get_singleton();
-			auto chat_name_variant = _js_bridge->eval("new URL(window.location.href).searchParams.get(\"chatName\")");
-			if (chat_name_variant.get_type() != Variant::STRING) {
-				auto chat_name = (String) chat_name_variant;
-				auto name_packet = BufWriter();
-				name_packet.u8(ClientPacket::SET_CHAT_NAME);
-				auto chat_name_str = chat_name.utf8().get_data();
-				name_packet.str(chat_name_str);
-				send(name_packet);
-			}
-
-			auto colour_variant = _js_bridge->eval("new URL(window.location.href).searchParams.get(\"colour\")");
-			if (colour_variant.get_type() != Variant::STRING) {
-				auto colour = (String) colour_variant;
-				auto model_packet = BufWriter();
-				model_packet.u8(ClientPacket::SET_MODEL_VARIANT);
-				auto colour_str = colour.utf8().get_data();
-				model_packet.str(colour_str);
-				send(model_packet);
-			}
+		auto colour_variant = _js_bridge->eval("new URL(window.location.href).searchParams.get(\"colour\")");
+		if (colour_variant.get_type() != Variant::STRING) {
+			auto colour = (String) colour_variant;
+			auto model_packet = BufWriter();
+			model_packet.u8(ClientPacket::SET_MODEL_VARIANT);
+			auto colour_str = colour.utf8().get_data();
+			model_packet.str(colour_str);
+			send(model_packet);
 		}
-		set_process(true);
 	}
-	else if (status == SocketStatus::FAILED) {
-		change_scene("loading_screen");
-		_alert_label->set_visible(true);
-		_alert_label->set_text(String("Critical error: Failed to connect to the server after {0} attempts.\n"
-			"Error code: {1}.\nPlease check your network connection or ongoing outages and restart the game to continue.")
-				.format(Array::make(_socket_retry_count, code)));
-	}
-	else if (status == SocketStatus::DISCONNECTED) {
-		change_scene("loading_screen");
-		_alert_label->set_visible(true);
-		_alert_label->set_text(String("Critical error: You have been disconnected from the server.\n"
-			"Close code {0}, reason: '{1}'.\nPlease restart/reload the game to continue.")
-				.format(Array::make(code, reason)));
-	}
+
+	set_process(true);
 }
 
 Ref<WebSocketPeer> Client::get_socket()
@@ -365,11 +315,17 @@ List<PackedByteArray> Client::poll_next_packets()
 		case WebSocketPeer::STATE_CLOSED:
 			auto code = _socket->get_close_code();
 			auto reason = _socket->get_close_reason();
-			auto formatted_log = String("WebSocket closed with code: {0}, reason \"{1}\". Clean: {2}")
-				.format(Array::make(code, reason, code != -1));
-			UtilityFunctions::printerr(formatted_log);
+			UtilityFunctions::print("Disconnected from client websocket: Code: ",
+				code, "Reason: ", reason);
 			_socket_closed = true;
-			emit_signal("socket_status", SocketStatus::DISCONNECTED, code, reason);
+
+			// Go back to loading screen. which will allow us to get connected to a new
+			// server / back to the server socket, while appearing elegant to a client
+			change_scene("loading_screen");
+			auto alert_message = String("You have been disconnected from the server.\n"
+				"Close code {0}, reason: '{1}'.\nPlease reconnect via the server list.")
+					.format(Array::make(code, reason));
+			show_alert(alert_message);
 			break;
 	}
 
@@ -408,8 +364,8 @@ void Client::_process(double delta)
 			switch (code) {
 				case ServerPacket::GAME_INFO: {
 					auto players_waiting = packet.u32();
-					auto player_id = packet.u32();
 					// Add ourselves into the generic player list
+					auto player_id = packet.u32();
 					_player_id = player_id;
 					_players.insert(_player_id, _player_body);
 					break;
@@ -592,6 +548,17 @@ void Client::_process(double delta)
 			}
 		}
 	}
+}
+
+void Client::show_alert(String message)
+{
+	_alert_panel->set_visible(true);
+	_alert_label->set_text(message);
+}
+
+void Client::_on_alert_close_button_pressed()
+{
+	_alert_panel->set_visible(false);
 }
 
 void Client::_on_player_entity_ready(int id, String chat_name, String model_variant)
