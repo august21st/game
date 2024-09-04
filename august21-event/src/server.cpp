@@ -41,7 +41,7 @@ const int PLAYER_LIMIT = 512;
 const int SERVER_PORT = 8021;
 const int TPS = 20;
 
-Server::Server() : _socket_server(nullptr)
+Server::Server() : _socket_server(nullptr), _server_camera(nullptr)
 {
 }
 
@@ -60,8 +60,7 @@ void Server::_bind_methods()
 	ClassDB::bind_method(D_METHOD("_on_peer_disconnected", "id"), &Server::_on_peer_disconnected);
 	ClassDB::bind_method(D_METHOD("run_console_loop"), &Server::run_console_loop);
 	ClassDB::bind_method(D_METHOD("set_phase", "name"), &Server::set_phase);
-	ClassDB::bind_method(D_METHOD("create_entity", "node_path", "paren_scene"), &Server::create_entity);
-
+	ClassDB::bind_method(D_METHOD("create_entity", "node_path", "parent_scene"), &Server::create_entity);
 }
 
 void Server::_ready()
@@ -106,6 +105,12 @@ void Server::_ready()
 	_console_thread = Ref<Thread>();
 	_console_thread.instantiate();
 	_console_thread->start(Callable(this, "run_console_loop"));
+
+	// Initialise GUI (if in graphical mode)
+	_display_server = DisplayServer::get_singleton();
+	if (_display_server->get_name() != "headless") {
+		_server_camera = get_node<Camera3D>("%ServerCamera");
+	}
 
 	// Initialise properties
 	_clients = { };
@@ -329,12 +334,11 @@ void Server::distribute_server_info()
 	// Server list details
 	auto server_info_packet = BufWriter();
 	server_info_packet.u8(ServerPacket::SERVER_INFO);
-	// TODO: Implement duration
 	auto duration_s = _start_time - _time->get_unix_time_from_system();
 	server_info_packet.u32(duration_s); // duration_s
 	// TODO: Use authenticated clients size
-	server_info_packet.u32(_clients.size());
-	server_info_packet.u32(512); // player_limit
+	server_info_packet.u32(_clients.size()); // player_count
+	server_info_packet.u32(PLAYER_LIMIT); // player_limit
 	// TODO: Send as phase:event
 	auto phase_str = _current_phase_scene.utf8().get_data();
 	server_info_packet.str(phase_str); // phase
@@ -434,8 +438,9 @@ void Server::run_console_loop()
 	while (interface(repl,
 		func(pack(this, &Server::repl_set_phase), "set_phase", "Set the game phase to the specified stage",
 			param("name", "String name of phase")),
-		func(pack(this, &Server::repl_create_entity), "create_entity", "node_path", "parent_scene", "Create a new entity of specified type",
-			param("type", "Node type name of entity to be created")),
+		func(pack(this, &Server::repl_create_entity), "create_entity", "Create a new entity of specified type",
+			param("node_path", "Path to scene containing entity node"),
+			param("parent_scene", "Identifier name of phase scene containing entity")),
 		/*func(pack(this, &Server::delete_entity), "delete_entity", "Delete a specific entity",
 			param("id", "Id of entity to be deleted")),
 		func(pack(this, &Server::repl_update_entity), "update_entity", "Update a property of a specific entity",
@@ -485,9 +490,9 @@ void Server::set_phase(String name)
 		if (identifier == name) {
 			// current scene
 			add_child(scene_node);
-			auto server_camera = scene_node->get_node<Camera3D>("ServerCamera");
-			if (server_camera != nullptr) {
-				server_camera->set_current(true);
+			if (_server_camera != nullptr) {
+				_server_camera->set_position(Vector3(0, 0, 0));
+				_server_camera->set_current(true);
 			}
 		}
 		else {

@@ -57,18 +57,6 @@ using namespace godot;
 using namespace NetworkShared;
 using namespace NodeShared;
 
-const float MAX_SPEED = 6.0f;
-const float MAX_CLIMB_SPEED = 2.0f;
-const float ACCELERATION = 12.0f;
-const float DECELERATION = 10.0f;
-const float JUMP_SPEED = 5.0f;
-const float MOUSE_SENSITIVITY = 0.001f;
-const float FALL_DAMAGE_THRESHOLD = 5.2f;
-const float FALL_DAMAGE_MIN = 4.0f;
-const int DEFAULT_HEALTH = 100;
-const float STILL_THRESHOLD  = 0.1;
-const float PI = 3.14159265358979f;
-
 // min: top left corner, max: bottom left corner, object can move within a circular area within the rectangle
 static Vector2 circular_clamp(const Vector2& vector, const Vector2& min, const Vector2& max)
 {

@@ -1,3 +1,6 @@
 [gd_scene format=3 uid="uid://ym7s5kjqo6ag"]
 
 [node name="Server" type="Server"]
+
+[node name="ServerCamera" type="ServerCamera" parent="."]
+unique_name_in_owner = true

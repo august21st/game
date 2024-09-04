@@ -16,6 +16,7 @@
 #include "board_mesh.hpp"
 #include "roof.hpp"
 #include "end.hpp"
+#include "server_camera.hpp"
 #include "server.hpp"
 #include "client.hpp"
 
@@ -40,6 +41,7 @@ void initialize_gdextension_types(ModuleInitializationLevel p_level)
 	GDREGISTER_RUNTIME_CLASS(Roof);
 	GDREGISTER_RUNTIME_CLASS(End);
 	GDREGISTER_RUNTIME_CLASS(BoardMesh);
+	GDREGISTER_RUNTIME_CLASS(ServerCamera);
 	GDREGISTER_RUNTIME_CLASS(Server);
 }
 

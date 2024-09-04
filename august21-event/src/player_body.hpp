@@ -92,6 +92,18 @@ private:
 	void _on_packet_received(PackedByteArray packed_packet);
 	void _on_chat_submit();
 
+	// Constants
+	const float MAX_SPEED = 6.0f;
+	const float MAX_CLIMB_SPEED = 2.0f;
+	const float ACCELERATION = 12.0f;
+	const float DECELERATION = 10.0f;
+	const float JUMP_SPEED = 5.0f;
+	const float MOUSE_SENSITIVITY = 0.001f;
+	const float FALL_DAMAGE_THRESHOLD = 5.2f;
+	const float FALL_DAMAGE_MIN = 4.0f;
+	const int DEFAULT_HEALTH = 100;
+	const float STILL_THRESHOLD  = 0.1;
+
 protected:
 	static void _bind_methods();
 

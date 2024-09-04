@@ -48,4 +48,6 @@ namespace NodeShared {
 	void write_entity_data(String node_path, BufWriter& buffer);
 	Node* read_entity_data(BufReader& buffer);
 	void set_environment(WorldEnvironment* environment_node, String path);
+
+	const float PI = 3.14159265358979f;
 }

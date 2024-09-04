@@ -8,6 +8,8 @@
 #include <godot_cpp/classes/thread.hpp>
 #include <godot_cpp/classes/time.hpp>
 #include <godot_cpp/templates/hash_map.hpp>
+#include <godot_cpp/classes/display_server.hpp>
+#include <godot_cpp/classes/camera3d.hpp>
 #include <dataproto_cpp/dataproto.hpp>
 
 #include "client_data.hpp"
@@ -23,6 +25,8 @@ private:
 	Engine* _engine;
 	Ref<WebSocketMultiplayerPeer> _socket_server;
 	Ref<Thread> _console_thread;
+	DisplayServer* _display_server;
+	Camera3D* _server_camera;
 	ResourceLoader* _resource_loader;
 	Time* _time;
 	double _start_time;
@@ -37,7 +41,7 @@ private:
 	int hash_string(String value);
 	void write_player_info(int id, ClientData* client, BufWriter& buffer);
 	int next_entity_id();
-	/*const String MODEL_VARIANTS[8] = {
+	const String _model_variants[8] = {
 		"lightblue",
 		"navy",
 		"green",
@@ -46,7 +50,7 @@ private:
 		"brown",
 		"orangered",
 		"gold"
-	};*/
+	};
 
 protected:
 	static void _bind_methods();

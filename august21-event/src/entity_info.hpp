@@ -6,7 +6,9 @@
 using namespace dataproto;
 using namespace godot;
 
-class EntityInfo {
+class EntityInfo : public Object {
+	GDCLASS(EntityInfo, Object);
+
 private:
 	int _id;
 	Node* _entity;

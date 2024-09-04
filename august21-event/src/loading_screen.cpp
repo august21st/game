@@ -18,6 +18,7 @@
 #include <godot_cpp/classes/timer.hpp>
 #include <godot_cpp/templates/list.hpp>
 #include <dataproto_cpp/dataproto.hpp>
+#include <godot_cpp/core/math.hpp>
 
 #include "client.hpp"
 #include "loading_screen.hpp"
@@ -70,6 +71,8 @@ void LoadingScreen::_ready()
 
 	_players_label = get_node<Label>("%PlayerCountLabel");
 
+	_server_panel = get_node<Panel>("%ServerPanel");
+	_server_panel->set_visible(true);
 	_server_list = get_node<ItemList>("%ServerList");
 	_server_list->connect("item_activated", Callable(this, "_on_server_list_item_activated"));
 	_servers = List<LoadingServer*>();
@@ -88,13 +91,26 @@ void LoadingScreen::_ready()
 	_tube = get_node<Node3D>("%Tube");
 }
 
+double LoadingScreen::get_next_retry_delay(LoadingServer* server)
+{
+	// Exponential backoff
+	int retry_delay = INITIAL_SOCKET_RETRY_DELAY_SECONDS
+		* Math::pow(INCREASE_SOCKET_RETRY_DELAY_FACTOR, server->attempt_count);
+	if (retry_delay > MAX_SOCKET_RETRY_DELAY_SECONDS) {
+		// Client is probably offline or issue is too severe to continue
+		return Math_INF;
+	}
+
+	return retry_delay;
+}
+
 void LoadingScreen::_on_retry_timer_timeout(int server_idx)
 {
 	auto server = _servers[server_idx];
-	try_reconnect_server(server);
+	try_connect_server_with_retry(server);
 }
 
-void LoadingScreen::try_reconnect_server(LoadingServer* server)
+void LoadingScreen::try_connect_server_with_retry(LoadingServer* server)
 {
 	if (server == nullptr) {
 		UtilityFunctions::print("Could not try reconnect to server: Server was null.");
@@ -102,19 +118,15 @@ void LoadingScreen::try_reconnect_server(LoadingServer* server)
 	}
 
 	auto socket = server->socket;
+	// Reset as we are starting a new connection
+	server->received_packets = false;
 	auto socket_error = socket->connect_to_url(server->url);
 
 	if (socket_error) {
 		server->closed = true;
-		server->retry_count++;
+		server->attempt_count++;
 
-		// Exponential backoff
-		int retry_delay = INITIAL_SOCKET_RETRY_DELAY_SECONDS * server->retry_count;
-		if (retry_delay > MAX_SOCKET_RETRY_DELAY_SECONDS) {
-			// Client is probably offline or issue is too severe to continue
-			return;
-		}
-
+		auto retry_delay = get_next_retry_delay(server);
 		UtilityFunctions::print("Websocket connection to ", server->url,
 			" failed: Retrying in ", retry_delay, " seconds.");
 		auto retry_timer = server->retry_timer;
@@ -122,8 +134,6 @@ void LoadingScreen::try_reconnect_server(LoadingServer* server)
 		retry_timer->start();
 	}
 	else {
-		// Reset retry count on successful connection
-		server->retry_count = 0;
 		server->closed = false;
 	}
 }
@@ -134,6 +144,7 @@ void LoadingScreen::add_server(String url)
 	socket.instantiate();
 
 	auto retry_timer = memnew(Timer());
+	add_child(retry_timer);
 
 	auto server = memnew(LoadingServer({
 		.url = url,
@@ -145,21 +156,18 @@ void LoadingScreen::add_server(String url)
 	auto icon_resource = _resource_loader->load("res://assets/rplace_gold.png");
 	if (icon_resource->is_class("Texture2D")) {
 		Ref<Texture2D> server_icon = icon_resource;
-		auto server_description = String("00:00, Players: 0/0, Phase: end");
-		auto id = _server_list->add_item(server_description, server_icon, true);
+		auto server_description = String("Connecting to server....");
+		auto id = _server_list->add_item(server_description, server_icon, false);
+		_server_list->set_item_disabled(id, true);
 		server->item_id = id;
 	}
 
-	// Try connect to server and setup reconnections
+	// Setup reconnections & try connect to server
 	_servers.push_back(server);
 	auto server_index = _servers.size() - 1;
 	retry_timer->connect("timeout", Callable(this, "_on_retry_timer_timeout")
 		.bind(server_index));
-	auto socket_error = socket->connect_to_url(url);
-	if (socket_error != Error::OK) {
-		try_reconnect_server(server);
-	}
-	server->closed = false;
+	try_connect_server_with_retry(server);
 }
 
 void LoadingScreen::_on_server_list_item_activated(int index)
@@ -168,9 +176,9 @@ void LoadingScreen::_on_server_list_item_activated(int index)
 		if (server->item_id != index) {
 			continue;
 		}
-
 		server->current = true;
 		_client->start_with_socket(server->socket);
+		_server_panel->set_visible(false);
 		break;
 	}
 }
@@ -197,6 +205,12 @@ void LoadingScreen::_process(double delta)
 			}
 			case WebSocketPeer::STATE_OPEN: {
 				while (socket->get_available_packet_count()) {
+					// Reset retry vars on successful connection and receive
+					server->attempt_count = 1;
+					server->received_packets = true;
+					_server_list->set_item_disabled(server->item_id, false);
+
+					// Handle server list packets
 					auto packed_packet = socket->get_packet();
 					auto packet = BufReader((char*) packed_packet.ptr(), packed_packet.size());
 					uint8_t code = packet.u8();
@@ -210,10 +224,19 @@ void LoadingScreen::_process(double delta)
 							server->phase = String(phase_str.c_str());
 
 							// Update GUI
-							auto hours = duration % 60;
-							auto minutes = duration / 60;
-							auto server_description = String("{0}:{1}, Players: {2}, Phase: {3}")
-								.format(Array::make(hours, minutes, server->player_count, server->player_limit));
+							String server_description;
+							auto int_hours = (int) duration / 3600;
+							auto hours = String("{0}").format(Array::make(int_hours)).lpad(2, "0");
+							auto minutes = String("{0}").format(Array::make((duration % 3600) / 60)).lpad(2, "0");
+							auto seconds = String("{0}").format(Array::make((duration % 60) / 60)).lpad(2, "0");
+							if (int_hours > 0) {
+								server_description = String("{0}:{1}:{2} Players: {3}, Phase: {4}")
+									.format(Array::make(hours, minutes, seconds, server->player_count, server->phase));
+							}
+							else {
+								server_description = String("{0}:{1} Players: {2}, Phase: {3}")
+									.format(Array::make(minutes, seconds, server->player_count, server->phase));
+							}
 							_server_list->set_item_text(server->item_id, server_description);
 							break;
 						}
@@ -227,9 +250,21 @@ void LoadingScreen::_process(double delta)
 			case WebSocketPeer::STATE_CLOSED: {
 				auto code = socket->get_close_code();
 				auto reason = socket->get_close_reason();
-				UtilityFunctions::print("Disconnected from serverlist socket ",
-					server->url, ": Code: ", code, ", Reason: ", reason);
+				auto retry_delay = get_next_retry_delay(server);
+				UtilityFunctions::print("Disconnected from serverlist socket ", server->url, ": Code: ",
+					code, ", Reason: '", reason, "', Retrying in ", retry_delay, " seconds.");
+				_server_list->set_item_disabled(server->item_id, true);
 				server->closed = true;
+
+				// Likely a failed connection, rather than an intentional server disconnnect, retry
+				if (!server->received_packets || code == -1) {
+					server->attempt_count++;
+
+					// Attempt to reconnect
+					auto retry_timer = server->retry_timer;
+					retry_timer->set_wait_time(retry_delay);
+					retry_timer->start();
+				}
 				break;
 			}
 		}

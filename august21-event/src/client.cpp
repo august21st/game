@@ -98,8 +98,10 @@ void Client::_ready()
 {
 	_os = OS::get_singleton();
 	_engine = Engine::get_singleton();
+	_client_gui = get_node<Control>("%ClientGui");
 	if (is_server()) {
 		set_process(false);
+		_client_gui->set_visible(false);
 		return;
 	}
 
@@ -111,7 +113,6 @@ void Client::_ready()
 	_player_input = Input::get_singleton();
 
 	_client_scene = get_node<Node3D>("%ClientScene");
-	_client_gui = get_node<Control>("%ClientGui");
 	_stats_label = get_node<Label>("%StatsLabel");
 	set_stats_enabled(false);
 
@@ -265,6 +266,7 @@ void Client::start_with_socket(Ref<WebSocketPeer> socket)
 		}
 	}
 
+	UtilityFunctions::print("Starting game with socket ", socket->get_requested_url());
 	set_process(true);
 }
 
@@ -323,7 +325,7 @@ List<PackedByteArray> Client::poll_next_packets()
 			// server / back to the server socket, while appearing elegant to a client
 			change_scene("loading_screen");
 			auto alert_message = String("You have been disconnected from the server.\n"
-				"Close code {0}, reason: '{1}'.\nPlease reconnect via the server list.")
+				"Close code {0}, reason: '{1}'.\nPlease restart the game or reconnect via the server list.")
 					.format(Array::make(code, reason));
 			show_alert(alert_message);
 			break;

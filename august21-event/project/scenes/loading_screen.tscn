@@ -1,4 +1,4 @@
-[gd_scene load_steps=22 format=3 uid="uid://ca11fthwu1qho"]
+[gd_scene load_steps=24 format=3 uid="uid://ca11fthwu1qho"]
 
 [ext_resource type="Theme" uid="uid://dbwgna8gjqom8" path="res://assets/default_theme.tres" id="1_ieq0l"]
 [ext_resource type="Texture2D" uid="uid://bpcp8t666sgwn" path="res://assets/rplace_gold.png" id="2_bqd13"]
@@ -19,6 +19,10 @@
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_3f3t6"]
 shader = ExtResource("2_kc0ms")
 shader_parameter/opacity = 0.5
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_p2sdb"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_7hesj"]
 
 [sub_resource type="Environment" id="Environment_qhq8w"]
 background_energy_multiplier = 5.0
@@ -223,9 +227,10 @@ expand_mode = 1
 stretch_mode = 5
 metadata/_edit_use_anchors_ = true
 
-[node name="Panel" type="Panel" parent="Gui"]
+[node name="ServerPanel" type="Panel" parent="Gui"]
+unique_name_in_owner = true
 layout_mode = 1
-anchors_preset = 8
+anchors_preset = -1
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
@@ -238,7 +243,7 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/panel = ExtResource("6_hcci7")
 
-[node name="BorderPanel" type="Panel" parent="Gui/Panel"]
+[node name="BorderPanel" type="Panel" parent="Gui/ServerPanel"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -246,7 +251,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="MarginContainer" type="MarginContainer" parent="Gui/Panel"]
+[node name="MarginContainer" type="MarginContainer" parent="Gui/ServerPanel"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -258,28 +263,35 @@ theme_override_constants/margin_top = 16
 theme_override_constants/margin_right = 16
 theme_override_constants/margin_bottom = 16
 
-[node name="VBoxContainer" type="VBoxContainer" parent="Gui/Panel/MarginContainer"]
+[node name="VBoxContainer" type="VBoxContainer" parent="Gui/ServerPanel/MarginContainer"]
 layout_mode = 2
 
-[node name="Label" type="Label" parent="Gui/Panel/MarginContainer/VBoxContainer"]
+[node name="Label" type="Label" parent="Gui/ServerPanel/MarginContainer/VBoxContainer"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 25
 text = "Select a game server:"
 
-[node name="ScrollContainer" type="ScrollContainer" parent="Gui/Panel/MarginContainer/VBoxContainer"]
+[node name="ScrollContainer" type="ScrollContainer" parent="Gui/ServerPanel/MarginContainer/VBoxContainer"]
 layout_mode = 2
 size_flags_vertical = 3
 horizontal_scroll_mode = 0
 
-[node name="ServerList" type="ItemList" parent="Gui/Panel/MarginContainer/VBoxContainer/ScrollContainer"]
+[node name="ServerList" type="ItemList" parent="Gui/ServerPanel/MarginContainer/VBoxContainer/ScrollContainer"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
+theme_override_styles/focus = SubResource("StyleBoxEmpty_p2sdb")
+theme_override_styles/panel = SubResource("StyleBoxEmpty_7hesj")
 max_text_lines = 4
 auto_height = true
 text_overrun_behavior = 0
 item_count = 1
+
+[node name="Button" type="Button" parent="Gui/ServerPanel/MarginContainer/VBoxContainer"]
+visible = false
+layout_mode = 2
+text = "Done"
 
 [node name="Tube" parent="." instance=ExtResource("5_uxkte")]
 unique_name_in_owner = true
