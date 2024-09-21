@@ -5,12 +5,16 @@
 #include <godot_cpp/classes/world_environment.hpp>
 #include <godot_cpp/classes/environment.hpp>
 #include <godot_cpp/variant/typed_array.hpp>
+#include <godot_cpp/classes/resource.hpp>
+#include <godot_cpp/core/class_db.hpp>
+#include <godot_cpp/variant/string.hpp>
+#include <godot_cpp/classes/scene_tree.hpp>
+#include <godot_cpp/classes/window.hpp>
 #include <dataproto_cpp/dataproto.hpp>
 
 #include "node_shared.hpp"
-#include "godot_cpp/classes/resource.hpp"
-#include "godot_cpp/core/class_db.hpp"
-#include "godot_cpp/variant/string.hpp"
+#include "server.hpp"
+#include "client.hpp"
 
 using namespace godot;
 using namespace dataproto;
@@ -271,5 +275,23 @@ namespace NodeShared {
 		else {
 			UtilityFunctions::printerr("Failed to load environment: file not found");
 		}
+	}
+
+	Server* get_global_server(Node* origin)
+	{
+		auto server = origin->get_tree()->get_root()->get_node<Server>("/root/GlobalServer");
+		if (server == nullptr) {
+			return nullptr;
+		}
+		return server;
+	}
+
+	Client* get_global_client(Node* origin)
+	{
+		auto client = origin->get_tree()->get_root()->get_node<Client>("/root/GlobalClient");
+		if (client == nullptr) {
+			return nullptr;
+		}
+		return client;
 	}
 }

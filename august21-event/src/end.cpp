@@ -34,8 +34,8 @@ void End::_bind_methods()
 {
 	ClassDB::bind_method(D_METHOD("_on_graphics_quality_changed", "level"),
 		&End::_on_graphics_quality_changed);
-	ClassDB::bind_method(D_METHOD("_server_run_phase_event", "phase_event"),
-		&End::_server_run_phase_event);
+	ClassDB::bind_method(D_METHOD("server_run_phase_event", "phase_event"),
+		&End::server_run_phase_event);
 }
 
 void End::_ready()
@@ -51,6 +51,12 @@ void End::_ready()
 		return;
 	}
 	_client->connect("graphics_quality_changed", Callable(this, "_on_graphics_quality_changed"));
+
+	_server = get_tree()->get_root()->get_node<Server>("/root/GlobalServer");
+	if (_server == nullptr) {
+		UtilityFunctions::print("Couldn't run serverside phase event: server autoload was null");
+		return;
+	}
 
 	_sun_light = get_node<DirectionalLight3D>("%SunLight");
 	_world_environment = get_node<WorldEnvironment>("%WorldEnvironment");
@@ -87,29 +93,12 @@ void End::run_phase_event(String phase_event)
 	}
 }
 
-void End::_server_run_phase_event(String phase_event)
+void End::server_run_phase_event(String phase_event)
 {
-	// WORKAROUND: Cursed way to get server singeton but it works
-	auto server = (Server*) get_parent();
-	if (server == nullptr) {
-		UtilityFunctions::print("Couldn't run serverside phase event: server autoload was null");
-		return;
-	}
-
 	if (phase_event == "intro") {
 		return;
 	}
-
 	if (phase_event == "sandbox") {
-		// DEBUG: Serverside test entity spawning, TODO: Remove this!
-		auto info = server->create_entity("res://scenes/item_chair_gun.tscn", "end");
-		if (info != nullptr) {
-			info->track_property("position");
-			info->track_property("rotation");
-		}
-		auto entity = Object::cast_to<Node3D>(info->get_entity());
-		add_child(entity);
-		entity->set_position(Vector3(0, 100, 0));
 		return;
 	}
 }

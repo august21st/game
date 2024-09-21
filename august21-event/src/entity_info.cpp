@@ -3,6 +3,10 @@
 
 #include "entity_info.hpp"
 
+EntityInfo::EntityInfo()
+{
+}
+
 EntityInfo::EntityInfo(int id, Node* entity, String parent_scene)
 {
 	_id = id;
@@ -13,7 +17,13 @@ EntityInfo::EntityInfo(int id, Node* entity, String parent_scene)
 
 EntityInfo::~EntityInfo()
 {
-	_entity->queue_free();
+	if (_entity != nullptr) {
+		_entity->queue_free();
+	}
+}
+
+void EntityInfo::_bind_methods()
+{
 }
 
 Node* EntityInfo::get_entity()

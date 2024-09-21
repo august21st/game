@@ -29,6 +29,7 @@
 #include <godot_cpp/classes/timer.hpp>
 #include <godot_cpp/core/math.hpp>
 #include <godot_cpp/core/memory.hpp>
+#include <godot_cpp/core/error_macros.hpp>
 #include <godot_cpp/core/property_info.hpp>
 #include <godot_cpp/variant/array.hpp>
 #include <godot_cpp/variant/string.hpp>
@@ -268,6 +269,10 @@ void Client::start_with_socket(Ref<WebSocketPeer> socket)
 
 	UtilityFunctions::print("Starting game with socket ", socket->get_requested_url());
 	set_process(true);
+
+	auto auth_packet = BufWriter();
+	auth_packet.u8(ClientPacket::AUTHENTICATE);
+	send(auth_packet);
 }
 
 Ref<WebSocketPeer> Client::get_socket()
@@ -365,7 +370,6 @@ void Client::_process(double delta)
 			uint8_t code = packet.u8();
 			switch (code) {
 				case ServerPacket::GAME_INFO: {
-					auto players_waiting = packet.u32();
 					// Add ourselves into the generic player list
 					auto player_id = packet.u32();
 					_player_id = player_id;
@@ -417,11 +421,11 @@ void Client::_process(double delta)
 					}
 
 					auto player_entity = _players[id];
-					auto position = Vector3(packet.f32(), packet.f32(), packet.f32());
-					auto rotation = Vector3(packet.f32(), packet.f32(), packet.f32());
+					auto position = read_vector3(packet); // position
+					auto velocity = read_vector3(packet); // velocity
+					auto rotation = read_vector3(packet); // rotation
 					auto current_animation_str = (string) packet.str();
 					auto current_animation = String(current_animation_str.c_str());
-
 					auto current_scene_node = _client_scene->get_child(0);
 					auto player_parent = player_entity->get_parent();
 					if (player_parent != current_scene_node) {
@@ -429,8 +433,8 @@ void Client::_process(double delta)
 						current_scene_node->add_child(player_entity);
 					}
 
-					player_entity->set_position(position);
-					player_entity->set_rotation(rotation);
+					player_entity->set_global_position(position);
+					player_entity->set_global_rotation(rotation);
 					break;
 				}
 				case ServerPacket::UPDATE_PLAYER_HEALTH: {
@@ -479,12 +483,12 @@ void Client::_process(double delta)
 				case ServerPacket::UPDATE_ENTITY: {
 					auto id = packet.u32();
 					if (!_entities.has(id)) {
-						//UtilityFunctions::print("Couldn't update entity with id ", id, ": entity not found.");
+						UtilityFunctions::print("Couldn't update entity with id ", id, ": entity not found.");
 						break;
 					}
 					auto entity = _entities[id];
 
-					auto property_count = packet.u8();
+					auto property_count = packet.flint();
 					for (auto i = 0; i < property_count; i++) {
 						auto property_str = (string) packet.str();
 						auto property = String(property_str.c_str());
@@ -543,11 +547,27 @@ void Client::_process(double delta)
 					_current_phase_event = phase_event;
 					break;
 				}
+				case ServerPacket::GRAB: {
+					auto player_id = packet.u32();
+					if (!_players.has(player_id)) {
+						UtilityFunctions::print("Could not handle item grab: player ", player_id, " not found");
+					}
+					auto entity_id = packet.u32();
+					if (!_entities.has(entity_id)) {
+						UtilityFunctions::print("Could not handle item grab: entity ", entity_id, " not found");
+						break;
+					}
+
+					auto player = _players.get(player_id);
+					UtilityFunctions::print("DEBUG: Grab");
+					break;
+				}
 				default: {
-					emit_signal("packet_received", packed_packet);
 					break;
 				}
 			}
+
+			emit_signal("packet_received", packed_packet);
 		}
 	}
 }
@@ -821,4 +841,16 @@ EntityPlayerBase* Client::get_player(int id)
 	}
 
 	return nullptr;
+}
+
+int Client::get_entity_id(Node* entity_node)
+{
+	// TODO: This is scuffed - maintain a reverse HashMap instead
+	for (auto &[id, entity] : _entities) {
+		if (entity_node == entity) {
+			return id;
+		}
+	}
+
+	return -1;
 }

@@ -1,7 +1,6 @@
 #include <godot_cpp/classes/web_socket_peer.hpp>
 
 #include "client_data.hpp"
-#include "entity_info.hpp"
 
 using namespace godot;
 

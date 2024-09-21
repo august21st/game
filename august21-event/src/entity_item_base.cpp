@@ -3,8 +3,9 @@
 #include <godot_cpp/variant/node_path.hpp>
 #include <godot_cpp/classes/rigid_body3d.hpp>
 #include <godot_cpp/classes/global_constants.hpp>
-#include  "node_shared.hpp"
 
+#include "server.hpp"
+#include "node_shared.hpp"
 #include "entity_item_base.hpp"
 
 using namespace NodeShared;
@@ -97,6 +98,23 @@ void EntityItemBase::_ready()
 	else if (_handle != nullptr) {
 		_handle_path = _handle->get_path();
 	}*/
+
+	// Register ourselves as an entity automatically
+	_server = get_global_server(this);
+	if (_server == nullptr) {
+		UtilityFunctions::print("Couldn't run serverside phase event: server autoload was null");
+		return;
+	}
+
+	// DEBUG: Serverside test entity spawning, TODO: Remove this!
+	auto info = _server->register_entity(this, "end");
+	if (info != nullptr) {
+		info->track_property("position");
+		info->track_property("rotation");
+	}
+	auto entity = Object::cast_to<Node3D>(info->get_entity());
+	add_child(entity);
+	entity->set_position(Vector3(0, 100, 0));
 }
 
 void EntityItemBase::set_can_grab_override(int value)

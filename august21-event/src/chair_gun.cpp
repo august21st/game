@@ -1,25 +1,23 @@
+#include <godot_cpp/core/object.hpp>
 #include <godot_cpp/classes/node3d.hpp>
 
 using namespace godot;
 
-#include "server.hpp"
 #include "chair_gun.hpp"
 #include "entity_item_base.hpp"
 #include "entity_info.hpp"
 
 void ChairGun::_bind_methods()
 {
-
+	ClassDB::bind_method(D_METHOD("server_use"), &ChairGun::server_use);
 }
 
 ChairGun::ChairGun()
 {
-
 }
 
 ChairGun::~ChairGun()
 {
-
 }
 
 bool ChairGun::is_item()

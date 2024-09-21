@@ -9,9 +9,9 @@
 #include <godot_cpp/classes/base_material3d.hpp>
 #include <godot_cpp/classes/standard_material3d.hpp>
 #include <godot_cpp/variant/utility_functions.hpp>
+#include <godot_cpp/variant/packed_color_array.hpp>
 
 #include "board_mesh.hpp"
-#include "godot_cpp/variant/packed_color_array.hpp"
 
 using namespace godot;
 
@@ -23,11 +23,11 @@ BoardMesh::BoardMesh() : _board_width(0), _board_height(0), _board_loaded(false)
 
 BoardMesh::~BoardMesh()
 {
-	if (_board) {
+	if (_board != nullptr) {
 		delete _board;
 		_board = nullptr;
 	}
-	if (_palette) {
+	if (_palette != nullptr) {
 		delete _palette;
 		_palette = nullptr;
 	}

@@ -2,5 +2,8 @@
 
 [node name="Server" type="Server"]
 
+[node name="ServerScene" type="Node3D" parent="."]
+unique_name_in_owner = true
+
 [node name="ServerCamera" type="ServerCamera" parent="."]
 unique_name_in_owner = true

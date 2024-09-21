@@ -52,8 +52,8 @@ void Roof::_bind_methods()
 		&Roof::_on_floor_area_body_entered);
 	ClassDB::bind_method(D_METHOD("_on_graphics_quality_changed", "level"),
 		&Roof::_on_graphics_quality_changed);
-	ClassDB::bind_method(D_METHOD("_server_run_phase_event", "phase_event"),
-		&Roof::_server_run_phase_event);
+	ClassDB::bind_method(D_METHOD("server_run_phase_event", "phase_event"),
+		&Roof::server_run_phase_event);
 }
 
 void Roof::_ready()
@@ -69,6 +69,13 @@ void Roof::_ready()
 		return;
 	}
 	_client->connect("graphics_quality_changed", Callable(this, "_on_graphics_quality_changed"));
+
+	_server = get_tree()->get_root()->get_node<Server>("/root/GlobalServer");
+	if (_server == nullptr) {
+		UtilityFunctions::print("Couldn't run serverside phase event: server autoload was null");
+		return;
+	}
+
 	_player = _client->get_player_body();
 
 	_resource_loader = ResourceLoader::get_singleton();
@@ -183,14 +190,7 @@ void Roof::run_phase_event(String phase_event)
 	}
 }
 
-// Serverside run phase event, works similarly to the client counterpart but
-// carries out only the essential server side operations of the event
-void Roof::_server_run_phase_event(String phase_event)
+void Roof::server_run_phase_event(String phase_event)
 {
-	// WORKAROUND: Cursed way to get server singeton but it works
-	auto server = (Server*) get_parent();
-	if (server == nullptr) {
-		UtilityFunctions::print("Couldn't run serverside phase event: server autoload was null");
-		return;
-	}
+
 }

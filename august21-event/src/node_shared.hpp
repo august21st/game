@@ -5,6 +5,9 @@
 #include <godot_cpp/classes/world_environment.hpp>
 #include <dataproto_cpp/dataproto.hpp>
 
+#include "server.hpp"
+#include "client.hpp"
+
 using namespace godot;
 using namespace dataproto;
 
@@ -48,6 +51,8 @@ namespace NodeShared {
 	void write_entity_data(String node_path, BufWriter& buffer);
 	Node* read_entity_data(BufReader& buffer);
 	void set_environment(WorldEnvironment* environment_node, String path);
+	Server* get_global_server(Node* origin);
+	Client* get_global_client(Node* origin);
 
 	const float PI = 3.14159265358979f;
 }

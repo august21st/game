@@ -4,6 +4,7 @@
 #include <godot_cpp/godot.hpp>
 
 #include "register_types.hpp"
+#include "entity_info.hpp"
 #include "entity_player_base.hpp"
 #include "entity_item_base.hpp"
 #include "chair_gun.hpp"
@@ -31,6 +32,7 @@ void initialize_gdextension_types(ModuleInitializationLevel p_level)
 	GDREGISTER_RUNTIME_CLASS(Client);
 	GDREGISTER_RUNTIME_CLASS(LoadingScreen);
 	GDREGISTER_RUNTIME_CLASS(PlayerBody);
+	GDREGISTER_RUNTIME_CLASS(EntityInfo);
 	GDREGISTER_RUNTIME_CLASS(EntityItemBase);
 	GDREGISTER_RUNTIME_CLASS(ChairGun);
 	GDREGISTER_RUNTIME_CLASS(EntityPlayerBase);

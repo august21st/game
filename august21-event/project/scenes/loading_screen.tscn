@@ -1,4 +1,4 @@
-[gd_scene load_steps=24 format=3 uid="uid://ca11fthwu1qho"]
+[gd_scene load_steps=25 format=3 uid="uid://ca11fthwu1qho"]
 
 [ext_resource type="Theme" uid="uid://dbwgna8gjqom8" path="res://assets/default_theme.tres" id="1_ieq0l"]
 [ext_resource type="Texture2D" uid="uid://bpcp8t666sgwn" path="res://assets/rplace_gold.png" id="2_bqd13"]
@@ -15,6 +15,7 @@
 [ext_resource type="PackedScene" uid="uid://557546e284g8" path="res://assets/short_assault_rifle/short_assault_rifle.glb" id="10_cpb0a"]
 [ext_resource type="Texture2D" uid="uid://dvcd2uhy1ay1d" path="res://assets/gold/gold_metallic.png" id="10_h8l0m"]
 [ext_resource type="Texture2D" uid="uid://dmn4wiikt6tfm" path="res://assets/gold/gold_roughness.png" id="11_mty8y"]
+[ext_resource type="Material" uid="uid://bmxbe0awryln4" path="res://assets/chair_gun/polished_metal.tres" id="16_45kp8"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_3f3t6"]
 shader = ExtResource("2_kc0ms")
@@ -339,5 +340,42 @@ transform = Transform3D(0.428739, -0.784082, 0.448773, 0.877397, 0.479763, -2.68
 [node name="ShortAssaultRifle" parent="FlyingObjects" instance=ExtResource("10_cpb0a")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -43.2389)
 
+[node name="Barrel" parent="FlyingObjects/ShortAssaultRifle/ShortAssaultRifle" index="0"]
+material_override = ExtResource("16_45kp8")
+
+[node name="EjectionPort" parent="FlyingObjects/ShortAssaultRifle/ShortAssaultRifle" index="1"]
+material_override = ExtResource("16_45kp8")
+
+[node name="Grip" parent="FlyingObjects/ShortAssaultRifle/ShortAssaultRifle" index="2"]
+material_override = ExtResource("16_45kp8")
+
+[node name="LowerFrame" parent="FlyingObjects/ShortAssaultRifle/ShortAssaultRifle" index="3"]
+material_override = ExtResource("16_45kp8")
+
+[node name="Rail" parent="FlyingObjects/ShortAssaultRifle/ShortAssaultRifle" index="4"]
+material_override = ExtResource("16_45kp8")
+
+[node name="Scope" parent="FlyingObjects/ShortAssaultRifle/ShortAssaultRifle" index="5"]
+surface_material_override/0 = ExtResource("16_45kp8")
+
+[node name="ScopeSideKnob" parent="FlyingObjects/ShortAssaultRifle/ShortAssaultRifle" index="6"]
+material_override = ExtResource("16_45kp8")
+
+[node name="ScopeSideKnob_001" parent="FlyingObjects/ShortAssaultRifle/ShortAssaultRifle" index="7"]
+surface_material_override/0 = ExtResource("16_45kp8")
+
+[node name="ScopeStand" parent="FlyingObjects/ShortAssaultRifle/ShortAssaultRifle" index="8"]
+material_override = ExtResource("16_45kp8")
+
+[node name="ScopeTopKnob" parent="FlyingObjects/ShortAssaultRifle/ShortAssaultRifle" index="9"]
+material_override = ExtResource("16_45kp8")
+
+[node name="StockBottom" parent="FlyingObjects/ShortAssaultRifle/ShortAssaultRifle" index="10"]
+material_override = ExtResource("16_45kp8")
+
+[node name="UpperFrame" parent="FlyingObjects/ShortAssaultRifle/ShortAssaultRifle" index="11"]
+material_override = ExtResource("16_45kp8")
+
 [editable path="Tube"]
 [editable path="FlyingObjects/AtaturkHead"]
+[editable path="FlyingObjects/ShortAssaultRifle"]

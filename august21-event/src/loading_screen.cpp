@@ -188,7 +188,7 @@ void LoadingScreen::_process(double delta)
 	for (auto i = 0; i < _servers.size(); i++) {
 		auto server = _servers[i];
 		// If we poll from the current server the client is using, we will
-		// steal it's packet
+		// steal its packets
 		if (server->current == true) {
 			continue;
 		}
@@ -228,7 +228,8 @@ void LoadingScreen::_process(double delta)
 							auto int_hours = (int) duration / 3600;
 							auto hours = String("{0}").format(Array::make(int_hours)).lpad(2, "0");
 							auto minutes = String("{0}").format(Array::make((duration % 3600) / 60)).lpad(2, "0");
-							auto seconds = String("{0}").format(Array::make((duration % 60) / 60)).lpad(2, "0");
+							auto seconds = String("{0}").format(Array::make(duration % 60)).lpad(2, "0");
+
 							if (int_hours > 0) {
 								server_description = String("{0}:{1}:{2} Players: {3}, Phase: {4}")
 									.format(Array::make(hours, minutes, seconds, server->player_count, server->phase));
@@ -273,7 +274,7 @@ void LoadingScreen::_process(double delta)
 
 void LoadingScreen::_on_packet_received(PackedByteArray packed_packet)
 {
-	auto packet = BufReader((char*) packed_packet.ptr(), packed_packet.size());
+	/*auto packet = BufReader((char*) packed_packet.ptr(), packed_packet.size());
 	uint8_t code = packet.u8();
 	switch (code) {
 		case ServerPacket::GAME_INFO: {
@@ -283,7 +284,7 @@ void LoadingScreen::_on_packet_received(PackedByteArray packed_packet)
 			_players_label->set_text(formatted_count);
 			break;
         }
-    }
+    }*/
 }
 
 void LoadingScreen::_on_graphics_quality_changed(int level)

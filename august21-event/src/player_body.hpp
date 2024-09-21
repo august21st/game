@@ -21,11 +21,12 @@
 #include <godot_cpp/classes/skeleton3d.hpp>
 #include <godot_cpp/classes/nine_patch_rect.hpp>
 #include <godot_cpp/classes/shader_material.hpp>
+#include <godot_cpp/classes/resource_loader.hpp>
+#include <godot_cpp/classes/h_box_container.hpp>
 
 #include "entity_player_base.hpp"
-// WORKAROUND: Forward declare to fix circular dependency
+// Forward declare Client as it is only used as a pointer here
 class Client;
-#include "client.hpp"
 
 using namespace godot;
 
@@ -77,8 +78,12 @@ private:
 	RayCast3D*  _grab_ray;
 	EntityItemBase* _hovered_item_entity;
 	int scroll_inventory_current(int by);
-	void set_inventory_current(int value);
+	void set_inventory_current(int value) override;
 	void set_mesh_next_pass_recursive(Node* root, Ref<Material> material);
+
+	// Server
+	Vector3 _last_packet_posiiton;
+	Vector3 _last_packet_rotation;
 
 	// Signal handlers
 	void _on_revive_pressed();

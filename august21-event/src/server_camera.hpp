@@ -11,10 +11,14 @@ class ServerCamera : public Camera3D {
 private:
 	Input* _camera_input;
 	bool _right_mouse_drag;
-	const float MOUSE_SENSITIVITY = 0.001f;
-	const float MOVE_SPEED = 5.0f;
+	float _move_speed;
+	const float MOUSE_SENSITIVITY = 0.04f;
+	const float SCROLL_FACTOR = 1.1;
+	const float MOVE_SPEED_MIN = 4.0f;
+	const float MOVE_SPEED_MAX = 100.0f;
 
-protected:	static void _bind_methods();
+protected:
+	static void _bind_methods();
 
 public:
 	ServerCamera();

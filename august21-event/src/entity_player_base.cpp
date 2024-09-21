@@ -26,6 +26,10 @@ void EntityPlayerBase::_bind_methods()
 	ClassDB::bind_method(D_METHOD("set_health"), &EntityPlayerBase::set_health);
 	ClassDB::bind_method(D_METHOD("get_model_variant"), &EntityPlayerBase::get_model_variant);
 	ClassDB::bind_method(D_METHOD("set_model_variant"), &EntityPlayerBase::set_model_variant);
+	//ClassDB::bind_method(D_METHOD("get_inventory"), &EntityPlayerBase::get_inventory);
+	//ClassDB::bind_method(D_METHOD("set_inventory"), &EntityPlayerBase::set_inventory);
+	ClassDB::bind_method(D_METHOD("get_inventory_current"), &EntityPlayerBase::get_inventory_current);
+	ClassDB::bind_method(D_METHOD("set_inventory_current"), &EntityPlayerBase::set_inventory_current);
 	ADD_PROPERTY(PropertyInfo(Variant::STRING, "chat_name"), "set_chat_name", "get_chat_name");
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "health"), "set_health", "get_health");
 	ADD_PROPERTY(PropertyInfo(Variant::STRING, "model_variant"), "set_model_variant", "get_model_variant");
@@ -59,6 +63,16 @@ void EntityPlayerBase::set_model_variant(String value)
 String EntityPlayerBase::get_model_variant()
 {
 	return _model_variant;
+}
+
+List<EntityItemBase*>* EntityPlayerBase::get_inventory()
+{
+	return &_inventory;
+}
+
+void EntityPlayerBase::set_inventory(List<EntityItemBase*> value)
+{
+	_inventory = value;
 }
 
 void EntityPlayerBase::set_inventory_current(int value)

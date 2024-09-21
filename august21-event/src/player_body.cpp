@@ -345,6 +345,15 @@ void PlayerBody::_unhandled_input(const Ref<InputEvent> &event)
 						UtilityFunctions::print("Failed to add inventory item: Loading inventory item scene failed with ", load_error);
 					}
 					_inventory_box->add_child(inventory_item);
+
+					// Notify server
+					auto grab_packet = BufWriter();
+					grab_packet.u8(ClientPacket::ACTION_GRAB);
+					auto entity_id = _client->get_entity_id(item_entity);
+					if (entity_id != -1) {
+						grab_packet.u32(entity_id);
+					}
+					_client->send(grab_packet);
 				}
 				break;
 			}
@@ -457,27 +466,32 @@ void PlayerBody::_physics_process(double delta)
 	set_velocity(_velocity);
 	move_and_slide();
 
-	// Update player on server
-	if (_update_tick % 3 == 0) { // 20 tps
+	// Update player on server every 20 ticks on move
+	auto current_position = get_global_position();
+	auto current_rotation = get_global_rotation();
+	auto moved = current_position.distance_to(_last_packet_posiiton) > 0.1f
+		|| current_rotation.distance_to(_last_packet_rotation) > 0.1f;
+	if (_update_tick % 3 == 0 && moved) {
 		auto update_packet = BufWriter();
 		update_packet.u8(ClientPacket::UPDATE_MOVEMENT);
 		auto phase_scene = _client->get_current_phase_scene();
 		auto phase_scene_utf8 = phase_scene.utf8().get_data();
 		update_packet.str(phase_scene_utf8);
-		auto position = get_position();
-		update_packet.f32(position.x);
-		update_packet.f32(position.y);
-		update_packet.f32(position.z);
-		auto rotation = get_rotation();
-		update_packet.f32(rotation.x);
-		update_packet.f32(rotation.y);
-		update_packet.f32(rotation.z);
+		auto position = get_global_position();
+		write_vector3(update_packet, position);
+		auto velocity = _velocity;
+		write_vector3(update_packet, velocity);
+		auto rotation = get_global_rotation();
+		write_vector3(update_packet, rotation);
 		// TODO: Implement current_animation
 		auto current_animation = String("idle");
 		auto current_animation_utf8 = current_animation.utf8().get_data();
 		update_packet.str(current_animation_utf8);
 		update_packet.u32(_health);
 		_client->send(update_packet);
+
+		_last_packet_posiiton = current_position;
+		_last_packet_rotation = current_rotation;
 	}
 	_update_tick++;
 }
@@ -676,7 +690,7 @@ void PlayerBody::set_health(int value)
 void PlayerBody::respawn(Vector3 position)
 {
 	set_position(position);
-	_camera_pivot->set_rotation(Vector3(90, 0, 0));
+	_camera_pivot->set_rotation(Vector3(0, 0, 0));
 	set_rotation(Vector3(0, 0, 0));
 	_player_input->set_mouse_mode(Input::MOUSE_MODE_CAPTURED);
 	_death_panel->set_visible(false);

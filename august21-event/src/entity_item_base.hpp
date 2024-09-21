@@ -5,7 +5,12 @@
 #include <godot_cpp/core/class_db.hpp>
 #include <godot_cpp/classes/rigid_body3d.hpp>
 
+// Forward declare to fix circular dependency
+class Server;
+#include "server.hpp"
+
 using namespace godot;
+
 
 // An entity:item, as in, an entity of type item, is an entity that represents
 // the itemised form of a node, and is usually the direct parent of the node
@@ -14,6 +19,7 @@ class EntityItemBase : public RigidBody3D {
 	GDCLASS(EntityItemBase, RigidBody3D);
 
 private:
+	Server* _server;
 	int _can_grab_override;
 	Area3D* _grab_area;
 	NodePath _grab_area_path;

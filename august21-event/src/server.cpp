@@ -16,11 +16,13 @@
 #include <godot_cpp/classes/camera3d.hpp>
 #include <godot_cpp/classes/node3d.hpp>
 #include <godot_cpp/classes/time.hpp>
+#include <godot_cpp/classes/mutex.hpp>
 #include <dataproto_cpp/dataproto.hpp>
 #include <commandIO.hpp>
 
 #include "server.hpp"
 #include "client_data.hpp"
+#include "entity_item_base.hpp"
 #include "network_shared.hpp"
 #include "node_shared.hpp"
 #include "entity_player.hpp"
@@ -35,11 +37,7 @@ using namespace std;
 using namespace NetworkShared;
 using namespace NodeShared;
 
-#define INTERVAL_SECONDS(count) (_tick_count / TPS) % count == 0
-
-const int PLAYER_LIMIT = 512;
-const int SERVER_PORT = 8021;
-const int TPS = 20;
+#define INTERVAL_SECONDS(count) (_tick_count % (count * TPS) == 0)
 
 Server::Server() : _socket_server(nullptr), _server_camera(nullptr)
 {
@@ -61,6 +59,9 @@ void Server::_bind_methods()
 	ClassDB::bind_method(D_METHOD("run_console_loop"), &Server::run_console_loop);
 	ClassDB::bind_method(D_METHOD("set_phase", "name"), &Server::set_phase);
 	ClassDB::bind_method(D_METHOD("create_entity", "node_path", "parent_scene"), &Server::create_entity);
+	ClassDB::bind_method(D_METHOD("register_entity", "entity", "parent_scene"), &Server::register_entity);
+	ClassDB::bind_method(D_METHOD("list_players"), &Server::list_players);
+	ClassDB::bind_method(D_METHOD("list_entities"), &Server::list_entities);
 }
 
 void Server::_ready()
@@ -110,11 +111,15 @@ void Server::_ready()
 	_display_server = DisplayServer::get_singleton();
 	if (_display_server->get_name() != "headless") {
 		_server_camera = get_node<Camera3D>("%ServerCamera");
+		_server_scene = get_node<Node3D>("%ServerScene");
 	}
 
 	// Initialise properties
-	_clients = { };
-	_entities = { };
+	_clients = HashMap<int, ClientData*>();
+	_authenticated_clients = HashMap<int, ClientData*>();
+	_entities = HashMap<int, EntityInfo*>();
+	_entities_lock = memnew(Mutex());
+	_entities_head = 0;
 	_start_time = _time->get_unix_time_from_system();
 	_game_time = 0.0L;
 	_tick_count = 0;
@@ -144,12 +149,11 @@ void Server::_physics_process(double delta)
 					// Client has choosen us in the server list, and will now
 					// be subscribed to game events
 					sender->authenticate();
+					_authenticated_clients[sender_id] = sender;
 
 					// Send initial game state info to client
 					auto game_info_packet = BufWriter();
 					game_info_packet.u8(ServerPacket::GAME_INFO);
-					// TODO: Implement players waiting
-					game_info_packet.u32((uint32_t) _clients.size()); // players waiting
 					game_info_packet.u32(sender_id); // (their) player id
 					send(sender_id, game_info_packet);
 
@@ -194,8 +198,8 @@ void Server::_physics_process(double delta)
 					auto phase_scene_str = (string) packet.str();
 					auto phase_scene = String(phase_scene_str.c_str());
 					if (!_phase_scenes.has(phase_scene)) {
-						//UtilityFunctions::print(
-						//	"Couldn't update movement for client ",  sender_id, ": phase scene doesn't exist");
+						UtilityFunctions::print("Couldn't update movement for client ",
+							sender_id, ": phase scene doesn't exist");
 						break;
 					}
 
@@ -207,10 +211,11 @@ void Server::_physics_process(double delta)
 						orphan_node(player_entity);
 						player_scene->add_child(player_entity);
 					}
-					auto position = Vector3(packet.f32(), packet.f32(), packet.f32());
-					player_entity->set_position(position);
-					auto rotation = Vector3(packet.f32(), packet.f32(), packet.f32());
-					player_entity->set_rotation(position);
+					auto position = read_vector3(packet); // position
+					player_entity->set_global_position(position);
+					auto velocity = read_vector3(packet); // velocity
+					auto rotation = read_vector3(packet); // rotation
+					player_entity->set_global_rotation(rotation);
 					auto current_animation_str = packet.str();
 
 					// Distribute updates to other clients
@@ -218,12 +223,9 @@ void Server::_physics_process(double delta)
 					update_packet.u8(ServerPacket::UPDATE_PLAYER_MOVEMENT);
 					update_packet.u32(sender_id); // player ID
 					update_packet.str(phase_scene_str); // phase scene
-					update_packet.f32(position.x); // position
-					update_packet.f32(position.y);
-					update_packet.f32(position.z);
-					update_packet.f32(rotation.x); // rotation
-					update_packet.f32(rotation.y);
-					update_packet.f32(rotation.z);
+					write_vector3(update_packet, position); // position
+					write_vector3(update_packet, velocity); // velocity
+					write_vector3(update_packet, rotation); // rotation
 					update_packet.str(current_animation_str); // current animation
 					send_to_others(sender_id, update_packet);
 					break;
@@ -235,13 +237,42 @@ void Server::_physics_process(double delta)
 					health_packet.u8(ServerPacket::UPDATE_PLAYER_HEALTH);
 					health_packet.u32(sender_id);
 					health_packet.u32(health);
-					send_to_all(health_packet);
+					send_to_authenticated(health_packet);
 					break;
 				}
 				case ClientPacket::ACTION_DROP: {
 					break;
 				}
 				case ClientPacket::ACTION_GRAB: {
+					_entities_lock->lock();
+					auto item_id = packet.u32();
+					if (!_entities.has(item_id)) {
+						_entities_lock->unlock();
+						break;
+					}
+					auto entity_info = _entities[item_id];
+					auto item_entity = Object::cast_to<EntityItemBase>(entity_info->get_entity());
+					if (item_entity == nullptr) {
+						// What the sigma
+						_entities_lock->unlock();
+						break;
+					}
+					_entities_lock->unlock();
+					orphan_node(item_entity);
+					auto player_body = sender->get_entity();
+					player_body->add_child(item_entity);
+					auto inventory = player_body->get_inventory();
+					inventory->push_back(item_entity);
+					player_body->set_inventory_current(inventory->size() - 1);
+
+					auto grab_packet = BufWriter();
+					grab_packet.u8(ServerPacket::GRAB);
+					grab_packet.u32(sender_id);
+					grab_packet.u32(item_id);
+					send_to_authenticated(grab_packet);
+					break;
+				}
+				case ClientPacket::ACTION_SWITCH: {
 					break;
 				}
 				case ClientPacket::ACTION_USE: {
@@ -253,7 +284,7 @@ void Server::_physics_process(double delta)
 					chat_packet.u8(ServerPacket::CHAT_MESSAGE);
 					chat_packet.i32(sender_id);
 					chat_packet.str(message);
-					send_to_all(chat_packet);
+					send_to_authenticated(chat_packet);
 					break;
 				}
 			}
@@ -261,12 +292,13 @@ void Server::_physics_process(double delta)
 	}
 
 	// Query new world state & run game loop
+	_entities_lock->lock();
 	for (auto &[id, entity_info] : _entities) {
 		auto update_packet = BufWriter();
 		update_packet.u8(ServerPacket::UPDATE_ENTITY);
 		update_packet.u32(id);
 		auto tracked_properties = entity_info->get_tracked_properties();
-		update_packet.u16(tracked_properties.size());
+		update_packet.flint(tracked_properties.size());
 		for (auto property : tracked_properties) {
 			if (entity_info->tracked_property_changed(property)) {
 				auto property_utf8 = property.utf8().get_data();
@@ -275,10 +307,11 @@ void Server::_physics_process(double delta)
 				write_compressed_variant(value, update_packet);
 			}
 		}
-		send_to_all(update_packet);
+		send_to_authenticated(update_packet);
 	}
+	_entities_lock->unlock();
 
-	if (INTERVAL_SECONDS(2)) {
+	if (INTERVAL_SECONDS(1)) {
 		distribute_server_info();
 	}
 	_game_time += delta;
@@ -317,7 +350,7 @@ void Server::_on_peer_connected(int id)
 		return;
 	}
 	auto chat_name = String("anon");
-	auto client_data = new ClientData(client_socket, client_body);
+	auto client_data = memnew(ClientData(client_socket, client_body));
 	_clients[id] = client_data;
 
 	distribute_server_info();
@@ -325,8 +358,11 @@ void Server::_on_peer_connected(int id)
 
 void Server::_on_peer_disconnected(int id)
 {
-	delete _clients[id];
+	memdelete(_clients[id]);
 	_clients.erase(id);
+	if (_authenticated_clients.has(id)) {
+		_authenticated_clients.erase(id);
+	}
 }
 
 void Server::distribute_server_info()
@@ -334,7 +370,7 @@ void Server::distribute_server_info()
 	// Server list details
 	auto server_info_packet = BufWriter();
 	server_info_packet.u8(ServerPacket::SERVER_INFO);
-	auto duration_s = _start_time - _time->get_unix_time_from_system();
+	auto duration_s = _time->get_unix_time_from_system() - _start_time;
 	server_info_packet.u32(duration_s); // duration_s
 	// TODO: Use authenticated clients size
 	server_info_packet.u32(_clients.size()); // player_count
@@ -364,18 +400,15 @@ godot::Error Server::register_phase_scene(String identifier, String path)
 	return godot::Error::OK;
 }
 
-int Server::next_entity_id()
+uint Server::next_entity_id()
 {
-	// Create new entity locally
-	int max_id = 0;
-	for (auto entity : _entities) {
-		auto id = entity.key;
-		if (id > max_id) {
-			max_id = id;
-		}
+	_entities_lock->lock();
+	_entities_head++;
+	while (_entities.has(_entities_head)) {
+		_entities_head++;
 	}
-	int new_id = max_id + 1;
-	return new_id;
+	_entities_lock->unlock();
+	return _entities_head;
 }
 
 void Server::repl_create_entity(string node_path, string parent_scene)
@@ -388,15 +421,17 @@ void Server::repl_create_entity(string node_path, string parent_scene)
 // clients to do so as  well, opposed to encoding the entire node inline
 EntityInfo* Server::create_entity(String node_path, String parent_scene)
 {
+	_entities_lock->lock();
 	auto new_id = next_entity_id();
 
 	Node* entity_node;
 	auto load_error = load_scene(node_path, &entity_node);
-	if (load_error != godot::Error::OK) {
+	if (load_error != godot::Error::OK || entity_node == nullptr) {
 		return nullptr;
 	}
-	auto info = new EntityInfo(new_id, entity_node, parent_scene);
+	auto info = memnew(EntityInfo(new_id, entity_node, parent_scene));
 	_entities.insert(new_id, info);
+	_entities_lock->unlock();
 
 	// Distribute to all clients
 	auto entity_info_packet = BufWriter();
@@ -408,15 +443,17 @@ EntityInfo* Server::create_entity(String node_path, String parent_scene)
 	// Write node data (node scene) - ObjectType::FILESYSTEM_NODE
 	write_entity_data(node_path, entity_info_packet); // entity data
 
-	send_to_all(entity_info_packet);
+	send_to_authenticated(entity_info_packet);
 	return info;
 }
 
 EntityInfo* Server::register_entity(Node* entity, String parent_scene)
 {
+	_entities_lock->lock();
 	auto new_id = next_entity_id();
-	auto info = new EntityInfo(new_id, entity, parent_scene);
+	auto info = memnew(EntityInfo(new_id, entity, parent_scene));
 	_entities.insert(new_id, info);
+	_entities_lock->unlock();
 
 	// Distribute to all clients
 	auto entity_info_packet = BufWriter();
@@ -428,7 +465,7 @@ EntityInfo* Server::register_entity(Node* entity, String parent_scene)
 	// Write node data (properties, children) - ObjectType::INLINE_NODE
 	write_entity_data(entity, entity_info_packet); // entity data
 
-	send_to_all(entity_info_packet);
+	send_to_authenticated(entity_info_packet);
 	return info;
 }
 
@@ -447,7 +484,8 @@ void Server::run_console_loop()
 			param("id", "Id of entity to be created"),
 			param("property", "Name of property to be modified"),
 			param("value", "New value to set of specified property")),*/
-		func(pack(this, &Server::list_players), "list_players", "List all connected players"),
+		func(pack(this, &Server::repl_list_entities), "list_entities", "List all entities"),
+		func(pack(this, &Server::repl_list_players), "list_players", "List all authenticated players"),
 		func(pack(this, &Server::kill_player), "kill_player", "Kill a specific player",
 			param("id", "Id of player to be killed")),
 		func(pack(this, &Server::kick_player), "kick_player", "Disconnect a specific player",
@@ -457,7 +495,7 @@ void Server::run_console_loop()
 			param("x", "X-coordinate of new location"),
 			param("y", "Y-coordinate of new location"),
 			param("z", "Z-coordinate of new location")),
-		func(pack(this, &Server::announce), "announce", "Send a message to all connected players",
+		func(pack(this, &Server::repl_announce), "announce", "Send a message to all connected players",
 			param("message", "Chat message to be broadcast"))));
 
 	// Exit
@@ -475,7 +513,7 @@ void Server::set_phase(String name)
 	auto phase_parts = name.split(":");
 	auto phase_scene = phase_parts.size() > 0 ? phase_parts[0] : "";
 	auto phase_event = phase_parts.size() > 1 ? phase_parts[1] : "";
-	if (phase_scene == "" || !_phase_scenes.has(phase_scene)) {
+	if (phase_scene == "") {
 		UtilityFunctions::print("Couldn't set phase to ", name, ": Invalid phase scene name");
 		return;
 	}
@@ -487,9 +525,11 @@ void Server::set_phase(String name)
 	// If multiple scenes are present, they will overlap physics and cause chaos -
 	// only one scene can be in tree at a time to prevent interference
 	for (auto &[identifier, scene_node] : _phase_scenes) {
-		if (identifier == name) {
+		auto identifier_parts = identifier.split(":");
+		auto identifier_scene = identifier_parts.size() > 0 ? identifier_parts[0] : "";
+		if (identifier_scene == phase_scene && scene_node->get_parent() != _server_scene) {
 			// current scene
-			add_child(scene_node);
+			_server_scene->add_child(scene_node);
 			if (_server_camera != nullptr) {
 				_server_camera->set_position(Vector3(0, 0, 0));
 				_server_camera->set_current(true);
@@ -497,18 +537,18 @@ void Server::set_phase(String name)
 		}
 		else {
 			// Other scene
-			remove_child(scene_node);
+			_server_scene->remove_child(scene_node);
 		}
 	}
 
 	// Run phase event on server replication scenes
 	if (phase_scene == "roof") {
 		auto roof_scene = (Roof*) _phase_scenes["roof"];
-		roof_scene->call_deferred("_server_run_phase_event", phase_event);
+		roof_scene->call_deferred("server_run_phase_event", phase_event);
 	}
 	else if (phase_scene == "end") {
 		auto end_scene = (End*) _phase_scenes["end"];
-		end_scene->call_deferred("_server_run_phase_event", phase_event);
+		end_scene->call_deferred("server_run_phase_event", phase_event);
 	}
 
 	// Run phase event on clients
@@ -530,11 +570,17 @@ void Server::repl_update_entity(int id, string property, string value)
 	// TODO: Implement this!
 }
 
+void Server::repl_list_players()
+{
+	call_deferred("list_players");
+}
+
+// Prints player list with main player properties in a JSON-like manner
 void Server::list_players()
 {
 	auto player_list = String("Showing {0} players:\n")
-		.format(Array::make(_clients.size()));
-	for (auto &[player_id, client] : _clients) {
+		.format(Array::make(_authenticated_clients.size()));
+	for (auto &[player_id, client] : _authenticated_clients) {
 		auto client_entity = client->get_entity();
 		player_list += String("{0}: { chat_name: {1}, health: {2}, position: {3}, rotation: {4} }")
 			.format(Array::make(player_id, client_entity->get_chat_name(),
@@ -543,6 +589,34 @@ void Server::list_players()
 		player_list += "\n";
 	}
 	UtilityFunctions::print(player_list);
+}
+
+void Server::repl_list_entities()
+{
+	call_deferred("list_entities");
+}
+
+// Prints entity list with tracked entity properties and metadata in a JSON-like manner
+void Server::list_entities()
+{
+	auto entity_list = String("Showing {0} entities:\n")
+		.format(Array::make(_entities.size()));
+	for (auto &[entity_id, entity_info] : _entities) {
+		auto entity = entity_info->get_entity();
+		if (entity == nullptr) {
+			entity_list += String("{0}: null").format(Array::make(entity_id));
+			continue;
+		}
+
+		entity_list += String("{0}: { parent_scene: {1}")
+			.format(Array::make(entity_id, entity_info->get_parent_scene()));
+		for (auto property : entity_info->get_tracked_properties()) {
+			entity_list += String(", {0}: {1}")
+				.format(Array::make(property, entity->get(property)));
+		}
+		entity_list += " }\n";
+	}
+	UtilityFunctions::print(entity_list);
 }
 
 void Server::kill_player(int id)
@@ -555,7 +629,7 @@ void Server::kill_player(int id)
 	health_packet.u8(ServerPacket::UPDATE_PLAYER_HEALTH);
 	health_packet.u32(id); // player_id
 	health_packet.u32(0); // health
-	send_to_all(health_packet);
+	send_to_authenticated(health_packet);
 }
 
 void Server::kick_player(int id)
@@ -572,13 +646,13 @@ void Server::tp_player(string scene, int x, int y, int z)
 {
 }
 
-void Server::announce(string message)
+void Server::repl_announce(string message)
 {
 	auto chat_packet = BufWriter();
 	chat_packet.u8(ServerPacket::CHAT_MESSAGE);
 	chat_packet.i32(0); // player_id
 	chat_packet.str(message);
-	send_to_all(chat_packet);
+	send_to_authenticated(chat_packet);
 }
 
 void Server::send_to_others(int exclude_id, const BufWriter& packet)
@@ -611,6 +685,22 @@ void Server::send_to_all(const char* data, size_t size)
 	memcpy(packed_data.ptrw(), data, size);
 
 	for (auto &[id, client] : _clients) {
+		client->get_socket()->put_packet(packed_data);
+	}
+}
+
+void Server::send_to_authenticated(const BufWriter& packet)
+{
+	send_to_authenticated(packet.data(), packet.size());
+}
+
+void Server::send_to_authenticated(const char* data, size_t size)
+{
+	auto packed_data = PackedByteArray();
+	packed_data.resize(size);
+	memcpy(packed_data.ptrw(), data, size);
+
+	for (auto &[id, client] : _authenticated_clients) {
 		client->get_socket()->put_packet(packed_data);
 	}
 }

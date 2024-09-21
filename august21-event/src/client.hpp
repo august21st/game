@@ -28,7 +28,7 @@
 #include <godot_cpp/classes/timer.hpp>
 
 #include "entity_player_base.hpp"
-// WORKAROUND: Forward declare to fix circular dependency
+// Forward declare to fix circular dependency
 class PlayerBody;
 #include "player_body.hpp"
 
@@ -58,8 +58,8 @@ class Client : public Node {
 	GDCLASS(Client, Node);
 
 private:
-	OS *_os;
-	Engine *_engine;
+	OS* _os;
+	Engine* _engine;
 	TranslationServer* _translation_server;
 	AudioServer* _audio_server;
 	Performance* _performance;
@@ -254,4 +254,5 @@ public:
 	PlayerBody* get_player_body();
 	HashMap<int, EntityPlayerBase*> get_players();
 	EntityPlayerBase* get_player(int id);
+	int get_entity_id(Node* entity);
 };

@@ -13,6 +13,7 @@
 #include <godot_cpp/classes/rich_text_label.hpp>
 
 #include "client.hpp"
+#include "server.hpp"
 #include "board_mesh.hpp"
 #include "player_body.hpp"
 
@@ -24,8 +25,9 @@ class Roof : public Node3D {
 
 private:
 	Engine* _engine;
-	ResourceLoader* _resource_loader;
 	Client* _client;
+	Server* _server;
+	ResourceLoader* _resource_loader;
 	DirectionalLight3D* _sun_light;
 	Area3D* _floor_area;
 	AnimationPlayer* _sky_animation_player;
@@ -55,7 +57,7 @@ private:
 	};
 	void _on_floor_area_body_entered(Node3D* body);
 	void _on_graphics_quality_changed(int level);
-	void _server_run_phase_event(String phase_event);
+	void server_run_phase_event(String phase_event);
 
 protected:
 	static void _bind_methods();

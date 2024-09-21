@@ -15,7 +15,12 @@ private:
 	String _parent_scene;
 	HashMap<String, Variant> _tracked_properties;
 
+protected:
+	static void _bind_methods();
+
 public:
+	// Godot constructor - Don't use
+	EntityInfo();
 	EntityInfo(int id, Node* entity, String parent_scene);
 	~EntityInfo();
 	int get_id();
