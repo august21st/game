@@ -5,7 +5,6 @@
 #include <godot_cpp/variant/string.hpp>
 #include <godot_cpp/core/class_db.hpp>
 #include <godot_cpp/core/method_bind.hpp>
-#include <dataproto_cpp/dataproto.hpp>
 #include <godot_cpp/classes/scene_tree.hpp>
 #include <godot_cpp/classes/window.hpp>
 #include <godot_cpp/classes/directional_light3d.hpp>
@@ -13,6 +12,7 @@
 #include <godot_cpp/classes/mesh_instance3d.hpp>
 #include <godot_cpp/classes/mesh.hpp>
 #include <godot_cpp/classes/quad_mesh.hpp>
+#include <dataproto_cpp/dataproto.hpp>
 
 #include "entity_player.hpp"
 
@@ -34,11 +34,6 @@ void EntityPlayer::_bind_methods()
 
 void EntityPlayer::_ready()
 {
-	_engine = Engine::get_singleton();
-	if (_engine->is_editor_hint()) {
-		return;
-	}
-
 	_chat_name_label = get_node<Label3D>("%ChatNameLabel");
 	_healthbar_mesh = get_node<MeshInstance3D>("%HealthbarMesh");
 }

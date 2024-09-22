@@ -1,6 +1,5 @@
 #pragma once
 #include <godot_cpp/classes/node3d.hpp>
-#include <godot_cpp/classes/engine.hpp>
 #include <godot_cpp/classes/label3d.hpp>
 #include <godot_cpp/classes/mesh_instance3d.hpp>
 
@@ -12,7 +11,6 @@ class EntityPlayer : public EntityPlayerBase {
 	GDCLASS(EntityPlayer, EntityPlayerBase);
 
 private:
-	Engine* _engine;
 	Label3D* _chat_name_label;
 	MeshInstance3D* _healthbar_mesh;
 

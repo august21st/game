@@ -11,11 +11,19 @@
 
 using namespace NodeShared;
 
+Loader::Loader()
+{
+}
+
+Loader::~Loader()
+{
+}
+
 void Loader::_bind_methods()
 {
 }
 
-Loader::Loader()
+void Loader::_ready()
 {
 	auto os = OS::get_singleton();
 	auto resource_loader = ResourceLoader::get_singleton();
@@ -31,8 +39,4 @@ Loader::Loader()
 		get_tree()->get_root()->call_deferred("propagate_notification", NOTIFICATION_WM_CLOSE_REQUEST);
 		get_tree()->quit(-1);
 	}
-}
-
-Loader::~Loader()
-{
 }

@@ -14,4 +14,5 @@ protected:
 public:
 	Loader();
 	~Loader();
+	void _ready() override;
 };

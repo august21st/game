@@ -1,4 +1,3 @@
-#include <godot_cpp/classes/engine.hpp>
 #include <godot_cpp/classes/node3d.hpp>
 #include <godot_cpp/variant/signal.hpp>
 #include <godot_cpp/classes/animation_player.hpp>
@@ -22,12 +21,6 @@ void Intro::_bind_methods()
 
 void Intro::_ready()
 {
-    _engine = Engine::get_singleton();
-    if (_engine->is_editor_hint())
-    {
-        return;
-    }
-
-    _building_camera_player = get_node<AnimationPlayer>("BuildingCameraPlayer");
-    _building_camera_player->play("intro_animation");
+	_building_camera_player = get_node<AnimationPlayer>("BuildingCameraPlayer");
+	_building_camera_player->play("intro_animation");
 }

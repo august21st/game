@@ -1,6 +1,5 @@
 #pragma once
 #include <godot_cpp/classes/node3d.hpp>
-#include <godot_cpp/classes/engine.hpp>
 #include <godot_cpp/classes/directional_light3d.hpp>
 #include <godot_cpp/classes/world_environment.hpp>
 
@@ -14,7 +13,6 @@ class End : public Node3D {
 	GDCLASS(End, Node3D);
 
 private:
-	Engine* _engine;
 	// May be null
 	Client* _client;
 	// May be null

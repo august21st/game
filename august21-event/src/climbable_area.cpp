@@ -1,5 +1,4 @@
 #include <godot_cpp/classes/ref.hpp>
-#include <godot_cpp/classes/engine.hpp>
 #include <godot_cpp/classes/node3d.hpp>
 #include <godot_cpp/variant/signal.hpp>
 
@@ -27,29 +26,24 @@ void ClimbableArea::_bind_methods()
 
 void ClimbableArea::_ready()
 {
-	_engine = Engine::get_singleton();
-	if (_engine->is_editor_hint()) {
-		return;
-	}
-
-    connect("body_entered", Callable(this, "_on_body_entered"));
-    connect("body_exited", Callable(this, "_on_body_exited"));
+	connect("body_entered", Callable(this, "_on_body_entered"));
+	connect("body_exited", Callable(this, "_on_body_exited"));
 }
 
 void ClimbableArea::_on_body_entered(Node3D* body)
 {
-    if (!body->is_class("PlayerBody")) {
-        return;
-    }
-    auto player_body = Object::cast_to<PlayerBody>(body);
-    player_body->set_climbing(true);
+	if (!body->is_class("PlayerBody")) {
+		return;
+	}
+	auto player_body = Object::cast_to<PlayerBody>(body);
+	player_body->set_climbing(true);
 }
 
 void ClimbableArea::_on_body_exited(Node3D* body)
 {
-    if (!body->is_class("PlayerBody")) {
-        return;
-    }
-    auto player_body = Object::cast_to<PlayerBody>(body);
-    player_body->set_climbing(false);
+	if (!body->is_class("PlayerBody")) {
+		return;
+	}
+	auto player_body = Object::cast_to<PlayerBody>(body);
+	player_body->set_climbing(false);
 }

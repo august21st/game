@@ -40,11 +40,6 @@ void End::_bind_methods()
 
 void End::_ready()
 {
-	_engine = Engine::get_singleton();
-	if (_engine->is_editor_hint()) {
-		return;
-	}
-
 	_client = get_global_client(this);
 	if (_client != nullptr) {
 		_client->connect("graphics_quality_changed", Callable(this, "_on_graphics_quality_changed"));
