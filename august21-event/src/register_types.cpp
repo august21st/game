@@ -18,6 +18,7 @@
 #include "roof.hpp"
 #include "end.hpp"
 #include "server_camera.hpp"
+#include "loader.hpp"
 #include "server.hpp"
 #include "client.hpp"
 
@@ -29,6 +30,7 @@ void initialize_gdextension_types(ModuleInitializationLevel p_level)
 		return;
 	}
 
+	GDREGISTER_RUNTIME_CLASS(Loader);
 	GDREGISTER_RUNTIME_CLASS(Client);
 	GDREGISTER_RUNTIME_CLASS(LoadingScreen);
 	GDREGISTER_RUNTIME_CLASS(PlayerBody);

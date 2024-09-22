@@ -68,10 +68,6 @@ void Server::_bind_methods()
 void Server::_ready()
 {
 	_engine = Engine::get_singleton();
-	if (!is_server()) {
-		set_physics_process(false);
-		return;
-	}
 	UtilityFunctions::print("Starting as server...");
 
 	_time = Time::get_singleton();
@@ -184,7 +180,7 @@ void Server::_physics_process(double delta)
 				}
 				case ClientPacket::SET_MODEL_VARIANT: {
 					bool valid = false;
-					// TODO: Fix me!
+					// TODO: Fix & implement model variants
 					/*for (auto i = 0; i < size(MODEL_VARIANTS); i++) {
 						if (MODEL_VARIANTS[i] == colour) {
 							valid = true;

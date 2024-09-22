@@ -1,11 +1,14 @@
 #include <godot_cpp/core/object.hpp>
 #include <godot_cpp/classes/node3d.hpp>
 
-using namespace godot;
-
 #include "chair_gun.hpp"
 #include "entity_item_base.hpp"
 #include "entity_info.hpp"
+#include "node_shared.hpp"
+
+using namespace godot;
+using namespace NodeShared;
+
 
 void ChairGun::_bind_methods()
 {
@@ -27,8 +30,7 @@ bool ChairGun::is_item()
 
 void ChairGun::server_use()
 {
-	// TODO: Hacky way to get server and current scene, but should work
-	auto server = (Server*) get_parent();
+	auto server = get_global_server(this);
 	if (server == nullptr) {
 		UtilityFunctions::print("Couldn't run serverside use: server autoload was null");
 		return;

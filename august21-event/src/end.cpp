@@ -45,19 +45,12 @@ void End::_ready()
 		return;
 	}
 
-	_client = get_tree()->get_root()->get_node<Client>("/root/GlobalClient");
-	if (_client == nullptr) {
-		UtilityFunctions::printerr("Could not get client: autoload singleton was null");
-		return;
-	}
-	_client->connect("graphics_quality_changed", Callable(this, "_on_graphics_quality_changed"));
-
-	_server = get_tree()->get_root()->get_node<Server>("/root/GlobalServer");
-	if (_server == nullptr) {
-		UtilityFunctions::print("Couldn't run serverside phase event: server autoload was null");
-		return;
+	_client = get_global_client(this);
+	if (_client != nullptr) {
+		_client->connect("graphics_quality_changed", Callable(this, "_on_graphics_quality_changed"));
 	}
 
+	_server = get_global_server(this);
 	_sun_light = get_node<DirectionalLight3D>("%SunLight");
 	_world_environment = get_node<WorldEnvironment>("%WorldEnvironment");
 }

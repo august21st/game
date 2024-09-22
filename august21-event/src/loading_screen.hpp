@@ -44,6 +44,7 @@ class LoadingScreen : public Node3D {
 private:
 	Engine* _engine;
 	ResourceLoader* _resource_loader;
+	// Wont't be null - Class depends strongly on client
 	Client* _client;
 	Label* _players_label;
 	Panel* _server_panel;

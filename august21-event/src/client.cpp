@@ -79,6 +79,8 @@ void Client::_bind_methods()
 		&Client::_on_setup_preset_button_pressed);
 	ClassDB::bind_method(D_METHOD("_on_setup_confirm_button_pressed"),
 		&Client::_on_setup_confirm_button_pressed);
+	ClassDB::bind_method(D_METHOD("_on_setup_language_options_item_selected", "index"),
+		&Client::_on_setup_language_options_item_selected);
 	ClassDB::bind_method(D_METHOD("_on_language_options_item_selected", "index"),
 		&Client::_on_language_options_item_selected);
 	ClassDB::bind_method(D_METHOD("_on_player_entity_ready", "id", "chat_name", "model_variant"),
@@ -100,11 +102,6 @@ void Client::_ready()
 	_os = OS::get_singleton();
 	_engine = Engine::get_singleton();
 	_client_gui = get_node<Control>("%ClientGui");
-	if (is_server()) {
-		set_process(false);
-		_client_gui->set_visible(false);
-		return;
-	}
 
 	_performance = Performance::get_singleton();
 	_translation_server = TranslationServer::get_singleton();
@@ -173,7 +170,7 @@ void Client::_ready()
 	}
 
 	_setup_language_options = get_node<OptionButton>("%SetupLanguageOptions");
-	_setup_language_options->connect("item_selected", Callable(this, "_on_language_options_item_selected"));
+	_setup_language_options->connect("item_selected", Callable(this, "_on_setup_language_options_item_selected"));
 
 	_setup_confirm_button = get_node<Button>("%SetupConfirmButton");
 	_setup_confirm_button->connect("pressed", Callable(this, "_on_setup_confirm_button_pressed"));
@@ -341,9 +338,6 @@ List<PackedByteArray> Client::poll_next_packets()
 
 void Client::_input(const Ref<InputEvent> &event)
 {
-	if (is_server()) {
-		return;
-	}
 	auto mouse_mode = _player_input->get_mouse_mode();
 
 	if (event->is_action_pressed("toggle_stats")) {
@@ -356,9 +350,6 @@ void Client::_input(const Ref<InputEvent> &event)
 
 void Client::_process(double delta)
 {
-	if (is_server()) {
-		return;
-	}
 	if (_stats_enabled) {
 		update_stats();
 	}
@@ -755,6 +746,13 @@ void Client::_on_quit_button_pressed()
 	get_tree()->quit(0);
 }
 
+void Client::_on_setup_language_options_item_selected(int index)
+{
+	// Cursed but will ensure that both selects are synchronised
+	_language_options->select(index);
+	_on_language_options_item_selected(index);
+}
+
 void Client::_on_language_options_item_selected(int index)
 {
 	switch (index) {
@@ -845,7 +843,7 @@ EntityPlayerBase* Client::get_player(int id)
 
 int Client::get_entity_id(Node* entity_node)
 {
-	// TODO: This is scuffed - maintain a reverse HashMap instead
+	// TODO: This is inefficient & scuffed - maintain a reverse HashMap instead
 	for (auto &[id, entity] : _entities) {
 		if (entity_node == entity) {
 			return id;

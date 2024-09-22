@@ -90,6 +90,7 @@ private:
 	int _current_graphics_level;
 	void _on_graphics_options_item_selected(int index);
 	OptionButton* _language_options;
+	void _on_setup_language_options_item_selected(int index);
 	void _on_language_options_item_selected(int index);
 	Button* _back_button;
 	Button* _close_button;

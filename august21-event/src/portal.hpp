@@ -9,7 +9,6 @@
 #include <godot_cpp/classes/resource_loader.hpp>
 #include <godot_cpp/variant/utility_functions.hpp>
 #include <godot_cpp/classes/environment.hpp>
-#include <godot_cpp/classes/engine.hpp>
 #include <godot_cpp/classes/area3d.hpp>
 
 #include "client.hpp"
@@ -21,7 +20,6 @@ class Portal : public MeshInstance3D {
     GDCLASS(Portal, MeshInstance3D);
 
 private:
-	Engine* _engine;
 	ResourceLoader* _resource_loader;
 	Client* _client;
 	AABB _mesh_aabb;

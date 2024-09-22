@@ -279,7 +279,7 @@ namespace NodeShared {
 
 	Server* get_global_server(Node* origin)
 	{
-		auto server = origin->get_tree()->get_root()->get_node<Server>("/root/GlobalServer");
+		auto server = origin->get_tree()->get_root()->get_node<Server>("/root/Server");
 		if (server == nullptr) {
 			return nullptr;
 		}
@@ -288,10 +288,17 @@ namespace NodeShared {
 
 	Client* get_global_client(Node* origin)
 	{
-		auto client = origin->get_tree()->get_root()->get_node<Client>("/root/GlobalClient");
+		auto client = origin->get_tree()->get_root()->get_node<Client>("/root/Client");
 		if (client == nullptr) {
 			return nullptr;
 		}
 		return client;
+	}
+
+
+	Node* get_global_root(Node* origin)
+	{
+		auto root = origin->get_tree()->get_root()->get_child(0);
+		return root;
 	}
 }

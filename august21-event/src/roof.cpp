@@ -58,25 +58,12 @@ void Roof::_bind_methods()
 
 void Roof::_ready()
 {
-	_engine = Engine::get_singleton();
-	if (_engine->is_editor_hint()) {
-		return;
+	_client = get_global_client(this);
+	if (_client != nullptr) {
+		_client->connect("graphics_quality_changed", Callable(this, "_on_graphics_quality_changed"));
+		_player = _client->get_player_body();
 	}
-
-	_client = get_tree()->get_root()->get_node<Client>("/root/GlobalClient");
-	if (_client == nullptr) {
-		UtilityFunctions::printerr("Could not get client: autoload singleton was null");
-		return;
-	}
-	_client->connect("graphics_quality_changed", Callable(this, "_on_graphics_quality_changed"));
-
-	_server = get_tree()->get_root()->get_node<Server>("/root/GlobalServer");
-	if (_server == nullptr) {
-		UtilityFunctions::print("Couldn't run serverside phase event: server autoload was null");
-		return;
-	}
-
-	_player = _client->get_player_body();
+	_server = get_global_server(this);
 
 	_resource_loader = ResourceLoader::get_singleton();
 

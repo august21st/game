@@ -14,7 +14,6 @@
  * ([Creative Commons Zero v1.0 Universal license](https://creativecommons.org/publicdomain/zero/1.0/deed.en)).
  */
 #include <godot_cpp/classes/camera3d.hpp>
-#include <godot_cpp/classes/engine.hpp>
 #include <godot_cpp/classes/environment.hpp>
 #include <godot_cpp/classes/global_constants.hpp>
 #include <godot_cpp/classes/material.hpp>
@@ -34,12 +33,15 @@
 #include <godot_cpp/variant/vector3.hpp>
 #include <godot_cpp/classes/scene_tree.hpp>
 #include <godot_cpp/classes/window.hpp>
+#include <godot_cpp/classes/area3d.hpp>
 
 #include "portal.hpp"
 #include "client.hpp"
-#include "godot_cpp/classes/area3d.hpp"
+#include "node_shared.hpp"
 
-Portal::Portal() : _engine(nullptr), _resource_loader(nullptr), _client(nullptr),
+using namespace NodeShared;
+
+Portal::Portal() : _resource_loader(nullptr), _client(nullptr),
 	_main_camera(nullptr), _exit_environment_override(nullptr), _exit_portal(nullptr),
 	_viewport(nullptr), _exit_camera(nullptr), _material_override(nullptr), _entrance_area(nullptr),
 	_main_camera_path(NodePath()), _exit_environment_override_path(NodePath()), _exit_portal_path(NodePath()),
@@ -109,17 +111,14 @@ void Portal::_bind_methods()
 
 void Portal::_ready()
 {
-	_engine = Engine::get_singleton();
-	_resource_loader = ResourceLoader::get_singleton();
-	if (!is_inside_tree() || _engine->is_editor_hint()) {
+	_client = get_global_client(this);
+	if (_client == nullptr) {
+		UtilityFunctions::printerr("Could not get client: autoload singleton was null");
+		set_process(false);
 		return;
 	}
 
-	_client = get_tree()->get_root()->get_node<Client>("/root/GlobalClient");
-	if (_client == nullptr) {
-		UtilityFunctions::printerr("Could not get client: autoload singleton was null");
-		return;
-	}
+	_resource_loader = ResourceLoader::get_singleton();
 
 	_mesh_aabb = get_aabb();
 
@@ -148,6 +147,9 @@ void Portal::_ready()
 	}
 
 	get_viewport()->connect("size_changed", Callable(this, "_on_viewport_size_changed"));
+	// TODO: Make shared functionality of client / server classes, or better yet avoid this hack alltogether
+	// by waiting in process until we have actually located our counterpart - would also more easily allow
+	// reconnection in case the exit portal is lost or re-assigneed
 	_client->connect("current_scene_ready", Callable(this, "_on_current_scene_ready"));
 
 	// Portal must render last such that all cameras have already finished transforming
@@ -367,7 +369,7 @@ void Portal::_on_entrance_area_body_entered(Node3D* body)
 
 bool Portal::ready_and_connected()
 {
-	return is_node_ready() && (_engine != nullptr && !_engine->is_editor_hint()) && is_inside_tree();
+	return is_node_ready() && is_inside_tree();
 }
 
 void Portal::_on_viewport_size_changed()
@@ -400,9 +402,6 @@ void Portal::_process(double delta)
 	// Try catch changes to the main camera if it is still null / was unset
 	if (_main_camera == nullptr) {
 		_main_camera = get_viewport()->get_camera_3d();
-	}
-	if (_engine->is_editor_hint() || _main_camera == nullptr) {
-		return;
 	}
 
 	// Disable the viewport if the portal is further away than disable_viewport_distance
@@ -450,14 +449,13 @@ void Portal::_process(double delta)
 		}
 	}
 
-	// Move the exit camera relative to the exit portal based on the main camera's
-	// position relative to the entrance portal
+	// Move the exit camera relative to the exit portal based on the main camera's position relative to
+	// the entrance portal
 	_exit_camera->set_global_transform(real_to_exit_transform(
-			_main_camera->get_global_transform()));
+		_main_camera->get_global_transform()));
 
-	// Get the four X, Y corners of the scaled entrance portal
-	// bounding box clamped to Z=0 (portal surface) relative to the exit portal.
-	// The entrance portal bounding box is used since the entrance portal mesh
+	// Get the four X, Y corners of the scaled entrance portal bounding box clamped to Z=0 (portal surface)
+	// relative to  the exit portal. The entrance portal bounding box is used since the entrance portal mesh
 	// does not need to match the exit portal mesh.
 	auto corner_1 = _exit_portal->to_global(Vector3(_mesh_aabb.position.x, _mesh_aabb.position.y, 0) * _exit_portal_scale);
 	auto corner_2 = _exit_portal->to_global(Vector3(_mesh_aabb.position.x + _mesh_aabb.size.x, _mesh_aabb.position.y, 0) * _exit_portal_scale);

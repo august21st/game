@@ -1,4 +1,4 @@
-[gd_scene load_steps=83 format=4 uid="uid://dh3f0fyoo6ibo"]
+[gd_scene load_steps=81 format=4 uid="uid://dh3f0fyoo6ibo"]
 
 [ext_resource type="Material" uid="uid://dhejphsc088k2" path="res://assets/concrete/concrete.tres" id="1_bacw7"]
 [ext_resource type="Texture2D" uid="uid://e88undo8tgp7" path="res://assets/vignette.png" id="1_olgna"]
@@ -50,12 +50,6 @@ metallic = 1.0
 metallic_texture = ExtResource("6_2e75g")
 roughness_texture = ExtResource("7_ls2ss")
 uv1_scale = Vector3(32, 32, 32)
-
-[sub_resource type="BoxShape3D" id="BoxShape3D_gql42"]
-size = Vector3(64, 140, 64)
-
-[sub_resource type="BoxShape3D" id="BoxShape3D_syoaj"]
-size = Vector3(1, 1, 64)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_djae4"]
 transparency = 1
@@ -1040,63 +1034,39 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -3, 0)
 
 [node name="Building" type="CSGBox3D" parent="RplaceHQ"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -70, 0)
+use_collision = true
 size = Vector3(64, 140, 64)
 material = SubResource("StandardMaterial3D_gg4lh")
 
-[node name="StaticBody3D" type="StaticBody3D" parent="RplaceHQ/Building"]
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="RplaceHQ/Building/StaticBody3D"]
-shape = SubResource("BoxShape3D_gql42")
-
-[node name="Building2" type="CSGBox3D" parent="RplaceHQ"]
+[node name="RoofFloor" type="CSGBox3D" parent="RplaceHQ"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.00050354, 0)
+use_collision = true
 size = Vector3(62, 0.01, 62)
 material = ExtResource("1_bacw7")
 
-[node name="StaticBody3D" type="StaticBody3D" parent="RplaceHQ/Building2"]
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="RplaceHQ/Building2/StaticBody3D"]
-shape = SubResource("BoxShape3D_gql42")
-
 [node name="Border" type="CSGBox3D" parent="RplaceHQ"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 31.5, 0.5, 0)
+use_collision = true
 size = Vector3(1, 1, 64)
 material = ExtResource("1_bacw7")
-
-[node name="StaticBody3D" type="StaticBody3D" parent="RplaceHQ/Border"]
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="RplaceHQ/Border/StaticBody3D"]
-shape = SubResource("BoxShape3D_syoaj")
 
 [node name="Border2" type="CSGBox3D" parent="RplaceHQ"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -31.5, 0.5, 0)
+use_collision = true
 size = Vector3(1, 1, 64)
 material = ExtResource("1_bacw7")
-
-[node name="StaticBody3D" type="StaticBody3D" parent="RplaceHQ/Border2"]
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="RplaceHQ/Border2/StaticBody3D"]
-shape = SubResource("BoxShape3D_syoaj")
 
 [node name="Border3" type="CSGBox3D" parent="RplaceHQ"]
 transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 0, 0.5, -31.5)
+use_collision = true
 size = Vector3(1, 1, 64)
 material = ExtResource("1_bacw7")
-
-[node name="StaticBody3D" type="StaticBody3D" parent="RplaceHQ/Border3"]
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="RplaceHQ/Border3/StaticBody3D"]
-shape = SubResource("BoxShape3D_syoaj")
 
 [node name="Border4" type="CSGBox3D" parent="RplaceHQ"]
 transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 0, 0.5, 31.5)
+use_collision = true
 size = Vector3(1, 1, 64)
 material = ExtResource("1_bacw7")
-
-[node name="StaticBody3D" type="StaticBody3D" parent="RplaceHQ/Border4"]
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="RplaceHQ/Border4/StaticBody3D"]
-shape = SubResource("BoxShape3D_syoaj")
 
 [node name="RoofSmokeParticles" type="GPUParticles3D" parent="RplaceHQ"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 12, 0)
@@ -1175,7 +1145,7 @@ surface_material_override/0 = SubResource("StandardMaterial3D_m8hv4")
 
 [node name="PlayerSpawnpoint" type="Node3D" parent="RplaceHQ"]
 unique_name_in_owner = true
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -26, 0, -27)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -22, 2, -22)
 
 [node name="FloorBody" type="StaticBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -140, 0)

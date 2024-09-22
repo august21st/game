@@ -68,6 +68,7 @@ namespace NodeShared {
 	void set_environment(WorldEnvironment* environment_node, String path);
 	Server* get_global_server(Node* origin);
 	Client* get_global_client(Node* origin);
+	Node* get_global_root(Node* origin);
 
 	// Constants
 	const float PI = 3.14159265358979f;

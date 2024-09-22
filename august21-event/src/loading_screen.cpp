@@ -23,6 +23,7 @@
 #include "client.hpp"
 #include "loading_screen.hpp"
 #include "network_shared.hpp"
+#include "node_shared.hpp"
 
 using namespace std;
 using namespace godot;
@@ -56,15 +57,12 @@ void LoadingScreen::_bind_methods()
 void LoadingScreen::_ready()
 {
 	_engine = Engine::get_singleton();
-	if (_engine && _engine->is_editor_hint()) {
-		return;
-	}
-
 	_resource_loader = ResourceLoader::get_singleton();
 
-	_client = get_tree()->get_root()->get_node<Client>("/root/GlobalClient");
+	_client = NodeShared::get_global_client(this);
 	if (_client == nullptr) {
 		UtilityFunctions::printerr("Could not get client: autoload singleton was null");
+		set_process(false);
 		return;
 	}
 	_client->connect("graphics_quality_changed", Callable(this, "_on_graphics_quality_changed"));

@@ -11,7 +11,7 @@ config_version=5
 [application]
 
 config/name="August21Event"
-run/main_scene="res://scenes/default.tscn"
+run/main_scene="res://scenes/loader.tscn"
 config/features=PackedStringArray("4.3", "GL Compatibility")
 boot_splash/bg_color=Color(0, 0, 0, 1)
 boot_splash/image="res://assets/rplace_gold.png"
@@ -21,11 +21,6 @@ config/icon="res://assets/rplace_gold.svg"
 [audio]
 
 buses/default_bus_layout="res://assets/default_bus_layout.tres"
-
-[autoload]
-
-GlobalServer="*res://scenes/server.tscn"
-GlobalClient="*res://scenes/client.tscn"
 
 [display]
 

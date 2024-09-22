@@ -35,6 +35,7 @@ class PlayerBody : public EntityPlayerBase {
 
 private:
 	ResourceLoader* _resource_loader;
+	// Won't be null - Class depends strongly on client
 	Client* _client;
 	ProjectSettings* _project_settings;
 	Input* _player_input;

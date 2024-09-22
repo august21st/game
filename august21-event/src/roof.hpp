@@ -1,7 +1,6 @@
 #pragma once
 #include <godot_cpp/classes/node3d.hpp>
 #include <godot_cpp/classes/area3d.hpp>
-#include <godot_cpp/classes/engine.hpp>
 #include <godot_cpp/classes/animation.hpp>
 #include <godot_cpp/classes/animation_player.hpp>
 #include <godot_cpp/classes/random_number_generator.hpp>
@@ -24,8 +23,11 @@ class Roof : public Node3D {
 	GDCLASS(Roof, Node3D);
 
 private:
-	Engine* _engine;
+	// May be null
 	Client* _client;
+	// May be null
+	PlayerBody* _player;
+	// May be null
 	Server* _server;
 	ResourceLoader* _resource_loader;
 	DirectionalLight3D* _sun_light;
@@ -38,7 +40,6 @@ private:
 	RichTextLabel* _event_title_label;
 	TextureRect* _event_image;
 	Ref<RandomNumberGenerator> _random;
-	PlayerBody* _player;
 	const String _death_titles[6] = {
 		"FATALITY",
 		"YOU PERISHED...",

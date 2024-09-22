@@ -90,9 +90,10 @@ void PlayerBody::_bind_methods()
 
 void PlayerBody::_ready()
 {
-	_client = get_tree()->get_root()->get_node<Client>("/root/GlobalClient");
+	_client = get_global_client(this);
 	if (_client == nullptr) {
 		UtilityFunctions::printerr("Could not get client: autoload singleton was null");
+		set_process(false);
 		return;
 	}
 	_client->connect("packet_received", Callable(this, "_on_packet_received"));
@@ -515,6 +516,7 @@ void PlayerBody::set_spawn_position(Vector3 new_spawn_position)
 
 void PlayerBody::_on_revive_pressed()
 {
+	// TODO: Send a message to the server asking us to respawn instead
 	PlayerBody::respawn(_spawn_position);
 }
 
@@ -615,6 +617,9 @@ void PlayerBody::_on_packet_received(PackedByteArray packed_packet)
 			_chat_messages_container->add_child(message_label);
 			break;
 		}
+		default: {
+			break;
+		}
 	}
 }
 
@@ -674,7 +679,7 @@ void PlayerBody::set_health(int value)
 void PlayerBody::respawn(Vector3 position)
 {
 	set_position(position);
-	_camera_pivot->set_rotation(Vector3(0, 0, 0));
+	//_camera_pivot->set_rotation(Vector3(0, 0, 0));
 	set_rotation(Vector3(0, 0, 0));
 	_player_input->set_mouse_mode(Input::MOUSE_MODE_CAPTURED);
 	_death_panel->set_visible(false);
@@ -690,6 +695,8 @@ void PlayerBody::die(String death_title, String death_mesage)
 	_death_panel->set_visible(true);
 	_death_title_label->set_text(death_title);
 	_death_message_label->set_text(death_mesage);
+
+	// TODO: Send a message to the server telling it that we have died
 }
 
 void PlayerBody::set_climbing(bool climbing)

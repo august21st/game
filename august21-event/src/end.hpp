@@ -15,7 +15,9 @@ class End : public Node3D {
 
 private:
 	Engine* _engine;
+	// May be null
 	Client* _client;
+	// May be null
 	Server* _server;
 	DirectionalLight3D* _sun_light;
 	WorldEnvironment* _world_environment;

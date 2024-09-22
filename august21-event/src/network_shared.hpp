@@ -60,7 +60,6 @@ namespace NetworkShared {
 		return static_cast<uint8_t>(packet_enum);
 	}
 
-	bool is_server();
 	void write_vector3(BufWriter& packet, Vector3 vector);
 	Vector3 read_vector3(BufReader& packet);
 }
