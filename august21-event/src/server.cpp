@@ -1,3 +1,4 @@
+#include <cstdint>
 #include <godot_cpp/classes/web_socket_multiplayer_peer.hpp>
 #include <godot_cpp/classes/web_socket_peer.hpp>
 #include <godot_cpp/variant/utility_functions.hpp>
@@ -143,7 +144,7 @@ void Server::_physics_process(double delta)
 			auto sender = _clients[sender_id];
 			auto data = _socket_server->get_packet();
 			auto packet = BufReader((char*) data.ptr(), data.size());
-			auto code = packet.u8();
+			auto code = static_cast<ClientPacket>(packet.u8());
 			switch (code) {
 				case ClientPacket::AUTHENTICATE: {
 					// Client has choosen us in the server list, and will now
@@ -153,13 +154,13 @@ void Server::_physics_process(double delta)
 
 					// Send initial game state info to client
 					auto game_info_packet = BufWriter();
-					game_info_packet.u8(ServerPacket::GAME_INFO);
+					game_info_packet.u8(to_uint8(ServerPacket::GAME_INFO));
 					game_info_packet.u32(sender_id); // (their) player id
 					send(sender_id, game_info_packet);
 
 					// Send initial playerlist to client
 					auto player_info_packet = BufWriter();
-					player_info_packet.u8(ServerPacket::PLAYERS_INFO);
+					player_info_packet.u8(to_uint8(ServerPacket::PLAYERS_INFO));
 					player_info_packet.u16(_clients.size()); // player_count
 					for (auto &[player_id, client] : _clients) {
 						write_player_info(player_id, client, player_info_packet); // player_info
@@ -168,7 +169,7 @@ void Server::_physics_process(double delta)
 
 					// Alert all other clients of the new player
 					auto new_player_info_packet = BufWriter();
-					new_player_info_packet.u8(ServerPacket::PLAYERS_INFO);
+					new_player_info_packet.u8(to_uint8(ServerPacket::PLAYERS_INFO));
 					new_player_info_packet.u16(1); // player_count
 					write_player_info(sender_id, sender, new_player_info_packet); // player_info
 					send_to_others(sender_id, new_player_info_packet);
@@ -220,7 +221,7 @@ void Server::_physics_process(double delta)
 
 					// Distribute updates to other clients
 					auto update_packet = BufWriter();
-					update_packet.u8(ServerPacket::UPDATE_PLAYER_MOVEMENT);
+					update_packet.u8(to_uint8(ServerPacket::UPDATE_PLAYER_MOVEMENT));
 					update_packet.u32(sender_id); // player ID
 					update_packet.str(phase_scene_str); // phase scene
 					write_vector3(update_packet, position); // position
@@ -232,12 +233,19 @@ void Server::_physics_process(double delta)
 				}
 				case ClientPacket::ACTION_TAKE_DAMAGE: {
 					auto health = packet.u32();
+					// TODO: Fully implement
 
 					auto health_packet = BufWriter();
-					health_packet.u8(ServerPacket::UPDATE_PLAYER_HEALTH);
+					health_packet.u8(to_uint8(ServerPacket::UPDATE_PLAYER_HEALTH));
 					health_packet.u32(sender_id);
 					health_packet.u32(health);
 					send_to_authenticated(health_packet);
+					break;
+				}
+				case ClientPacket::ACTION_DIE: {
+					break;
+				}
+				case ClientPacket::ACTION_RESPAWN: {
 					break;
 				}
 				case ClientPacket::ACTION_DROP: {
@@ -266,7 +274,7 @@ void Server::_physics_process(double delta)
 					player_body->set_inventory_current(inventory->size() - 1);
 
 					auto grab_packet = BufWriter();
-					grab_packet.u8(ServerPacket::GRAB);
+					grab_packet.u8(to_uint8(ServerPacket::GRAB));
 					grab_packet.u32(sender_id);
 					grab_packet.u32(item_id);
 					send_to_authenticated(grab_packet);
@@ -281,7 +289,7 @@ void Server::_physics_process(double delta)
 				case ClientPacket::ACTION_CHAT_MESSAGE: {
 					auto message = (string) packet.str();
 					auto chat_packet = BufWriter();
-					chat_packet.u8(ServerPacket::CHAT_MESSAGE);
+					chat_packet.u8(to_uint8(ServerPacket::CHAT_MESSAGE));
 					chat_packet.i32(sender_id);
 					chat_packet.str(message);
 					send_to_authenticated(chat_packet);
@@ -295,7 +303,7 @@ void Server::_physics_process(double delta)
 	_entities_lock->lock();
 	for (auto &[id, entity_info] : _entities) {
 		auto update_packet = BufWriter();
-		update_packet.u8(ServerPacket::UPDATE_ENTITY);
+		update_packet.u8(to_uint8(ServerPacket::UPDATE_ENTITY));
 		update_packet.u32(id);
 		auto tracked_properties = entity_info->get_tracked_properties();
 		update_packet.flint(tracked_properties.size());
@@ -369,7 +377,7 @@ void Server::distribute_server_info()
 {
 	// Server list details
 	auto server_info_packet = BufWriter();
-	server_info_packet.u8(ServerPacket::SERVER_INFO);
+	server_info_packet.u8(to_uint8(ServerPacket::SERVER_INFO));
 	auto duration_s = _time->get_unix_time_from_system() - _start_time;
 	server_info_packet.u32(duration_s); // duration_s
 	// TODO: Use authenticated clients size
@@ -435,7 +443,7 @@ EntityInfo* Server::create_entity(String node_path, String parent_scene)
 
 	// Distribute to all clients
 	auto entity_info_packet = BufWriter();
-	entity_info_packet.u8(ServerPacket::ENTITIES_INFO); // packet code
+	entity_info_packet.u8(to_uint8(ServerPacket::ENTITIES_INFO)); // packet code
 	entity_info_packet.u16(1); //entity count
 	entity_info_packet.u32(new_id); // entity id
 	auto parent_scene_str = parent_scene.utf8().get_data();
@@ -457,7 +465,7 @@ EntityInfo* Server::register_entity(Node* entity, String parent_scene)
 
 	// Distribute to all clients
 	auto entity_info_packet = BufWriter();
-	entity_info_packet.u8(ServerPacket::ENTITIES_INFO); // packet code
+	entity_info_packet.u8(to_uint8(ServerPacket::ENTITIES_INFO)); // packet code
 	entity_info_packet.u16(1); //entity count
 	entity_info_packet.u32(new_id); // entity id
 	auto parent_scene_str = parent_scene.utf8().get_data();
@@ -553,7 +561,7 @@ void Server::set_phase(String name)
 
 	// Run phase event on clients
 	auto phase_packet = BufWriter();
-	phase_packet.u8(ServerPacket::SET_PHASE);
+	phase_packet.u8(to_uint8(ServerPacket::SET_PHASE));
 	auto name_str = name.utf8().get_data();
 	phase_packet.str(name_str);
 	send_to_all(phase_packet);
@@ -626,7 +634,7 @@ void Server::kill_player(int id)
 		return;
 	}
 	auto health_packet = BufWriter();
-	health_packet.u8(ServerPacket::UPDATE_PLAYER_HEALTH);
+	health_packet.u8(to_uint8(ServerPacket::UPDATE_PLAYER_HEALTH));
 	health_packet.u32(id); // player_id
 	health_packet.u32(0); // health
 	send_to_authenticated(health_packet);
@@ -649,7 +657,7 @@ void Server::tp_player(string scene, int x, int y, int z)
 void Server::repl_announce(string message)
 {
 	auto chat_packet = BufWriter();
-	chat_packet.u8(ServerPacket::CHAT_MESSAGE);
+	chat_packet.u8(to_uint8(ServerPacket::CHAT_MESSAGE));
 	chat_packet.i32(0); // player_id
 	chat_packet.str(message);
 	send_to_authenticated(chat_packet);

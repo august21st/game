@@ -43,7 +43,6 @@
 #include <godot_cpp/classes/texture2d.hpp>
 #include <godot_cpp/classes/mesh.hpp>
 #include <dataproto_cpp/dataproto.hpp>
-#include <algorithm>
 
 #include "client.hpp"
 #include "player_body.hpp"
@@ -56,21 +55,6 @@
 using namespace godot;
 using namespace NetworkShared;
 using namespace NodeShared;
-
-// min: top left corner, max: bottom left corner, object can move within a circular area within the rectangle
-static Vector2 circular_clamp(const Vector2& vector, const Vector2& min, const Vector2& max)
-{
-    Vector2 center = (min + max) * 0.5f;
-    float radius = std::min((max.x - min.x) * 0.5f, (max.y - min.y) * 0.5f);
-    Vector2 to_vector = vector - center;
-    float length = to_vector.length();
-
-    if (length > radius) {
-        return center + to_vector.normalized() * radius;
-    }
-
-    return vector;
-}
 
 PlayerBody::PlayerBody() : _client(nullptr)
 {
@@ -348,7 +332,7 @@ void PlayerBody::_unhandled_input(const Ref<InputEvent> &event)
 
 					// Notify server
 					auto grab_packet = BufWriter();
-					grab_packet.u8(ClientPacket::ACTION_GRAB);
+					grab_packet.u8(to_uint8(ClientPacket::ACTION_GRAB));
 					auto entity_id = _client->get_entity_id(item_entity);
 					if (entity_id != -1) {
 						grab_packet.u32(entity_id);
@@ -473,7 +457,7 @@ void PlayerBody::_physics_process(double delta)
 		|| current_rotation.distance_to(_last_packet_rotation) > 0.1f;
 	if (_update_tick % 3 == 0 && moved) {
 		auto update_packet = BufWriter();
-		update_packet.u8(ClientPacket::UPDATE_MOVEMENT);
+		update_packet.u8(to_uint8(ClientPacket::UPDATE_MOVEMENT));
 		auto phase_scene = _client->get_current_phase_scene();
 		auto phase_scene_utf8 = phase_scene.utf8().get_data();
 		update_packet.str(phase_scene_utf8);
@@ -603,7 +587,7 @@ void PlayerBody::_on_chat_close_tween_completed()
 void PlayerBody::_on_packet_received(PackedByteArray packed_packet)
 {
 	auto packet = BufReader((char*) packed_packet.ptr(), packed_packet.size());
-	uint8_t code = packet.u8();
+	auto code = static_cast<ServerPacket>(packet.u8());
 	switch (code) {
 		case ServerPacket::CHAT_MESSAGE: {
 			auto player_id = packet.i32();
@@ -656,7 +640,7 @@ void PlayerBody::take_damage(int damage)
 {
 	_health = Math::max(0, _health - damage);
 	auto damage_packet = BufWriter();
-	damage_packet.u8(ClientPacket::ACTION_TAKE_DAMAGE);
+	damage_packet.u8(to_uint8(ClientPacket::ACTION_TAKE_DAMAGE));
 	damage_packet.u32(_health);
 	_client->send(damage_packet);
 
@@ -673,7 +657,7 @@ void PlayerBody::send_chat(String message)
 	}
 
 	auto chat_packet = BufWriter();
-	chat_packet.u8(ClientPacket::ACTION_CHAT_MESSAGE);
+	chat_packet.u8(to_uint8(ClientPacket::ACTION_CHAT_MESSAGE));
 	auto chat_message_utf8 = message.utf8().get_data();
 	chat_packet.str(chat_message_utf8);
 	_client->send(chat_packet);

@@ -6,13 +6,14 @@ using namespace godot;
 using namespace dataproto;
 
 namespace NetworkShared {
-	enum ClientPacket {
+	enum class ClientPacket : uint8_t {
 		// Loading screen / serverlist only
 		AUTHENTICATE = 0,
 
 		// Client / player
 		SET_CHAT_NAME = 16,
 		SET_MODEL_VARIANT = 17,
+
 		UPDATE_MOVEMENT = 32,
 
 		ACTION_GRAB = 48,
@@ -20,10 +21,12 @@ namespace NetworkShared {
 		ACTION_SWITCH = 50,
 		ACTION_USE = 51,
 		ACTION_TAKE_DAMAGE = 52,
-		ACTION_CHAT_MESSAGE = 53
+		ACTION_DIE = 53,
+		ACTION_RESPAWN = 54,
+		ACTION_CHAT_MESSAGE = 55
 	};
 
-	enum ServerPacket {
+	enum class ServerPacket : uint8_t {
 		// Loading screen / serverlist only
 		SERVER_INFO = 0,
 
@@ -34,17 +37,28 @@ namespace NetworkShared {
 
 		SET_PHASE = 16,
 
-		UPDATE_PLAYER_HEALTH = 32,
-		UPDATE_PLAYER_MOVEMENT = 33,
-
-		TP_PLAYER = 34,
+		UPDATE_PLAYER_MOVEMENT = 32,
+		UPDATE_PLAYER_HEALTH = 33,
 		UPDATE_ENTITY = 36,
+
 		GRAB = 48,
 		DROP = 49,
 		SWITCH = 50,
 		USE = 51,
-		CHAT_MESSAGE = 53
+		DAMAGE = 52,
+		DIE = 53,
+		RESPAWN = 54,
+		CHAT_MESSAGE = 55,
+		TP_PLAYER = 56
 	};
+
+	inline uint8_t to_uint8(ClientPacket packet_enum) {
+    	return static_cast<uint8_t>(packet_enum);
+	}
+
+	inline uint8_t to_uint8(ServerPacket packet_enum) {
+		return static_cast<uint8_t>(packet_enum);
+	}
 
 	bool is_server();
 	void write_vector3(BufWriter& packet, Vector3 vector);

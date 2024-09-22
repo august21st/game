@@ -250,7 +250,7 @@ void Client::start_with_socket(Ref<WebSocketPeer> socket)
 		if (chat_name_variant.get_type() != Variant::STRING) {
 			auto chat_name = (String) chat_name_variant;
 			auto name_packet = BufWriter();
-			name_packet.u8(ClientPacket::SET_CHAT_NAME);
+			name_packet.u8(to_uint8(ClientPacket::SET_CHAT_NAME));
 			auto chat_name_str = chat_name.utf8().get_data();
 			name_packet.str(chat_name_str);
 			send(name_packet);
@@ -260,7 +260,7 @@ void Client::start_with_socket(Ref<WebSocketPeer> socket)
 		if (colour_variant.get_type() != Variant::STRING) {
 			auto colour = (String) colour_variant;
 			auto model_packet = BufWriter();
-			model_packet.u8(ClientPacket::SET_MODEL_VARIANT);
+			model_packet.u8(to_uint8(ClientPacket::SET_MODEL_VARIANT));
 			auto colour_str = colour.utf8().get_data();
 			model_packet.str(colour_str);
 			send(model_packet);
@@ -271,7 +271,7 @@ void Client::start_with_socket(Ref<WebSocketPeer> socket)
 	set_process(true);
 
 	auto auth_packet = BufWriter();
-	auth_packet.u8(ClientPacket::AUTHENTICATE);
+	auth_packet.u8(to_uint8(ClientPacket::AUTHENTICATE));
 	send(auth_packet);
 }
 
@@ -367,7 +367,7 @@ void Client::_process(double delta)
 		auto packed_packets = poll_next_packets();
 		for (PackedByteArray packed_packet : packed_packets) {
 			auto packet = BufReader((char*) packed_packet.ptr(), packed_packet.size());
-			uint8_t code = packet.u8();
+			auto code = static_cast<ServerPacket>(packet.u8());
 			switch (code) {
 				case ServerPacket::GAME_INFO: {
 					// Add ourselves into the generic player list

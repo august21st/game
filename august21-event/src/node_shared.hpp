@@ -32,6 +32,21 @@ namespace NodeShared {
 	}
 	int node_children_count_recursive(Node* node, int count = 0);
 
+	// Min: top left corner, max: bottom left corner, object can move within a circular area within the rectangle
+	static Vector2 circular_clamp(const Vector2& vector, const Vector2& min, const Vector2& max)
+	{
+		Vector2 centre = (min + max) * 0.5f;
+		float radius = MIN((max.x - min.x) * 0.5f, (max.y - min.y) * 0.5f);
+		Vector2 to_vector = vector - centre;
+		float length = to_vector.length();
+
+		if (length > radius) {
+			return centre + to_vector.normalized() * radius;
+		}
+
+		return vector;
+	}
+
 	// Serialised properties / can either be defined as a pointer to the filesystem,
 	// or as an inlinne encoded variant. The same case for resource-type properties
 	// on an entity.
@@ -54,5 +69,6 @@ namespace NodeShared {
 	Server* get_global_server(Node* origin);
 	Client* get_global_client(Node* origin);
 
+	// Constants
 	const float PI = 3.14159265358979f;
 }

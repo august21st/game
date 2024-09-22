@@ -96,6 +96,7 @@ void Roof::_ready()
 	_board_mesh = get_node<BoardMesh>("%BoardMesh");
 	_board_mesh->load_canvas();
 
+	// TODO: This should really really be serverside - especially respawn requests
 	_player_spawnpoint = get_node<Node3D>("%PlayerSpawnpoint");
 
 	_event_container = get_node<HBoxContainer>("%EventContainer");

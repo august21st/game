@@ -1,16 +1,81 @@
-[gd_scene load_steps=17 format=3 uid="uid://c2xy8asjsovia"]
+[gd_scene load_steps=16 format=3 uid="uid://c2xy8asjsovia"]
 
-[ext_resource type="Material" uid="uid://dhejphsc088k2" path="res://assets/concrete/concrete.tres" id="1_k6hli"]
-[ext_resource type="PackedScene" uid="uid://ca7n3vrq5gy37" path="res://assets/rplace_logo.glb" id="1_mjyb7"]
 [ext_resource type="Texture2D" uid="uid://e88undo8tgp7" path="res://assets/vignette.png" id="1_yuhia"]
 [ext_resource type="Animation" uid="uid://butjgk4p71n3g" path="res://animations/intro_animation.tres" id="3_rvdho"]
 [ext_resource type="PackedScene" uid="uid://216xcciqsui0" path="res://assets/building_ground.glb" id="4_rom83"]
 [ext_resource type="PackedScene" uid="uid://b6u2gq168cs2c" path="res://assets/aeroplane/united_airlines_boeing_777.glb" id="5_ua2td"]
 [ext_resource type="PackedScene" uid="uid://xr8d7au3y4um" path="res://assets/distant_buildings/distant_buildings.glb" id="6_xwii3"]
+[ext_resource type="PackedScene" uid="uid://dcsdkwr6qbb53" path="res://assets/rplace_hq/rplace_hq.glb" id="7_44der"]
 [ext_resource type="PackedScene" uid="uid://bmqxjo7ithlk8" path="res://assets/eiffel/eiffel_lowpoly.glb" id="7_jev6g"]
 
 [sub_resource type="Animation" id="Animation_inc0k"]
 length = 0.001
+tracks/0/type = "bezier"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Plane:rotation:x")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"handle_modes": PackedInt32Array(0),
+"points": PackedFloat32Array(-0.263702, -0.25, 0, 0.25, 0),
+"times": PackedFloat32Array(0)
+}
+tracks/1/type = "bezier"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("Plane:rotation:y")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"handle_modes": PackedInt32Array(0),
+"points": PackedFloat32Array(-3.127, -0.25, 0, 0.25, 0),
+"times": PackedFloat32Array(0)
+}
+tracks/2/type = "bezier"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("Plane:rotation:z")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"handle_modes": PackedInt32Array(0),
+"points": PackedFloat32Array(-0.924237, -0.25, 0, 0.25, 0),
+"times": PackedFloat32Array(0)
+}
+tracks/3/type = "bezier"
+tracks/3/imported = false
+tracks/3/enabled = true
+tracks/3/path = NodePath("Plane:position:x")
+tracks/3/interp = 1
+tracks/3/loop_wrap = true
+tracks/3/keys = {
+"handle_modes": PackedInt32Array(0),
+"points": PackedFloat32Array(-27.1143, -0.25, 0, 0.25, 0),
+"times": PackedFloat32Array(0)
+}
+tracks/4/type = "bezier"
+tracks/4/imported = false
+tracks/4/enabled = true
+tracks/4/path = NodePath("Plane:position:y")
+tracks/4/interp = 1
+tracks/4/loop_wrap = true
+tracks/4/keys = {
+"handle_modes": PackedInt32Array(0),
+"points": PackedFloat32Array(124.397, -0.25, 0, 0.25, 0),
+"times": PackedFloat32Array(0)
+}
+tracks/5/type = "bezier"
+tracks/5/imported = false
+tracks/5/enabled = true
+tracks/5/path = NodePath("Plane:position:z")
+tracks/5/interp = 1
+tracks/5/loop_wrap = true
+tracks/5/keys = {
+"handle_modes": PackedInt32Array(0),
+"points": PackedFloat32Array(-33.5081, -0.25, 0, 0.25, 0),
+"times": PackedFloat32Array(0)
+}
 
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_etu56"]
 _data = {
@@ -27,9 +92,12 @@ sky_material = SubResource("ProceduralSkyMaterial_whumy")
 background_mode = 2
 sky = SubResource("Sky_83hny")
 ambient_light_source = 3
+ambient_light_color = Color(0.258559, 0.430568, 0.597677, 1)
 ambient_light_energy = 0.75
+fog_enabled = true
+fog_light_color = Color(0.614711, 0.527338, 0.512358, 1)
 fog_light_energy = 0.3
-fog_density = 0.0005
+fog_density = 0.003
 adjustment_brightness = 0.57
 adjustment_contrast = 0.01
 adjustment_saturation = 4.55
@@ -75,30 +143,14 @@ theme_override_font_sizes/normal_font_size = 32
 bbcode_enabled = true
 text = "Rplace HQ, Manhattan"
 scroll_active = false
-visible_characters = 0
-visible_ratio = 0.0
 metadata/_edit_use_anchors_ = true
 
 [node name="RplaceHQ" type="Node3D" parent="."]
 
-[node name="Building" type="CSGBox3D" parent="RplaceHQ"]
-transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 0, 80, 0)
-size = Vector3(64, 160, 64)
-material = ExtResource("1_k6hli")
-
-[node name="BuildingInner" type="CSGBox3D" parent="RplaceHQ"]
-transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 0, 80, 0)
-flip_faces = true
-size = Vector3(64, 160, 64)
-material = ExtResource("1_k6hli")
-
-[node name="RplaceLogo" parent="RplaceHQ" instance=ExtResource("1_mjyb7")]
-transform = Transform3D(2, 0, 0, 0, -8.74228e-08, 2, 0, -2, -8.74228e-08, 0, 140, 32)
-
 [node name="BuildingCamera" type="Camera3D" parent="."]
-transform = Transform3D(0.951057, -0.120742, -0.284452, -2.23518e-08, 0.920505, -0.390731, 0.309017, 0.371607, 0.875452, -8, 126, 54.61)
+transform = Transform3D(0.281608, -0.620638, -0.731782, -0.00518912, 0.761651, -0.647967, 0.959516, 0.18627, 0.211266, -31.7941, 62, 45.9587)
 current = true
-fov = 31.6
+fov = 40.4406
 
 [node name="BuildingAudioPlayer" type="AudioStreamPlayer" parent="."]
 
@@ -187,11 +239,11 @@ rings = 12
 surface_material_override/0 = SubResource("StandardMaterial3D_ambu1")
 
 [node name="Plane" parent="." instance=ExtResource("5_ua2td")]
-transform = Transform3D(-0.953001, -0.277447, -0.121701, -0.285297, 0.957009, 0.052336, 0.101949, 0.0845975, -0.991185, 67, 130, 105)
+transform = Transform3D(-0.605416, -0.795784, -0.0140924, -0.77057, 0.581618, 0.260656, -0.199229, 0.168665, -0.965328, -27.1143, 124.397, -33.5081)
 
 [node name="PlaneAudioPlayer" type="AudioStreamPlayer3D" parent="Plane"]
 attenuation_model = 2
-volume_db = 50.0
+volume_db = 78.5283
 bus = &"IntroPlane"
 
 [node name="DistantBuildings" parent="." instance=ExtResource("6_xwii3")]
@@ -202,6 +254,9 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -511, 50.4379, -343)
 
 [node name="CSGMesh3D" type="CSGMesh3D" parent="."]
 mesh = SubResource("PlaneMesh_n5cef")
+
+[node name="RplaceHq" parent="." instance=ExtResource("7_44der")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7, 30, -2)
 
 [editable path="BuildingGround"]
 [editable path="Plane"]

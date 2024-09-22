@@ -213,7 +213,7 @@ void LoadingScreen::_process(double delta)
 					// Handle server list packets
 					auto packed_packet = socket->get_packet();
 					auto packet = BufReader((char*) packed_packet.ptr(), packed_packet.size());
-					uint8_t code = packet.u8();
+					auto code = static_cast<ServerPacket>(packet.u8());
 					switch (code) {
 						case ServerPacket::SERVER_INFO: {
 							auto duration = packet.u32();
@@ -239,6 +239,9 @@ void LoadingScreen::_process(double delta)
 									.format(Array::make(minutes, seconds, server->player_count, server->phase));
 							}
 							_server_list->set_item_text(server->item_id, server_description);
+							break;
+						}
+						default: {
 							break;
 						}
 					}

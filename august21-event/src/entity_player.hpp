@@ -23,7 +23,6 @@ public:
 	EntityPlayer();
 	~EntityPlayer();
 	void _ready() override;
-	void _physics_process(double delta) override;
 	void set_chat_name(String name) override;
 	String get_chat_name() override;
 	void set_health(int value) override;
