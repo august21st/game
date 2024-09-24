@@ -58,7 +58,7 @@ along with producing a web build with scons, which will automate the process:
 
 ## License:
 The contents of the august21-event folder are based off the public domain template
-project, [godot-cpp](https://github.com/godotengine/godot-cpp). All modified files,
+project, [godot-cpp-template](https://github.com/godotengine/godot-cpp-template). All modified files,
 including everything under [august21-event/project](./august21-event/godot),
 [august21-event/test-server](./august21-event/server), and
 [august21-event/src](./august21-event/src) are original works that are **NOT** public
