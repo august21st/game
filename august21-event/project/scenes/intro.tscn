@@ -1,9 +1,10 @@
-[gd_scene load_steps=16 format=3 uid="uid://c2xy8asjsovia"]
+[gd_scene load_steps=19 format=3 uid="uid://c2xy8asjsovia"]
 
 [ext_resource type="Texture2D" uid="uid://e88undo8tgp7" path="res://assets/vignette.png" id="1_yuhia"]
 [ext_resource type="Animation" uid="uid://butjgk4p71n3g" path="res://animations/intro_animation.tres" id="3_rvdho"]
 [ext_resource type="PackedScene" uid="uid://216xcciqsui0" path="res://assets/building_ground.glb" id="4_rom83"]
 [ext_resource type="PackedScene" uid="uid://b6u2gq168cs2c" path="res://assets/aeroplane/united_airlines_boeing_777.glb" id="5_ua2td"]
+[ext_resource type="Texture2D" uid="uid://kgfd8cgtu6cq" path="res://assets/smoke_particle.png" id="5_uovrb"]
 [ext_resource type="PackedScene" uid="uid://xr8d7au3y4um" path="res://assets/distant_buildings/distant_buildings.glb" id="6_xwii3"]
 [ext_resource type="PackedScene" uid="uid://dcsdkwr6qbb53" path="res://assets/rplace_hq/rplace_hq.glb" id="7_44der"]
 [ext_resource type="PackedScene" uid="uid://bmqxjo7ithlk8" path="res://assets/eiffel/eiffel_lowpoly.glb" id="7_jev6g"]
@@ -76,6 +77,58 @@ tracks/5/keys = {
 "points": PackedFloat32Array(-33.5081, -0.25, 0, 0.25, 0),
 "times": PackedFloat32Array(0)
 }
+tracks/6/type = "bezier"
+tracks/6/imported = false
+tracks/6/enabled = true
+tracks/6/path = NodePath("Plane:scale:x")
+tracks/6/interp = 1
+tracks/6/loop_wrap = true
+tracks/6/keys = {
+"handle_modes": PackedInt32Array(0),
+"points": PackedFloat32Array(1, -0.25, 0, 0.25, 0),
+"times": PackedFloat32Array(0)
+}
+tracks/7/type = "bezier"
+tracks/7/imported = false
+tracks/7/enabled = true
+tracks/7/path = NodePath("Plane:scale:y")
+tracks/7/interp = 1
+tracks/7/loop_wrap = true
+tracks/7/keys = {
+"handle_modes": PackedInt32Array(0),
+"points": PackedFloat32Array(1, -0.25, 0, 0.25, 0),
+"times": PackedFloat32Array(0)
+}
+tracks/8/type = "bezier"
+tracks/8/imported = false
+tracks/8/enabled = true
+tracks/8/path = NodePath("Plane:scale:z")
+tracks/8/interp = 1
+tracks/8/loop_wrap = true
+tracks/8/keys = {
+"handle_modes": PackedInt32Array(0),
+"points": PackedFloat32Array(1, -0.25, 0, 0.25, 0),
+"times": PackedFloat32Array(0)
+}
+tracks/9/type = "rotation_3d"
+tracks/9/imported = false
+tracks/9/enabled = true
+tracks/9/path = NodePath("BuildingCamera")
+tracks/9/interp = 1
+tracks/9/loop_wrap = true
+tracks/9/keys = PackedFloat32Array(0, 1, 0.193489, -0.523971, 0.119707, 0.820784)
+tracks/10/type = "value"
+tracks/10/imported = false
+tracks/10/enabled = true
+tracks/10/path = NodePath("BuildingCamera:fov")
+tracks/10/interp = 1
+tracks/10/loop_wrap = true
+tracks/10/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [14.8928]
+}
 
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_etu56"]
 _data = {
@@ -107,7 +160,31 @@ adjustment_saturation = 4.55
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ambu1"]
 albedo_color = Color(0.0115854, 0.487142, 0, 1)
 
-[sub_resource type="PlaneMesh" id="PlaneMesh_n5cef"]
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_rtbi1"]
+emission_shape = 3
+emission_box_extents = Vector3(1, 1, 1)
+direction = Vector3(0, 0, -1)
+spread = 0.0
+initial_velocity_max = 1.0
+gravity = Vector3(0, 0, 0)
+linear_accel_min = -2.23517e-06
+linear_accel_max = 4.0
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_mb053"]
+transparency = 1
+cull_mode = 2
+albedo_color = Color(1, 1, 1, 0.101961)
+albedo_texture = ExtResource("5_uovrb")
+emission = Color(0.683077, 0.683077, 0.683077, 1)
+disable_receive_shadows = true
+billboard_mode = 3
+particles_anim_h_frames = 1
+particles_anim_v_frames = 1
+particles_anim_loop = false
+
+[sub_resource type="QuadMesh" id="QuadMesh_31nkk"]
+material = SubResource("StandardMaterial3D_mb053")
+size = Vector2(6, 6)
 
 [node name="Intro" type="Intro"]
 
@@ -131,26 +208,29 @@ texture = ExtResource("1_yuhia")
 expand_mode = 1
 
 [node name="LocationLabel" type="RichTextLabel" parent="IntroGui"]
-layout_mode = 0
-anchor_left = 0.00694444
-anchor_top = 0.91358
-anchor_right = 0.340278
-anchor_bottom = 0.987654
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 7.99999
+offset_top = -56.0002
+offset_right = 440.0
+offset_bottom = -8.00018
 theme_override_colors/font_shadow_color = Color(0, 0, 0, 1)
 theme_override_constants/shadow_offset_y = 1
 theme_override_constants/shadow_offset_x = 1
 theme_override_font_sizes/normal_font_size = 32
 bbcode_enabled = true
-text = "Rplace HQ, Manhattan"
+text = "Rplace HQ, New Manhattan"
+fit_content = true
 scroll_active = false
+autowrap_mode = 0
 metadata/_edit_use_anchors_ = true
 
-[node name="RplaceHQ" type="Node3D" parent="."]
-
 [node name="BuildingCamera" type="Camera3D" parent="."]
-transform = Transform3D(0.281608, -0.620638, -0.731782, -0.00518912, 0.761651, -0.647967, 0.959516, 0.18627, 0.211266, -31.7941, 62, 45.9587)
+transform = Transform3D(0.422249, -0.399273, -0.81381, -0.00625808, 0.896465, -0.443071, 0.906458, 0.19218, 0.376033, -61.465, 80, 48)
 current = true
-fov = 40.4406
+fov = 14.8928
 
 [node name="BuildingAudioPlayer" type="AudioStreamPlayer" parent="."]
 
@@ -167,84 +247,32 @@ camera_attributes = SubResource("CameraAttributesPhysical_x4upr")
 transform = Transform3D(0.766044, -0.55667, 0.321394, 0, 0.5, 0.866025, -0.642788, -0.663414, 0.383022, 0, 198, 0)
 shadow_enabled = true
 
-[node name="Tunnel" type="CSGCombiner3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -7, 0)
-
-[node name="CSGBox3D3" type="CSGBox3D" parent="Tunnel"]
-size = Vector3(5, 5, 42)
-
-[node name="CSGSphere3D" type="CSGSphere3D" parent="Tunnel"]
-transform = Transform3D(1.095, 0, 0, 0, 1.19, 0, 0, 0, 1.865, 0, 0, 6.37188)
-operation = 2
-radius = 2.0
-rings = 12
-
-[node name="CSGSphere3D2" type="CSGSphere3D" parent="Tunnel"]
-transform = Transform3D(1.095, 0, 0, 0, 1.19, 0, 0, 0, 1.865, 0, 0, 2.37188)
-operation = 2
-radius = 2.0
-rings = 12
-
-[node name="CSGSphere3D9" type="CSGSphere3D" parent="Tunnel"]
-transform = Transform3D(1.095, 0, 0, 0, 1.19, 0, 0, 0, 3.02, 0, 0, 18.3719)
-operation = 2
-radius = 2.0
-rings = 12
-
-[node name="CSGSphere3D10" type="CSGSphere3D" parent="Tunnel"]
-transform = Transform3D(1.095, 0, 0, 0, 1.19, 0, 0, 0, 3.02, 0, 0, 10.3719)
-operation = 2
-radius = 2.0
-rings = 12
-
-[node name="CSGSphere3D3" type="CSGSphere3D" parent="Tunnel"]
-transform = Transform3D(1.095, 0, 0, 0, 1.19, 0, 0, 0, 1.865, 0, 0, -2.62812)
-operation = 2
-radius = 2.0
-rings = 12
-
-[node name="CSGSphere3D4" type="CSGSphere3D" parent="Tunnel"]
-transform = Transform3D(1.095, 0, 0, 0, 1.19, 0, 0, 0, 1.865, 0, 0, -5.62812)
-operation = 2
-radius = 2.0
-rings = 12
-
-[node name="CSGSphere3D5" type="CSGSphere3D" parent="Tunnel"]
-transform = Transform3D(1.095, 0, 0, 0, 1.19, 0, 0, 0, 1.865, 0, 0, -21.6281)
-operation = 2
-radius = 2.0
-rings = 12
-
-[node name="CSGSphere3D6" type="CSGSphere3D" parent="Tunnel"]
-transform = Transform3D(1.095, 0, 0, 0, 1.19, 0, 0, 0, 3.185, 0, 0, -11.6281)
-operation = 2
-radius = 2.0
-rings = 12
-
-[node name="CSGSphere3D7" type="CSGSphere3D" parent="Tunnel"]
-transform = Transform3D(1.095, 0, 0, 0, 1.19, 0, 0, 0, 1.47, 0, 0, -15.7281)
-operation = 2
-radius = 2.1
-rings = 12
-
-[node name="CSGSphere3D8" type="CSGSphere3D" parent="Tunnel"]
-transform = Transform3D(1.095, 0, 0, 0, 1.19, 0, 0, 0, 1.47, 0, 0, -17.1281)
-operation = 2
-radius = 2.1
-rings = 12
-
 [node name="BuildingGround" parent="." instance=ExtResource("4_rom83")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1.4, 0)
 
 [node name="Plane" parent="BuildingGround" index="0"]
 surface_material_override/0 = SubResource("StandardMaterial3D_ambu1")
 
 [node name="Plane" parent="." instance=ExtResource("5_ua2td")]
-transform = Transform3D(-0.605416, -0.795784, -0.0140924, -0.77057, 0.581618, 0.260656, -0.199229, 0.168665, -0.965328, -27.1143, 124.397, -33.5081)
+transform = Transform3D(-0.605415, -0.795785, -0.0140876, -0.77057, 0.581618, 0.260656, -0.199233, 0.168661, -0.965329, -27.1143, 124.397, -33.5081)
 
 [node name="PlaneAudioPlayer" type="AudioStreamPlayer3D" parent="Plane"]
 attenuation_model = 2
 volume_db = 78.5283
 bus = &"IntroPlane"
+
+[node name="LeftSmokeParticles" type="GPUParticles3D" parent="Plane"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, -1, 0)
+transform_align = 1
+process_material = SubResource("ParticleProcessMaterial_rtbi1")
+draw_pass_1 = SubResource("QuadMesh_31nkk")
+
+[node name="RightSmokeParticles" type="GPUParticles3D" parent="Plane"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, -1, 0)
+amount = 20
+lifetime = 4.0
+process_material = SubResource("ParticleProcessMaterial_rtbi1")
+draw_pass_1 = SubResource("QuadMesh_31nkk")
 
 [node name="DistantBuildings" parent="." instance=ExtResource("6_xwii3")]
 transform = Transform3D(2.12132, 0, 2.12132, 0, 3, 0, -2.12132, 0, 2.12132, -289, 19, -257)
@@ -252,11 +280,9 @@ transform = Transform3D(2.12132, 0, 2.12132, 0, 3, 0, -2.12132, 0, 2.12132, -289
 [node name="EiffelLowpoly" parent="." instance=ExtResource("7_jev6g")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -511, 50.4379, -343)
 
-[node name="CSGMesh3D" type="CSGMesh3D" parent="."]
-mesh = SubResource("PlaneMesh_n5cef")
-
-[node name="RplaceHq" parent="." instance=ExtResource("7_44der")]
+[node name="RplaceHQ" parent="." instance=ExtResource("7_44der")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7, 30, -2)
 
 [editable path="BuildingGround"]
 [editable path="Plane"]
+[editable path="RplaceHQ"]

@@ -52,7 +52,6 @@ text = "| |"
 
 [node name="PausePanel" type="Panel" parent="ClientGui"]
 unique_name_in_owner = true
-visible = false
 layout_mode = 1
 anchors_preset = -1
 anchor_right = 1.0
@@ -193,10 +192,11 @@ fit_content = true
 
 [node name="VolumeLabel" type="RichTextLabel" parent="ClientGui/PausePanel"]
 unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 72)
 layout_mode = 0
-offset_right = 298.0
-offset_bottom = 80.0
-pivot_offset = Vector2(149, 80)
+offset_right = 300.0
+offset_bottom = 72.0
+pivot_offset = Vector2(150, 72)
 theme_override_colors/default_color = Color(0, 0, 0, 1)
 theme_override_colors/font_shadow_color = Color(1, 0.67062, 0.522109, 1)
 theme_override_styles/normal = ExtResource("4_gxwos")
@@ -221,7 +221,6 @@ metadata/_edit_use_anchors_ = true
 
 [node name="SetupPanel" type="Panel" parent="ClientGui"]
 unique_name_in_owner = true
-visible = false
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -260,7 +259,8 @@ vertical_alignment = 1
 metadata/_edit_use_anchors_ = true
 
 [node name="HBoxContainer2" type="HBoxContainer" parent="ClientGui/SetupPanel"]
-layout_mode = 0
+layout_mode = 1
+anchors_preset = -1
 anchor_left = 0.21831
 anchor_top = 0.0632911
 anchor_right = 0.78169

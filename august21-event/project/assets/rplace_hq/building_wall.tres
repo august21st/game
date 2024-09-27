@@ -1,11 +1,14 @@
-[gd_resource type="StandardMaterial3D" load_steps=4 format=3 uid="uid://c8o82g2oxg74s"]
+[gd_resource type="StandardMaterial3D" load_steps=5 format=3 uid="uid://c8o82g2oxg74s"]
 
 [ext_resource type="Texture2D" uid="uid://cj0s851pt5127" path="res://assets/rplace_hq/building_window.png" id="1_q3hx2"]
 [ext_resource type="Texture2D" uid="uid://tacvx7ijqvau" path="res://assets/rplace_hq/building_window_metallic.png" id="2_namxr"]
 [ext_resource type="Texture2D" uid="uid://bg2vw6t1ppjdw" path="res://assets/rplace_hq/building_window_roughness.png" id="3_l1kls"]
+[ext_resource type="Texture2D" uid="uid://bll1oud1848ou" path="res://assets/rplace_hq/building_window_normal.png" id="3_mkfub"]
 
 [resource]
 albedo_texture = ExtResource("1_q3hx2")
 metallic = 1.0
 metallic_texture = ExtResource("2_namxr")
 roughness_texture = ExtResource("3_l1kls")
+normal_enabled = true
+normal_texture = ExtResource("3_mkfub")

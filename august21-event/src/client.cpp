@@ -714,12 +714,16 @@ void Client::_on_volume_slider_value_changed(float value)
 		Vector2(0.4f, 0.4f) * slide_ratio + Vector2(0.8f, 0.8f));
 	_volume_label->set_pivot_offset(Vector2(
 		volume_label_size.x / 2, volume_label_size.y));
-	_volume_label->set_rotation_degrees(20 * slide_ratio - 10.0f);
 	auto slider_position = _volume_slider->get_global_rect().get_position();
 	auto slider_size = _volume_slider->get_size();
+	const float slider_x_padding = 8.0f;
 	_volume_label->set_global_position(Vector2(
-		slider_position.x + (slide_ratio * slider_size.x) - (volume_label_size.x / 2.0f),
-		slider_position.y)); // - _volume_label->get_size().y * _volume_label->get_scale().y
+		(slider_position.x + slider_x_padding)
+			+ (slide_ratio * (slider_size.x - slider_x_padding * 2.0f))
+			- (volume_label_size.x / 2.0f * _volume_label->get_scale().x),
+		slider_position.y - _volume_label->get_size().y * _volume_label->get_scale().y));
+	//const float rotate_magnitude = 20.0f;
+	//_volume_label->set_rotation_degrees(rotate_magnitude * slide_ratio - rotate_magnitude / 2.0f);
 
 	auto master_index = _audio_server->get_bus_index("Master");
 	_audio_server->set_bus_volume_db(master_index, Math::linear2db(slide_ratio));
