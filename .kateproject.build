@@ -6,7 +6,7 @@
             "name": "Target Set",
             "targets": [
                 {
-                    "build_cmd": "/home/zekiah/august21-event/august21-event",
+                    "build_cmd": "/home/zekiah/august21st-game/august21st-game",
                     "name": "build",
                     "run_cmd": "scons platform=linux debug_symbols=yes"
                 }

@@ -5,11 +5,11 @@
             "name": "Linux",
             "includePath": [
                 "/usr/include",
-                "${workspaceFolder}/august21-event/godot-cpp/gen/include",
-                "${workspaceFolder}/august21-event/godot-cpp/gdextension",
-                "${workspaceFolder}/august21-event/godot-cpp/include",
-                "${workspaceFolder}/august21-event/dataproto-cpp/include",
-                "${workspaceFolder}/august21-event/commandIO-cpp/src"
+                "${workspaceFolder}/august21st-game/godot-cpp/gen/include",
+                "${workspaceFolder}/august21st-game/godot-cpp/gdextension",
+                "${workspaceFolder}/august21st-game/godot-cpp/include",
+                "${workspaceFolder}/august21st-game/dataproto-cpp/include",
+                "${workspaceFolder}/august21st-game/commandIO-cpp/src"
             ],
             "defines": [],
             "compilerPath": "/usr/bin/gcc",

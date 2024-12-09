@@ -1,13 +1,13 @@
-[submodule "august21-event/godot-cpp"]
-	path = august21-event/godot-cpp
+[submodule "august21st-game/godot-cpp"]
+	path = august21st-game/godot-cpp
 	url = https://github.com/godotengine/godot-cpp
 	branch = 4.2
-[submodule "august21-event/dataproto-cpp"]
-	path = august21-event/dataproto-cpp
+[submodule "august21st-game/dataproto-cpp"]
+	path = august21st-game/dataproto-cpp
 	url = https://github.com/Zekiah-A/dataproto-cpp.git
-[submodule "august21-event/project/assets/skybox/py360convert"]
-	path = august21-event/project/assets/skybox/py360convert
+[submodule "august21st-game/project/assets/skybox/py360convert"]
+	path = august21st-game/project/assets/skybox/py360convert
 	url = https://github.com/sunset1995/py360convert
-[submodule "august21-event/commandIO-cpp"]
-	path = august21-event/commandIO-cpp
+[submodule "august21st-game/commandIO-cpp"]
+	path = august21st-game/commandIO-cpp
 	url = https://github.com/Zekiah-A/commandIO-cpp.git

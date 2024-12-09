@@ -1,4 +1,4 @@
-# august21-event
+# august21st-game
 Sources for rplace.live 'august 21st' event game.
 
 
@@ -6,7 +6,7 @@ Sources for rplace.live 'august 21st' event game.
 1. **Clone the Project:**
 Make sure to clone this project with the --recursive flag to include the godot-cpp submodule:
    ```bash
-   git clone --recursive https://github.com/Zekiah-A/august21-event
+   git clone --recursive https://github.com/august21st/game
    ```
 
 2. **Install SCons:**
@@ -25,10 +25,10 @@ or you can use the gen-headers.sh script on Linux, which will automate the proce
    ```
 
 4. **Perform a Debug Build:**
-To perform a debug build of the project, navigate to the august21-event directory and run scons.
-This should automatically output the compiled library to `august21-event/project/bin/YOUR_TARGET_PLATFORM`:
+To perform a debug build of the project, navigate to the august21st-game directory and run scons.
+This should automatically output the compiled library to `august21st-game/project/bin/YOUR_TARGET_PLATFORM`:
    ```bash
-   cd august21-event
+   cd august21st-game
    scons debug_symbols=yes
    ```
 
@@ -57,11 +57,11 @@ along with producing a web build with scons, which will automate the process:
 
 
 ## License:
-The contents of the august21-event folder are based off the public domain template
+The contents of the august21st-game folder are based off the public domain template
 project, [godot-cpp-template](https://github.com/godotengine/godot-cpp-template). All modified files,
-including everything under [august21-event/project](./august21-event/godot),
-[august21-event/test-server](./august21-event/server), and
-[august21-event/src](./august21-event/src) are original works that are **NOT** public
+including everything under [august21st-game/project](./august21st-game/godot),
+[august21st-game/test-server](./august21st-game/server), and
+[august21st-game/src](./august21st-game/src) are original works that are **NOT** public
 domain, and are licensed under [GNU GPL 3.0](https://www.gnu.org/licenses/gpl-3.0.en.html),
 unless stated otherwise. For the terms of this license, refer to the [license file](./LICENSE)
 provided.

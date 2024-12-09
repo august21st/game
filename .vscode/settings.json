@@ -2,10 +2,13 @@
     "cmake.ignoreCMakeListsMissing": true,
     "clangd.fallbackFlags": [
         "-I/usr/include",
-        "-I${workspaceFolder}/august21-event/godot-cpp/gen/include",
-        "-I${workspaceFolder}/august21-event/godot-cpp/gdextension",
-        "-I${workspaceFolder}/august21-event/godot-cpp/include",
-        "-I${workspaceFolder}/august21-event/dataproto-cpp/include",
-        "-I${workspaceFolder}/august21-event/commandIO-cpp/src"
-    ]
+        "-I${workspaceFolder}/august21st-game/godot-cpp/gen/include",
+        "-I${workspaceFolder}/august21st-game/godot-cpp/gdextension",
+        "-I${workspaceFolder}/august21st-game/godot-cpp/include",
+        "-I${workspaceFolder}/august21st-game/dataproto-cpp/include",
+        "-I${workspaceFolder}/august21st-game/commandIO-cpp/src"
+    ],
+    "files.exclude": {
+        "**/.git": false
+    }
 }

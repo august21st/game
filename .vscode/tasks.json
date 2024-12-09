@@ -9,7 +9,7 @@
             "args": [ "dev_build=yes" ],
             "problemMatcher": "$msCompile",
             "options": {
-                "cwd": "${workspaceFolder}/august21-event"
+                "cwd": "${workspaceFolder}/august21st-game"
             }
         }
     ]

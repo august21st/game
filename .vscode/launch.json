@@ -6,9 +6,9 @@
             "type": "lldbg",
             "request": "launch",
             "program": "godot",
-            "args": [ "--editor", "--path", "${workspaceFolder}/august21-event/project/" ],
+            "args": [ "--editor", "--path", "${workspaceFolder}/august21st-game/project/" ],
             "stopAtEntry": false,
-            "cwd": "${workspaceFolder}/august21-event",
+            "cwd": "${workspaceFolder}/august21st-game",
             "environment": [],
             "externalConsole": false,
             "preLaunchTask": "build"
