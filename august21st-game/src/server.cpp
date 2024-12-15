@@ -114,11 +114,15 @@ void Server::_ready()
 	UtilityFunctions::print("Loading phase scenes...");
 	_resource_loader = ResourceLoader::get_singleton();
 	_phase_scenes = { };
-	auto roof_err = register_phase_scene("roof", "res://scenes/roof.tscn");
+	auto intro_err = register_phase_scene("rplace/intro", "res://scenes/rplace/intro.tscn");
+	if (intro_err != godot::Error::OK) {
+		return;
+	}
+	auto roof_err = register_phase_scene("rplace/roof", "res://scenes/rplace/roof.tscn");
 	if (roof_err != godot::Error::OK) {
 		return;
 	}
-	auto end_err = register_phase_scene("end", "res://scenes/end.tscn");
+	auto end_err = register_phase_scene("rplace/end", "res://scenes/rplace/end.tscn");
 	if (end_err != godot::Error::OK) {
 		return;
 	}
@@ -483,6 +487,13 @@ EntityInfo* Server::create_entity(String node_path, String parent_scene)
 	if (load_error != godot::Error::OK || entity_node == nullptr) {
 		return nullptr;
 	}
+	if (!_phase_scenes.has(parent_scene)) {
+		UtilityFunctions::printerr("Can't create entity ", node_path,
+			"in scene", parent_scene, ": phase scene doesn't exist");
+		return nullptr;
+	}
+
+	_phase_scenes[parent_scene]->add_child(entity_node);
 	auto info = memnew(EntityInfo(new_id, entity_node, parent_scene));
 	_entities.insert(new_id, info);
 	_entities_lock->unlock();
@@ -800,7 +811,6 @@ String Server::get_current_phase_event()
 {
 	return _current_phase_event;
 }
-
 
 void Server::initialize_fuzzing()
 {

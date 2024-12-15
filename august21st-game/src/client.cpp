@@ -201,9 +201,9 @@ void Client::_ready()
 	_players = { };
 	_phase_scenes = { };
 	register_phase_scene("loading_screen", "res://scenes/loading_screen.tscn");
-	register_phase_scene("intro", "res://scenes/intro.tscn");
-	register_phase_scene("roof", "res://scenes/roof.tscn");
-	register_phase_scene("end", "res://scenes/end.tscn");
+	register_phase_scene("rplace/intro", "res://scenes/rplace/intro.tscn");
+	register_phase_scene("rplace/roof", "res://scenes/rplace/roof.tscn");
+	register_phase_scene("rplace/end", "res://scenes/rplace/end.tscn");
 
 	UtilityFunctions::print("Starting as client...");
 	PlayerBody* player_body_scene = nullptr;
@@ -486,11 +486,11 @@ void Client::_process(double delta)
 						_entities.insert(id, entity_node);
 
 						// If a scene is defined, spawn the entity in
-						if (parent_scene == "roof" && _current_phase_scene == "roof") {
+						if (parent_scene == "roof" && _current_phase_scene == "rplace/roof") {
 							auto roof_scene = get_current_scene_strict<Roof>();
 							roof_scene->add_child(entity_node);
 						}
-						else if (parent_scene == "end" && _current_phase_scene == "end") {
+						else if (parent_scene == "end" && _current_phase_scene == "rplace/end") {
 							auto end_scene = get_current_scene_strict<End>();
 							end_scene->add_child(entity_node);
 						}
@@ -542,12 +542,12 @@ void Client::_process(double delta)
 					if (phase_scene == "loading_screen") {
 						change_scene("loading_screen");
 					}
-					if (phase_scene == "intro") {
-						change_scene("intro");
+					if (phase_scene == "rplace/intro") {
+						change_scene("rplace/intro");
 					}
-					else if (phase_scene == "roof") {
+					else if (phase_scene == "rplace/roof") {
 						if (_current_phase_scene != phase_scene) {
-							change_scene("roof");
+							change_scene("rplace/roof");
 						}
 
 						auto roof_scene = get_current_scene_strict<Roof>();
@@ -558,9 +558,9 @@ void Client::_process(double delta)
 						}
 						roof_scene->run_phase_event(phase_event);
 					}
-					else if (phase_scene == "end") {
+					else if (phase_scene == "rplace/end") {
 						if (_current_phase_scene != phase_scene) {
-							change_scene("end");
+							change_scene("rplace/end");
 						}
 
 						auto end_scene = get_current_scene_strict<End>();
@@ -569,8 +569,6 @@ void Client::_process(double delta)
 							end_scene->spawn_player(_player_body);
 						}
 						end_scene->run_phase_event(phase_event);
-					}
-					else {
 					}
 					_current_phase_scene = phase_scene;
 					_current_phase_event = phase_event;

@@ -1,4 +1,4 @@
-[gd_scene load_steps=25 format=3 uid="uid://ca11fthwu1qho"]
+[gd_scene load_steps=26 format=3 uid="uid://ca11fthwu1qho"]
 
 [ext_resource type="Theme" uid="uid://dbwgna8gjqom8" path="res://assets/default_theme.tres" id="1_ieq0l"]
 [ext_resource type="Texture2D" uid="uid://bpcp8t666sgwn" path="res://assets/rplace_gold.png" id="2_bqd13"]
@@ -8,6 +8,7 @@
 [ext_resource type="PackedScene" uid="uid://cdn343nsbxvqi" path="res://assets/tube.glb" id="5_uxkte"]
 [ext_resource type="Material" uid="uid://b3aaq2cp51dw7" path="res://assets/tube_material_high.tres" id="6_0wwry"]
 [ext_resource type="StyleBox" uid="uid://b7hyoe2nep4ja" path="res://assets/panel_background_style.tres" id="6_hcci7"]
+[ext_resource type="Texture2D" uid="uid://bdlce1o8l3erp" path="res://assets/ui/refresh.svg" id="7_mdpyo"]
 [ext_resource type="AudioStream" uid="uid://ddxo0ijvc0xsr" path="res://assets/august_21st.mp3" id="7_qwgri"]
 [ext_resource type="PackedScene" uid="uid://cwgp0q1aj5tli" path="res://assets/ataturk/ataturk_head.glb" id="8_xpof5"]
 [ext_resource type="Texture2D" uid="uid://bqlkjsksubx06" path="res://assets/gold/gold_albedo.png" id="9_5woh5"]
@@ -141,7 +142,7 @@ theme_override_constants/shadow_offset_y = 2
 theme_override_constants/outline_size = 2
 theme_override_fonts/font = ExtResource("3_bi7p0")
 theme_override_font_sizes/font_size = 24
-text = "A rplace.live special event..."
+text = "A rplace.live spinoff game..."
 horizontal_alignment = 1
 vertical_alignment = 1
 metadata/_edit_use_anchors_ = true
@@ -211,7 +212,7 @@ theme_override_constants/shadow_offset_y = 2
 theme_override_constants/outline_size = 2
 theme_override_fonts/font = ExtResource("3_bi7p0")
 theme_override_font_sizes/font_size = 24
-text = "Waiting for event to start..."
+text = "Waiting for game to start..."
 horizontal_alignment = 1
 vertical_alignment = 1
 metadata/_edit_use_anchors_ = true
@@ -267,10 +268,22 @@ theme_override_constants/margin_bottom = 16
 [node name="VBoxContainer" type="VBoxContainer" parent="Gui/ServerPanel/MarginContainer"]
 layout_mode = 2
 
-[node name="Label" type="Label" parent="Gui/ServerPanel/MarginContainer/VBoxContainer"]
+[node name="HBoxContainer" type="HBoxContainer" parent="Gui/ServerPanel/MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="Gui/ServerPanel/MarginContainer/VBoxContainer/HBoxContainer"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 25
 text = "Select a game server:"
+
+[node name="Button" type="Button" parent="Gui/ServerPanel/MarginContainer/VBoxContainer/HBoxContainer"]
+custom_minimum_size = Vector2(32, 32)
+layout_mode = 2
+size_flags_horizontal = 10
+icon = ExtResource("7_mdpyo")
+flat = true
+icon_alignment = 1
+expand_icon = true
 
 [node name="ScrollContainer" type="ScrollContainer" parent="Gui/ServerPanel/MarginContainer/VBoxContainer"]
 layout_mode = 2
