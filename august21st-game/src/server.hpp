@@ -1,8 +1,11 @@
 #pragma once
+#include "game_root.hpp"
 #include <godot_cpp/classes/random_number_generator.hpp>
 #include <godot_cpp/classes/reg_ex.hpp>
 #include <godot_cpp/templates/list.hpp>
 #include <godot_cpp/classes/node.hpp>
+#include <godot_cpp/classes/item_list.hpp>
+#include <godot_cpp/classes/line_edit.hpp>
 #include <godot_cpp/classes/web_socket_multiplayer_peer.hpp>
 #include <godot_cpp/classes/engine.hpp>
 #include <godot_cpp/classes/resource_loader.hpp>
@@ -13,29 +16,63 @@
 #include <godot_cpp/templates/hash_map.hpp>
 #include <godot_cpp/classes/display_server.hpp>
 #include <godot_cpp/classes/camera3d.hpp>
+#include <godot_cpp/classes/check_button.hpp>
+#include <godot_cpp/classes/button.hpp>
 #include <dataproto_cpp/dataproto.hpp>
 
+#include "game_root.hpp"
 // Forward declare to fix circular dependency
 class EntityItemBase;
 #include "entity_item_base.hpp"
 #include "client_data.hpp"
 #include "entity_info.hpp"
+#include "packet_info.hpp"
+#include "network_shared.hpp"
 
 using namespace godot;
 using namespace dataproto;
+using namespace NetworkShared;
 
-class Server : public Node {
-	GDCLASS(Server, Node)
+class Server : public GameRoot {
+	GDCLASS(Server, GameRoot)
 
 private:
 	Engine* _engine;
 	Ref<WebSocketMultiplayerPeer> _socket_server;
 	Ref<Thread> _console_thread;
 	DisplayServer* _display_server;
-	Camera3D* _server_camera;
-	Node3D* _server_scene;
 	ResourceLoader* _resource_loader;
 	Time* _time;
+
+	Camera3D* _server_camera;
+	Node3D* _server_scene;
+	List<PacketInfo*> _incoming_packets;
+	bool _incoming_packets_logging;
+	void set_incoming_packets_logging(bool value);
+	bool get_incoming_packets_logging();
+	ItemList* _incoming_packets_list;
+	LineEdit* _incoming_packets_filter;
+	void _on_incoming_packets_filter_text_submitted(String new_text);
+	Button* _incoming_packets_filter_clear;
+	void _on_incoming_packets_filter_clear_pressed();
+	CheckButton* _incoming_packets_enabled;
+	void _on_incoming_packets_enabled_pressed();
+	bool _outgoing_packets_logging;
+	void set_outgoing_packets_logging(bool value);
+	bool get_outgoing_packets_logging();
+	List<PacketInfo*> _outgoing_packets;
+	ItemList* _outgoing_packets_list;
+	LineEdit* _outgoing_packets_filter;
+	void _on_outgoing_packets_filter_text_submitted(String new_text);
+	Button* _outgoing_packets_filter_clear;
+	void _on_outgoing_packets_filter_clear_pressed();
+	CheckButton* _outgoing_packets_enabled;
+	void _on_outgoing_packets_enabled_pressed();
+	void packets_list_autoscroll(VScrollBar* scroll_bar);
+	void eval_packet_filter(String filter, List<PacketInfo*> infos, ItemList* info_list);
+	void add_incoming_packet_info(ClientPacket code, ClientData* from);
+	void add_outgoing_packet_info(ServerPacket code, ClientData* to = nullptr);
+
 	double _start_time;
 	double _game_time;
 	int _tick_count;
@@ -64,18 +101,8 @@ private:
 	void maybe_disconnect_fuzz();
 	String generate_random_string(int length);
 	Vector3 generate_random_vector3();
-	
+
 	// Constants
-	const String _model_variants[8] = {
-		"lightblue",
-		"navy",
-		"green",
-		"purple",
-		"grey",
-		"brown",
-		"orangered",
-		"gold"
-	};
 	const int PLAYER_LIMIT = 512;
 	const int SERVER_PORT = 8021;
 	const int TPS = 20;
@@ -96,6 +123,7 @@ public:
 	void repl_create_entity(string node_path, string parent_scene);
 	// thread safe
 	EntityInfo* create_entity(String node_path, String parent_scene);
+	EntityInfo* get_entity(int id);
 	void repl_set_phase(string name);
 	void set_phase(String name);
 	void repl_update_entity(int id, string property, string value);
@@ -105,18 +133,25 @@ public:
 	void repl_list_entities();
 	void list_entities();
 	void kill_player(int id);
-	void kick_player(int id);
+	void kick_client(int id);
 	void tp_player(string scene, int x, int y, int z);
 	void repl_announce(string message);
+	// Send to all connected websocket clients
 	void send_to_all(const BufWriter& packet);
 	void send_to_all(const char* data, size_t size);
-	void send_to_authenticated(const BufWriter& packet);
-	void send_to_authenticated(const char* data, size_t size);
-	void send_to_others(int exclude_id, const BufWriter& packet);
-	void send_to_others(int exclude_id, const char* data, size_t size);
+	// Send to all authenticated players
+	void send_to_players(const BufWriter& packet);
+	void send_to_players(const char* data, size_t size);
+	void send_to_other_players(int exclude_id, const BufWriter& packet);
+	void send_to_other_players(int exclude_id, const char* data, size_t size);
 	void send(int id, const BufWriter& packet);
 	void send(int id, const char* data, size_t size);
 	void send(int id, PackedByteArray packed_data);
-	String get_current_phase_scene();
-	String get_current_phase_event();
+
+	String get_current_phase_scene() override;
+	String get_current_phase_event() override;
+	bool has_phase_scene(String name) override;
+	Node* get_phase_scene(String name) override;
+	bool is_client() override;
+	bool is_server() override;
 };

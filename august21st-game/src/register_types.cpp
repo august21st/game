@@ -5,9 +5,11 @@
 
 #include "register_types.hpp"
 #include "entity_info.hpp"
+#include "packet_info.hpp"
 #include "entity_player_base.hpp"
 #include "entity_item_base.hpp"
 #include "chair_gun.hpp"
+#include "phase_scene.hpp"
 #include "player_body.hpp"
 #include "entity_player.hpp"
 #include "loading_screen.hpp"
@@ -19,6 +21,7 @@
 #include "end.hpp"
 #include "server_camera.hpp"
 #include "loader.hpp"
+#include "game_root.hpp"
 #include "server.hpp"
 #include "client.hpp"
 
@@ -31,10 +34,13 @@ void initialize_gdextension_types(ModuleInitializationLevel p_level)
 	}
 
 	GDREGISTER_RUNTIME_CLASS(Loader);
+	GDREGISTER_RUNTIME_CLASS(GameRoot);
 	GDREGISTER_RUNTIME_CLASS(Client);
+	GDREGISTER_RUNTIME_CLASS(PhaseScene);
 	GDREGISTER_RUNTIME_CLASS(LoadingScreen);
 	GDREGISTER_RUNTIME_CLASS(PlayerBody);
 	GDREGISTER_RUNTIME_CLASS(EntityInfo);
+	GDREGISTER_RUNTIME_CLASS(PacketInfo);
 	GDREGISTER_RUNTIME_CLASS(EntityItemBase);
 	GDREGISTER_RUNTIME_CLASS(ChairGun);
 	GDREGISTER_RUNTIME_CLASS(EntityPlayerBase);

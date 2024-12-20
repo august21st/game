@@ -189,7 +189,7 @@ void Portal::_on_current_scene_ready()
 			// Next try scene default
 			_main_camera = get_viewport()->get_camera_3d();
 			if (_main_camera == nullptr) {
-				UtilityFunctions::print("Portal '", get_name(), "' cannot render: Scene main camera not found.");
+				UtilityFunctions::printerr("Portal '", get_name(), "' cannot render: Scene main camera not found.");
 			}
 		}
 	}

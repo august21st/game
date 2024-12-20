@@ -27,6 +27,7 @@
 #include <godot_cpp/templates/list.hpp>
 #include <godot_cpp/classes/timer.hpp>
 
+#include "game_root.hpp"
 #include "entity_player_base.hpp"
 // Forward declare to fix circular dependency
 class PlayerBody;
@@ -54,8 +55,8 @@ struct PhaseSceneInfo {
 
 // Global autoload singleton for client, manages global
 // client state, like handling websocket connection and settings
-class Client : public Node {
-	GDCLASS(Client, Node);
+class Client : public GameRoot {
+	GDCLASS(Client, GameRoot);
 
 private:
 	OS* _os;
@@ -245,15 +246,20 @@ public:
 	Ref<WebSocketPeer> get_socket();
 	Error send(const BufWriter& packet);
 	Error send(const char* data, size_t size);
-	Node* get_current_scene();
-	template<typename T> T* get_current_scene_strict();
-	Error change_scene(String identifier);
-	String get_current_phase_scene();
-	String get_current_phase_event();
 	PresetsPlatform get_presets_platform();
 	int get_player_id();
 	PlayerBody* get_player_body();
 	HashMap<int, EntityPlayerBase*> get_players();
 	EntityPlayerBase* get_player(int id);
 	int get_entity_id(Node* entity);
+
+	Node* get_current_scene();
+	template<typename T> T* get_current_scene_strict();
+	Error change_scene(String identifier);
+	String get_current_phase_scene() override;
+	String get_current_phase_event() override;
+	bool has_phase_scene(String name) override;
+	Node* get_phase_scene(String name) override;
+	bool is_client() override;
+	bool is_server() override;
 };

@@ -1,18 +1,15 @@
-[gd_scene load_steps=81 format=4 uid="uid://dh3f0fyoo6ibo"]
+[gd_scene load_steps=76 format=4 uid="uid://dh3f0fyoo6ibo"]
 
 [ext_resource type="Material" uid="uid://dhejphsc088k2" path="res://assets/concrete/concrete.tres" id="1_bacw7"]
 [ext_resource type="Texture2D" uid="uid://e88undo8tgp7" path="res://assets/vignette.png" id="1_olgna"]
 [ext_resource type="FontFile" uid="uid://dud2oarn413ue" path="res://assets/impact/impacted.ttf" id="2_em1jt"]
 [ext_resource type="FontFile" uid="uid://vo3twycs6ve7" path="res://assets/reddit/reddit_sans_bold.woff2" id="2_gdjed"]
-[ext_resource type="PackedScene" uid="uid://ca7n3vrq5gy37" path="res://assets/rplace_logo.glb" id="4_o0vqv"]
 [ext_resource type="Texture2D" uid="uid://bpcp8t666sgwn" path="res://assets/rplace_gold.png" id="4_ql7d3"]
 [ext_resource type="Texture2D" uid="uid://c5tmyq4qeg1gf" path="res://assets/concrete/concrete.png" id="4_sbhyi"]
-[ext_resource type="Texture2D" uid="uid://cj0s851pt5127" path="res://assets/rplace_hq/building_window.png" id="5_713lv"]
+[ext_resource type="PackedScene" uid="uid://dcsdkwr6qbb53" path="res://assets/rplace_hq/rplace_hq.glb" id="5_b5swd"]
 [ext_resource type="Material" uid="uid://7ob7uwp8gnn7" path="res://assets/chair/plywood.tres" id="5_vkl7b"]
-[ext_resource type="Texture2D" uid="uid://tacvx7ijqvau" path="res://assets/rplace_hq/building_window_metallic.png" id="6_2e75g"]
 [ext_resource type="Texture2D" uid="uid://pqivc2xifl8u" path="res://assets/stall/free_pixels_sign.png" id="6_jap0l"]
 [ext_resource type="PackedScene" uid="uid://cqs3omeen5ext" path="res://assets/clouds_cone.glb" id="7_k73ar"]
-[ext_resource type="Texture2D" uid="uid://bg2vw6t1ppjdw" path="res://assets/rplace_hq/building_window_roughness.png" id="7_ls2ss"]
 [ext_resource type="Texture2D" uid="uid://cmt1bh1b0hrie" path="res://assets/signpost/leap_of_faith.png" id="7_rss4r"]
 [ext_resource type="Material" uid="uid://bfjx4pf6sb5q0" path="res://assets/circular_vortex/circular_vortex.tres" id="7_td0np"]
 [ext_resource type="Shader" path="res://shaders/floor_lava.gdshader" id="8_5yos5"]
@@ -44,12 +41,8 @@ shadow_color = Color(0, 0, 0, 1)
 [sub_resource type="LabelSettings" id="LabelSettings_c2b30"]
 shadow_color = Color(0, 0, 0, 1)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_gg4lh"]
-albedo_texture = ExtResource("5_713lv")
-metallic = 1.0
-metallic_texture = ExtResource("6_2e75g")
-roughness_texture = ExtResource("7_ls2ss")
-uv1_scale = Vector3(32, 32, 32)
+[sub_resource type="ConcavePolygonShape3D" id="ConcavePolygonShape3D_10pa2"]
+data = PackedVector3Array(-33, 0, 33, -33, 140, -33, -33, 140, 33, -33, 0, 33, -33, 0, -33, -33, 140, -33, -33, 0, -33, 33, 140, -33, -33, 140, -33, -33, 0, -33, 33, 0, -33, 33, 140, -33, 33, 0, -33, 33, 140, 33, 33, 140, -33, 33, 0, -33, 33, 0, 33, 33, 140, 33, 33, 0, 33, -33, 140, 33, 33, 140, 33, 33, 0, 33, -33, 0, 33, -33, 140, 33, 32.5992, 140, 32.5992, 32.5992, 139, -32.6002, 32.5992, 140, -32.6002, 32.5992, 140, 32.5992, 32.5992, 139, 32.5992, 32.5992, 139, -32.6002, -32.6002, 140, 32.5992, -33, 140, -33, -32.6002, 140, -32.6002, -32.6002, 140, 32.5992, -33, 140, 33, -33, 140, -33, -32.6002, 140, -32.6002, 33, 140, -33, 32.5992, 140, -32.6002, -32.6002, 140, -32.6002, -33, 140, -33, 33, 140, -33, 32.5992, 140, -32.6002, 33, 140, 33, 32.5992, 140, 32.5992, 32.5992, 140, -32.6002, 33, 140, -33, 33, 140, 33, 32.5992, 140, 32.5992, -33, 140, 33, -32.6002, 140, 32.5992, 32.5992, 140, 32.5992, 33, 140, 33, -33, 140, 33, 32.5992, 139, -32.6002, -32.6002, 139, 32.5992, -32.6002, 139, -32.6002, 32.5992, 139, -32.6002, 32.5992, 139, 32.5992, -32.6002, 139, 32.5992, -32.6002, 140, -32.6002, -32.6002, 139, 32.5992, -32.6002, 140, 32.5992, -32.6002, 140, -32.6002, -32.6002, 139, -32.6002, -32.6002, 139, 32.5992, -32.6002, 140, 32.5992, 32.5992, 139, 32.5992, 32.5992, 140, 32.5992, -32.6002, 140, 32.5992, -32.6002, 139, 32.5992, 32.5992, 139, 32.5992, 32.5992, 140, -32.6002, -32.6002, 139, -32.6002, -32.6002, 140, -32.6002, 32.5992, 140, -32.6002, 32.5992, 139, -32.6002, -32.6002, 139, -32.6002)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_djae4"]
 transparency = 1
@@ -118,12 +111,6 @@ size = Vector2(2.6, 0.8)
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ny3bq"]
 transparency = 1
 albedo_texture = ExtResource("6_jap0l")
-
-[sub_resource type="BoxShape3D" id="BoxShape3D_6wnrb"]
-size = Vector3(16, 20, 2)
-
-[sub_resource type="BoxShape3D" id="BoxShape3D_35aqv"]
-size = Vector3(4, 16, 2)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_m8hv4"]
 transparency = 1
@@ -1030,44 +1017,15 @@ label_settings = SubResource("LabelSettings_c2b30")
 vertical_alignment = 1
 metadata/_edit_use_anchors_ = true
 
-[node name="RplaceHQ" type="Node3D" parent="."]
+[node name="RplaceHQ" type="StaticBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -3, 0)
 
-[node name="Building" type="CSGBox3D" parent="RplaceHQ"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -70, 0)
-use_collision = true
-size = Vector3(64, 140, 64)
-material = SubResource("StandardMaterial3D_gg4lh")
+[node name="RplaceHQ" parent="RplaceHQ" instance=ExtResource("5_b5swd")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -149, 0)
 
-[node name="RoofFloor" type="CSGBox3D" parent="RplaceHQ"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.00050354, 0)
-use_collision = true
-size = Vector3(62, 0.01, 62)
-material = ExtResource("1_bacw7")
-
-[node name="Border" type="CSGBox3D" parent="RplaceHQ"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 31.5, 0.5, 0)
-use_collision = true
-size = Vector3(1, 1, 64)
-material = ExtResource("1_bacw7")
-
-[node name="Border2" type="CSGBox3D" parent="RplaceHQ"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -31.5, 0.5, 0)
-use_collision = true
-size = Vector3(1, 1, 64)
-material = ExtResource("1_bacw7")
-
-[node name="Border3" type="CSGBox3D" parent="RplaceHQ"]
-transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 0, 0.5, -31.5)
-use_collision = true
-size = Vector3(1, 1, 64)
-material = ExtResource("1_bacw7")
-
-[node name="Border4" type="CSGBox3D" parent="RplaceHQ"]
-transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 0, 0.5, 31.5)
-use_collision = true
-size = Vector3(1, 1, 64)
-material = ExtResource("1_bacw7")
+[node name="CollisionShape3D" type="CollisionShape3D" parent="RplaceHQ"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -139, 0)
+shape = SubResource("ConcavePolygonShape3D_10pa2")
 
 [node name="RoofSmokeParticles" type="GPUParticles3D" parent="RplaceHQ"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 12, 0)
@@ -1123,20 +1081,6 @@ surface_material_override/0 = SubResource("StandardMaterial3D_ny3bq")
 transform = Transform3D(-1, 0, 2.62269e-07, 0, 1, 0, -2.62269e-07, 0, -1, 0, 0, 0)
 size = Vector3(3, 1, 1)
 material = ExtResource("5_vkl7b")
-
-[node name="RplaceLogoBody" type="StaticBody3D" parent="RplaceHQ"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -22, 32)
-
-[node name="RplaceLogo" parent="RplaceHQ/RplaceLogoBody" instance=ExtResource("4_o0vqv")]
-transform = Transform3D(2, 0, 0, 0, -8.74228e-08, 2, 0, -2, -8.74228e-08, 0, 0, 0)
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="RplaceHQ/RplaceLogoBody"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 0, 1)
-shape = SubResource("BoxShape3D_6wnrb")
-
-[node name="CollisionShape3D2" type="CollisionShape3D" parent="RplaceHQ/RplaceLogoBody"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, -2, 1)
-shape = SubResource("BoxShape3D_35aqv")
 
 [node name="Signpost" parent="RplaceHQ" instance=ExtResource("19_idya5")]
 transform = Transform3D(0.258819, 0, -0.965926, 0, 1, 0, 0.965926, 0, 0.258819, 31.4, 1, -31.5)
@@ -2911,6 +2855,7 @@ transform = Transform3D(0.0209171, -0.0757097, -0.996911, 0.00158819, 0.99713, -
 [node name="CoverCamera" type="Camera3D" parent="CoverAssets"]
 transform = Transform3D(0.753576, 0.24431, 0.610275, 0.0111756, 0.923476, -0.383494, -0.657266, 0.295812, 0.693179, -26.4677, 0.807439, -26.2514)
 
+[editable path="RplaceHQ/RplaceHQ"]
 [editable path="RplaceHQ/CanvasFloorBody/CanvasFrame"]
 [editable path="RplaceHQ/Signpost"]
 [editable path="CloudsCone"]

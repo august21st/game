@@ -102,7 +102,7 @@ void EntityItemBase::_ready()
 	// Register ourselves as an entity automatically
 	_server = get_global_server(this);
 	if (_server == nullptr) {
-		UtilityFunctions::print("Couldn't run serverside phase event: server autoload was null");
+		UtilityFunctions::printerr("Couldn't run serverside phase event: server autoload was null");
 		return;
 	}
 

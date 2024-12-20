@@ -2,6 +2,8 @@
     "recommendations": [
         "ms-vscode.cpptools-extension-pack",
         "ms-python.python",
-        "vadimcn.vscode-lldb"
+        "vadimcn.vscode-lldb",
+        "cschlosser.doxdocgen",
+        "geequlim.godot-tools"       
     ]
 }

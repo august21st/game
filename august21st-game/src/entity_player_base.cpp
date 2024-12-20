@@ -20,6 +20,8 @@ EntityPlayerBase::~EntityPlayerBase()
 
 void EntityPlayerBase::_bind_methods()
 {
+	ClassDB::bind_method(D_METHOD("get_id"), &EntityPlayerBase::get_id);
+	ClassDB::bind_method(D_METHOD("set_id"), &EntityPlayerBase::set_id);
 	ClassDB::bind_method(D_METHOD("get_chat_name"), &EntityPlayerBase::get_chat_name);
 	ClassDB::bind_method(D_METHOD("set_chat_name"), &EntityPlayerBase::set_chat_name);
 	ClassDB::bind_method(D_METHOD("get_health"), &EntityPlayerBase::get_health);
@@ -30,9 +32,20 @@ void EntityPlayerBase::_bind_methods()
 	//ClassDB::bind_method(D_METHOD("set_inventory"), &EntityPlayerBase::set_inventory);
 	ClassDB::bind_method(D_METHOD("get_inventory_current"), &EntityPlayerBase::get_inventory_current);
 	ClassDB::bind_method(D_METHOD("set_inventory_current"), &EntityPlayerBase::set_inventory_current);
+	ADD_PROPERTY(PropertyInfo(Variant::INT, "id"), "set_id", "get_id");
 	ADD_PROPERTY(PropertyInfo(Variant::STRING, "chat_name"), "set_chat_name", "get_chat_name");
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "health"), "set_health", "get_health");
 	ADD_PROPERTY(PropertyInfo(Variant::STRING, "model_variant"), "set_model_variant", "get_model_variant");
+}
+
+void EntityPlayerBase::set_id(int id)
+{
+	_id = id;
+}
+
+int EntityPlayerBase::get_id()
+{
+	return _id;
 }
 
 void EntityPlayerBase::set_chat_name(String name)
@@ -85,8 +98,12 @@ int EntityPlayerBase::get_inventory_current()
 	return _inventory_current;
 }
 
-void EntityPlayerBase::respawn(Vector3 position)
+void EntityPlayerBase::respawn(String phase_scene, Vector3 position)
 {
-    set_global_position(position);
-    set_health(DEFAULT_HEALTH);
+	// TODO: Implement properly
+}
+
+void EntityPlayerBase::die(String reason, String message)
+{
+	// TODO: Implement properly
 }

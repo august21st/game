@@ -3,8 +3,11 @@
 
 using namespace godot;
 
-// Startup scene of program - Ushers in root Client / Server depending on game startup
-// the objective of this class is to ultimately GTFO as fast as possible
+/**
+ * @brief Startup scene of game - ushers in root Client / Server depending
+ * on game startup arguments. The objective of this Node is to ultimately
+ * initialise the game and GTFO as fast as possible.
+ */
 class Loader : public Node {
 	GDCLASS(Loader, Node);
 

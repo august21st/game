@@ -46,6 +46,11 @@ along with producing a web build with scons, which will automate the process:
    ./build-web.sh
    ```
 
+7. **Generating documentation:**
+To generate the doxygen documentation, both `doxygen` and the `DoxygenBuilder` from scons-contrib must be
+installed. To install the scons-contrib package, run `python -m pip install --user git+https://github.com/SCons/scons-contrib.git`,
+or see https://github.com/SCons/scons-contrib/tree/master for more information.
+
 ### Additional notes:
 - Ensure you have the Godot 4.3 editor installed and available in your PATH.
 - For building web without threads, make sure to compile extensions using the

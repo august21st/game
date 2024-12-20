@@ -126,8 +126,8 @@ public:
 	void _unhandled_input(const Ref<InputEvent> &event) override;
 	void _physics_process(double delta) override;
 	void _process(double delta) override;
-	void die(String death_title = "YOU DIED", String death_message = "[center]Press revive to respawn...[/center]");
-	void respawn(Vector3 position) override;
+	void die(String reason, String message="[center]Press revive to respawn...[/center]") override;
+	void respawn(String phase_scene, Vector3 position) override;
 	void take_damage(int damage);
 	void set_climbing(bool climbing);
 	void open_chat();

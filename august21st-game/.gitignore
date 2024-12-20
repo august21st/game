@@ -6,6 +6,7 @@
 project/android
 project/assets/skybox/cubemap/*
 !project/assets/skybox/cubemap/.gitkeep
+docs/html/
 
 # Ignore exports - keep directory structure for ease
 project/export/*

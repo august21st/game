@@ -28,7 +28,7 @@ def find_directories(directory):
 source_libname = "august21st-game"
 source_projectdir = "project"
 
-localEnv = Environment(tools=["default"], PLATFORM="")
+localEnv = Environment(tools=["default", "doxygen"], PLATFORM="")
 
 customs = ["custom.py"]
 customs = [os.path.abspath(path) for path in customs]
@@ -49,6 +49,13 @@ opts.Add(
 		validator=validate_parent_dir,
 	)
 )
+opts.Add(
+	BoolVariable(
+		key="docs",
+		help="Generate doxygen documentation",
+		default=localEnv.get("docs", False)
+	)
+)
 opts.Update(localEnv)
 
 Help(opts.GenerateHelpText(localEnv))
@@ -61,6 +68,9 @@ compilation_db = env.CompilationDatabase(
 	normalize_path(localEnv["compiledb_file"], localEnv)
 )
 env.Alias("compiledb", compilation_db)
+
+doxygen = env.Doxygen("Doxyfile")
+env.Alias("docs", doxygen)
 
 env = SConscript("godot-cpp/SConstruct", {"env": env, "customs": customs})
 source_dirs = find_directories("src/")

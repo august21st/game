@@ -1,9 +1,10 @@
-## 'Entity Data' specification
-All types within these diagrams are equivalent  to the dataproto-cpp types,
+# Packets
+All types within these diagrams are equivalent to the dataproto-cpp types,
 with numerical types encoded in big endian format, and *_str / str types
 being utf8 C-like string sequences, made up of flint-like length, and an
 unterminated u8[].
 
+## 'Entity Data' specification
 
 ### Used by:
  - `NodeShared::write_entity_data(String node_path, BufWriter& buffer)`
@@ -50,6 +51,7 @@ EntityData:
 </pre>
 
 ## 'Entity info' packet specification
+
 ### Diagram:
 <pre style="overflow-x: auto; white-space: pre;">
 u8 ServerPacket::ENTITIES_INFO

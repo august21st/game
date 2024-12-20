@@ -8,8 +8,8 @@
 using namespace dataproto;
 using namespace godot;
 
-
 namespace NetworkShared {
+	// TODO: This should probably be in NodeShared, or NodeShared's variant writing methods should be moved here
 	void write_vector3(BufWriter& packet, Vector3 vector)
 	{
 		packet.f32(vector.x);

@@ -1,4 +1,6 @@
-[gd_scene format=3 uid="uid://ym7s5kjqo6ag"]
+[gd_scene load_steps=2 format=3 uid="uid://ym7s5kjqo6ag"]
+
+[ext_resource type="FontFile" uid="uid://ca14mkoohldct" path="res://assets/reddit/reddit_mono_bold.woff2" id="1_ndbnk"]
 
 [node name="Server" type="Server"]
 
@@ -7,3 +9,178 @@ unique_name_in_owner = true
 
 [node name="ServerCamera" type="ServerCamera" parent="."]
 unique_name_in_owner = true
+
+[node name="ServerGui" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="HSplitContainer" type="HSplitContainer" parent="ServerGui"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+split_offset = 250
+
+[node name="Control" type="Control" parent="ServerGui/HSplitContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 2
+
+[node name="TabContainer" type="TabContainer" parent="ServerGui/HSplitContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+current_tab = 0
+metadata/_edit_use_anchors_ = true
+
+[node name="Packets" type="Panel" parent="ServerGui/HSplitContainer/TabContainer"]
+layout_mode = 2
+metadata/_edit_use_anchors_ = true
+metadata/_tab_index = 0
+
+[node name="Label" type="Label" parent="ServerGui/HSplitContainer/TabContainer/Packets"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.025
+anchor_top = 0.0145867
+anchor_right = 0.975
+anchor_bottom = 0.0923825
+theme_override_fonts/font = ExtResource("1_ndbnk")
+theme_override_font_sizes/font_size = 28
+text = "Packets:"
+vertical_alignment = 1
+metadata/_edit_use_anchors_ = true
+
+[node name="MarginContainer" type="MarginContainer" parent="ServerGui/HSplitContainer/TabContainer/Packets"]
+layout_mode = 2
+anchor_top = 0.105348
+anchor_right = 1.0
+anchor_bottom = 1.0
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 8
+metadata/_edit_use_anchors_ = true
+
+[node name="VSplitContainer" type="VSplitContainer" parent="ServerGui/HSplitContainer/TabContainer/Packets/MarginContainer"]
+layout_mode = 2
+split_offset = 264
+metadata/_edit_use_anchors_ = true
+
+[node name="HBoxContainer" type="VBoxContainer" parent="ServerGui/HSplitContainer/TabContainer/Packets/MarginContainer/VSplitContainer"]
+layout_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="ServerGui/HSplitContainer/TabContainer/Packets/MarginContainer/VSplitContainer/HBoxContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="ServerGui/HSplitContainer/TabContainer/Packets/MarginContainer/VSplitContainer/HBoxContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Incoming:"
+
+[node name="IncomingPacketsEnabled" type="CheckButton" parent="ServerGui/HSplitContainer/TabContainer/Packets/MarginContainer/VSplitContainer/HBoxContainer/HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Logging enabled"
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="ServerGui/HSplitContainer/TabContainer/Packets/MarginContainer/VSplitContainer/HBoxContainer"]
+layout_mode = 2
+
+[node name="IncomingPacketsFilter" type="LineEdit" parent="ServerGui/HSplitContainer/TabContainer/Packets/MarginContainer/VSplitContainer/HBoxContainer/HBoxContainer2"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+tooltip_text = "Filter syntax uses a gdscript filter expression
+which each item is compared against.
+For example:
+code == 0 && time >= \"08:11:24\" && from == 12345678"
+placeholder_text = "Filter packets"
+
+[node name="IncomingPacketsFilterClear" type="Button" parent="ServerGui/HSplitContainer/TabContainer/Packets/MarginContainer/VSplitContainer/HBoxContainer/HBoxContainer2"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Clear"
+
+[node name="IncomingPacketsList" type="ItemList" parent="ServerGui/HSplitContainer/TabContainer/Packets/MarginContainer/VSplitContainer/HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="HBoxContainer2" type="VBoxContainer" parent="ServerGui/HSplitContainer/TabContainer/Packets/MarginContainer/VSplitContainer"]
+layout_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="ServerGui/HSplitContainer/TabContainer/Packets/MarginContainer/VSplitContainer/HBoxContainer2"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="ServerGui/HSplitContainer/TabContainer/Packets/MarginContainer/VSplitContainer/HBoxContainer2/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Outgoing:"
+
+[node name="OutgoingPacketsEnabled" type="CheckButton" parent="ServerGui/HSplitContainer/TabContainer/Packets/MarginContainer/VSplitContainer/HBoxContainer2/HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Logging enabled"
+
+[node name="HBoxContaine2" type="HBoxContainer" parent="ServerGui/HSplitContainer/TabContainer/Packets/MarginContainer/VSplitContainer/HBoxContainer2"]
+layout_mode = 2
+
+[node name="OutgoingPacketsFilter" type="LineEdit" parent="ServerGui/HSplitContainer/TabContainer/Packets/MarginContainer/VSplitContainer/HBoxContainer2/HBoxContaine2"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+tooltip_text = "Filter syntax uses a gdscript filter expression
+which each item is compared against.
+For example:
+code != 32 || to  == 12345678"
+placeholder_text = "Filter packets"
+
+[node name="OutgoingPacketsFilterClear" type="Button" parent="ServerGui/HSplitContainer/TabContainer/Packets/MarginContainer/VSplitContainer/HBoxContainer2/HBoxContaine2"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Clear"
+
+[node name="OutgoingPacketsList" type="ItemList" parent="ServerGui/HSplitContainer/TabContainer/Packets/MarginContainer/VSplitContainer/HBoxContainer2"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="Players" type="Panel" parent="ServerGui/HSplitContainer/TabContainer"]
+visible = false
+layout_mode = 2
+metadata/_tab_index = 1
+
+[node name="Label" type="Label" parent="ServerGui/HSplitContainer/TabContainer/Players"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.025
+anchor_top = 0.0145867
+anchor_right = 0.975
+anchor_bottom = 0.0923825
+theme_override_fonts/font = ExtResource("1_ndbnk")
+theme_override_font_sizes/font_size = 28
+text = "Players:"
+vertical_alignment = 1
+metadata/_edit_use_anchors_ = true
+
+[node name="Entities" type="Panel" parent="ServerGui/HSplitContainer/TabContainer"]
+visible = false
+layout_mode = 2
+metadata/_tab_index = 2
+
+[node name="Label" type="Label" parent="ServerGui/HSplitContainer/TabContainer/Entities"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.025
+anchor_top = 0.0145867
+anchor_right = 0.975
+anchor_bottom = 0.0923825
+theme_override_fonts/font = ExtResource("1_ndbnk")
+theme_override_font_sizes/font_size = 28
+text = "Entities:"
+vertical_alignment = 1
+metadata/_edit_use_anchors_ = true

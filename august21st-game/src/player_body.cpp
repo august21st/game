@@ -154,7 +154,7 @@ void PlayerBody::_ready()
 		_item_outline_material = item_outline_resource;
 	}
 	else {
-		UtilityFunctions::print("Failed to load outline material: Resource was not a ShaderMaterial");
+		UtilityFunctions::printerr("Failed to load outline material: Resource was not a ShaderMaterial");
 	}
 
 	if (_client->get_presets_platform() != PresetsPlatform::MOBILE) {
@@ -310,7 +310,7 @@ void PlayerBody::_unhandled_input(const Ref<InputEvent> &event)
 								thumbnail = thumbnail_resource;
 							}
 							else {
-								UtilityFunctions::print("Failed to read from thumbnail path ",
+								UtilityFunctions::printerr("Failed to read from thumbnail path ",
 									thumbnail_path, ": resource was not a Texture2D");
 							}
 						}
@@ -324,7 +324,7 @@ void PlayerBody::_unhandled_input(const Ref<InputEvent> &event)
 						}
 					}
 					else {
-						UtilityFunctions::print("Failed to add inventory item: Loading inventory item scene failed with ", load_error);
+						UtilityFunctions::printerr("Failed to add inventory item: Loading inventory item scene failed with ", load_error);
 					}
 					_inventory_box->add_child(inventory_item);
 
@@ -461,9 +461,6 @@ void PlayerBody::_physics_process(double delta)
 	if (_update_tick % 3 == 0 && moved) {
 		auto update_packet = BufWriter();
 		update_packet.u8(to_uint8(ClientPacket::UPDATE_MOVEMENT));
-		auto phase_scene = _client->get_current_phase_scene();
-		auto phase_scene_utf8 = phase_scene.utf8().get_data();
-		update_packet.str(phase_scene_utf8);
 		auto position = get_global_position();
 		write_vector3(update_packet, position);
 		auto velocity = _velocity;
@@ -674,10 +671,6 @@ void PlayerBody::take_damage(int damage)
 	damage_packet.u8(to_uint8(ClientPacket::ACTION_TAKE_DAMAGE));
 	damage_packet.u32(_health);
 	_client->send(damage_packet);
-
-	if (_health <= 0 && !_is_dead) {
-		die();
-	}
 }
 
 void PlayerBody::send_chat(String message)
@@ -697,30 +690,25 @@ void PlayerBody::send_chat(String message)
 void PlayerBody::set_health(int value)
 {
 	_health = value;
-	if (_health <= 0 && !_is_dead) {
-		die();
-	}
 }
 
-void PlayerBody::respawn(Vector3 position)
+void PlayerBody::respawn(String phase_scene, Vector3 position)
 {
-	EntityPlayerBase::respawn(position);
+	EntityPlayerBase::respawn(phase_scene, position);
 	set_rotation(Vector3(0, 0, 0));
 	_player_input->set_mouse_mode(Input::MOUSE_MODE_CAPTURED);
 	_death_panel->set_visible(false);
 	_is_dead = false;
 }
 
-void PlayerBody::die(String death_title, String death_mesage)
+void PlayerBody::die(String reason, String death_mesage)
 {
 	_health = 0;
 	_is_dead = true;
 	_player_input->set_mouse_mode(Input::MOUSE_MODE_VISIBLE);
 	_death_panel->set_visible(true);
-	_death_title_label->set_text(death_title);
+	_death_title_label->set_text("YOU DIED: " + reason);
 	_death_message_label->set_text(death_mesage);
-
-	// TODO: Send a message to the server telling it that we have died
 }
 
 void PlayerBody::set_climbing(bool climbing)

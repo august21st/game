@@ -66,9 +66,11 @@ namespace NodeShared {
 	void write_entity_data(String node_path, BufWriter& buffer);
 	Node* read_entity_data(BufReader& buffer);
 	void set_environment(WorldEnvironment* environment_node, String path);
+
+	// TODO: Consider consolidating into GameRoot
 	Server* get_global_server(Node* origin);
 	Client* get_global_client(Node* origin);
-	Node* get_global_root(Node* origin);
+	GameRoot* get_game_root(Node* origin);
 
 	// Constants
 	const float PI = 3.14159265358979f;

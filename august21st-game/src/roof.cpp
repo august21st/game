@@ -52,8 +52,8 @@ void Roof::_bind_methods()
 		&Roof::_on_floor_area_body_entered);
 	ClassDB::bind_method(D_METHOD("_on_graphics_quality_changed", "level"),
 		&Roof::_on_graphics_quality_changed);
-	ClassDB::bind_method(D_METHOD("server_run_phase_event", "phase_event"),
-		&Roof::server_run_phase_event);
+	ClassDB::bind_method(D_METHOD("run_phase_event", "phase_event"),
+		&Roof::run_phase_event);
 }
 
 void Roof::_ready()
@@ -176,9 +176,4 @@ void Roof::run_phase_event(String phase_event)
 			"[center][color=#d4af37]OPPENHEIMER'S LE BOMB[/color][/center]");
 		return;
 	}
-}
-
-void Roof::server_run_phase_event(String phase_event)
-{
-
 }

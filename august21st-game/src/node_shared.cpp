@@ -13,6 +13,7 @@
 #include <dataproto_cpp/dataproto.hpp>
 
 #include "node_shared.hpp"
+#include "game_root.hpp"
 #include "server.hpp"
 #include "client.hpp"
 
@@ -208,7 +209,7 @@ namespace NodeShared {
 			// Instance node from type name
 			auto entity_node = Object::cast_to<Node>(ClassDB::instantiate(node_class));
 			if (entity_node == nullptr) {
-				UtilityFunctions::print("Couldn't read entity: Node of type ", node_class, " couldn't be instanced with ClassDB.");
+				UtilityFunctions::printerr("Couldn't read entity: Node of type ", node_class, " couldn't be instanced with ClassDB.");
 				return nullptr;
 			}
 
@@ -220,7 +221,7 @@ namespace NodeShared {
 				auto prop_object_type = buffer.u8();
 				if (prop_object_type == ObjectType::INLINE_RESOURCE)  { // i.e: Texture, Material
 					// TODO: Implement this! (Likely using compressed_variant)
-					UtilityFunctions::print("Couldn't read entity: Inline resource not implemented.");
+					UtilityFunctions::printerr("Couldn't read entity: Inline resource not implemented.");
 					return nullptr;
 				}
 				else if (prop_object_type == ObjectType::FILESYSTEM_RESOURCE)  { // i.e: Mesh
@@ -230,7 +231,7 @@ namespace NodeShared {
 
 					auto resource = resource_loader->load(resource_path);
 					if (!resource.is_valid()) {
-						UtilityFunctions::print("Failed to read filesystem resource: Resource was null!");
+						UtilityFunctions::printerr("Failed to read filesystem resource: Resource was null!");
 						continue;
 					}
 					entity_node->set(prop_name, resource);
@@ -254,7 +255,7 @@ namespace NodeShared {
 			return entity_node;
 		}
 		else {
-			UtilityFunctions::print("Couldn't read entity data, object type was not NODE or INLINE_NODE");
+			UtilityFunctions::printerr("Couldn't read entity data, object type was not NODE or INLINE_NODE");
 			return nullptr;
 		}
 	}
@@ -299,10 +300,13 @@ namespace NodeShared {
 		return client;
 	}
 
-
-	Node* get_global_root(Node* origin)
+	GameRoot* get_game_root(Node* origin)
 	{
 		auto root = origin->get_tree()->get_root()->get_child(0);
-		return root;
+		auto game_root = Object::cast_to<GameRoot>(root);
+		if (game_root == nullptr) {
+			return nullptr;
+		}
+		return game_root;
 	}
 }

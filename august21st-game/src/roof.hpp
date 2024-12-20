@@ -58,7 +58,6 @@ private:
 	};
 	void _on_floor_area_body_entered(Node3D* body);
 	void _on_graphics_quality_changed(int level);
-	void server_run_phase_event(String phase_event);
 
 protected:
 	static void _bind_methods();

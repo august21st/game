@@ -111,7 +111,7 @@ void LoadingScreen::_on_retry_timer_timeout(int server_idx)
 void LoadingScreen::try_connect_server_with_retry(LoadingServer* server)
 {
 	if (server == nullptr) {
-		UtilityFunctions::print("Could not try reconnect to server: Server was null.");
+		UtilityFunctions::printerr("Could not try reconnect to server: Server was null.");
 		return;
 	}
 

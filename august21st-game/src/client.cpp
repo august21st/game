@@ -209,7 +209,7 @@ void Client::_ready()
 	PlayerBody* player_body_scene = nullptr;
 	auto load_error = load_scene_strict<PlayerBody>("res://scenes/player_body.tscn", &player_body_scene);
 	if (load_error != Error::OK || player_body_scene == nullptr) {
-		UtilityFunctions::print("Couldn't start client, player body scene failed to load");
+		UtilityFunctions::printerr("Couldn't start client, player body scene failed to load");
 		return;
 	}
 	_player_body = player_body_scene;
@@ -345,7 +345,7 @@ List<PackedByteArray> Client::poll_next_packets()
 		case WebSocketPeer::STATE_CLOSED:
 			auto code = _socket->get_close_code();
 			auto reason = _socket->get_close_reason();
-			UtilityFunctions::print("Disconnected from client websocket: Code: ",
+			UtilityFunctions::printerr("Disconnected from client websocket: Code: ",
 				code, "Reason: ", reason);
 			_socket_closed = true;
 
@@ -406,7 +406,7 @@ void Client::_process(double delta)
 							EntityPlayer* player_entity = nullptr;
 							auto load_error = load_scene_strict<EntityPlayer>("res://scenes/entity_player.tscn", &player_entity);
 							if (load_error != Error::OK || player_entity == nullptr) {
-								UtilityFunctions::print("Failed to insert entity player: entity player scene failed to load.");
+								UtilityFunctions::printerr("Failed to insert entity player: entity player scene failed to load.");
 								return;
 							}
 							player_entity->connect("ready", Callable(this, "_on_player_entity_ready")
@@ -421,19 +421,98 @@ void Client::_process(double delta)
 					}
 					break;
 				}
-				case ServerPacket::UPDATE_PLAYER_MOVEMENT: {
+				case ServerPacket::ENTITIES_INFO: {
+					auto entity_count = packet.u16();
+					for (auto i = 0; i < entity_count; i++) {
+						auto id = packet.u32();
+						auto parent_scene_str = (string) packet.str();
+						auto parent_scene = String(parent_scene_str.c_str());
+
+						auto entity_node = read_entity_data(packet);
+						if (entity_node == nullptr) {
+							UtilityFunctions::printerr("Failed to create entity ", id, ": failed to decode entity data");
+							UtilityFunctions::printerr("Dumping entity info packet after reading ", i, " entities: BufReader state is corrupted");
+							break;
+						}
+						// Register entity
+						_entities.insert(id, entity_node);
+
+						// If a scene is defined, spawn the entity in
+						if (parent_scene == "roof" && _current_phase_scene == "rplace/roof") {
+							auto roof_scene = get_current_scene_strict<Roof>();
+							roof_scene->add_child(entity_node);
+						}
+						else if (parent_scene == "end" && _current_phase_scene == "rplace/end") {
+							auto end_scene = get_current_scene_strict<End>();
+							end_scene->add_child(entity_node);
+						}
+					}
+					break;
+				}
+				case ServerPacket::SET_PHASE: {
+					auto phase_str = (string) packet.str();
+					auto phase = String(phase_str.c_str());
+					auto phase_parts = phase.split(":");
+					auto phase_scene = phase_parts.size() > 0 ? phase_parts[0] : "";
+					auto phase_event = phase_parts.size() > 1 ? phase_parts[1] : "";
+
+					if (!_phase_scenes.has(phase_scene)) {
+						UtilityFunctions::printerr("Could not set phase to ",
+							phase, ": unknown phase");
+						break;
+					}
+
+					if (phase_scene == "loading_screen") {
+						change_scene("loading_screen");
+					}
+
+					if (phase_scene == "rplace/intro") {
+						change_scene("rplace/intro");
+					}
+					else if (phase_scene == "rplace/roof") {
+						if (_current_phase_scene != phase_scene) {
+							change_scene("rplace/roof");
+						}
+
+						auto roof_scene = get_current_scene_strict<Roof>();
+						// Remove player from wherever it was and hand it over TODO: Move to using EntityPlayerBase::respawn
+						if (_player_body->get_parent() != roof_scene) {
+							orphan_node(_player_body);
+							roof_scene->spawn_player(_player_body);
+						}
+						roof_scene->run_phase_event(phase_event);
+					}
+					else if (phase_scene == "rplace/end") {
+						if (_current_phase_scene != phase_scene) {
+							change_scene("rplace/end");
+						}
+
+						auto end_scene = get_current_scene_strict<End>();
+						// Remove player from wherever it was and hand it over TODO: Move to using EntityPlayerBase::respawn
+						if (_player_body->get_parent() != end_scene) {
+							orphan_node(_player_body);
+							end_scene->spawn_player(_player_body);
+						}
+						end_scene->run_phase_event(phase_event);
+					}
+
+					auto as_phase_scene = Object::cast_to<PhaseScene>(get_current_scene());
+					if (as_phase_scene != nullptr) {
+
+						as_phase_scene->run_phase_event(phase_event);
+					}
+
+					_current_phase_scene = phase_scene;
+					_current_phase_event = phase_event;
+					break;
+				}
+				case ServerPacket::UPDATE_MOVEMENT: {
 					auto id = packet.u32();
 					if (!_players.has(id)) {
 						if (id != _player_id) {
 							UtilityFunctions::printerr("Could not update player ",
 								id, ": player entity not found");
 						}
-						break;
-					}
-					auto phase_scene_str = (string) packet.str();
-					auto phase_scene = String(phase_scene_str.c_str());
-					if (phase_scene != _current_phase_scene) {
-						// Player is not in our world, ignore it
 						break;
 					}
 
@@ -454,7 +533,7 @@ void Client::_process(double delta)
 					player_entity->set_global_rotation(rotation);
 					break;
 				}
-				case ServerPacket::UPDATE_PLAYER_HEALTH: {
+				case ServerPacket::UPDATE_HEALTH: {
 					auto player_id = packet.u32();
 					if (!_players.has(player_id)) {
 						if (player_id != _player_id) {
@@ -469,50 +548,10 @@ void Client::_process(double delta)
 					player_entity->set_health(health);
 					break;
 				}
-				case ServerPacket::ENTITIES_INFO: {
-					auto entity_count = packet.u16();
-					for (auto i = 0; i < entity_count; i++) {
-						auto id = packet.u32();
-						auto parent_scene_str = (string) packet.str();
-						auto parent_scene = String(parent_scene_str.c_str());
-
-						auto entity_node = read_entity_data(packet);
-						if (entity_node == nullptr) {
-							UtilityFunctions::print("Failed to create entity ", id, ": failed to decode entity data");
-							UtilityFunctions::print("Dumping entity info packet after reading ", i, " entities: BufReader state is corrupted");
-							break;
-						}
-						// Register entity
-						_entities.insert(id, entity_node);
-
-						// If a scene is defined, spawn the entity in
-						if (parent_scene == "roof" && _current_phase_scene == "rplace/roof") {
-							auto roof_scene = get_current_scene_strict<Roof>();
-							roof_scene->add_child(entity_node);
-						}
-						else if (parent_scene == "end" && _current_phase_scene == "rplace/end") {
-							auto end_scene = get_current_scene_strict<End>();
-							end_scene->add_child(entity_node);
-						}
-					}
-					break;
-				}
-				case ServerPacket::RESPAWN: {
-					auto player_id = packet.u32();
-					auto position = read_vector3(packet);
-					if (_players.has(player_id)) {
-						auto player = _players[player_id];
-						player->respawn(position);
-					}
-					else {
-						UtilityFunctions::print("Could not respawn player ", player_id, ": player not found");
-					}
-					break;
-				}
 				case ServerPacket::UPDATE_ENTITY: {
 					auto id = packet.u32();
 					if (!_entities.has(id)) {
-						UtilityFunctions::print("Couldn't update entity with id ", id, ": entity not found.");
+						UtilityFunctions::printerr("Couldn't update entity with id ", id, ": entity not found.");
 						break;
 					}
 					auto entity = _entities[id];
@@ -526,67 +565,66 @@ void Client::_process(double delta)
 					}
 					break;
 				}
-				case ServerPacket::SET_PHASE: {
-					auto phase_str = (string) packet.str();
-					auto phase = String(phase_str.c_str());
-					auto phase_parts = phase.split(":");
-					auto phase_scene = phase_parts.size() > 0 ? phase_parts[0] : "";
-					auto phase_event = phase_parts.size() > 1 ? phase_parts[1] : "";
-
-					if (!_phase_scenes.has(phase_scene)) {
-						UtilityFunctions::printerr("Could not set phase to ",
-							phase, ": unknown phase");
-						break;
-					}
-
-					if (phase_scene == "loading_screen") {
-						change_scene("loading_screen");
-					}
-					if (phase_scene == "rplace/intro") {
-						change_scene("rplace/intro");
-					}
-					else if (phase_scene == "rplace/roof") {
-						if (_current_phase_scene != phase_scene) {
-							change_scene("rplace/roof");
-						}
-
-						auto roof_scene = get_current_scene_strict<Roof>();
-						// Remove player from wherever it was and hand it over
-						if (_player_body->get_parent() != roof_scene) {
-							orphan_node(_player_body);
-							roof_scene->spawn_player(_player_body);
-						}
-						roof_scene->run_phase_event(phase_event);
-					}
-					else if (phase_scene == "rplace/end") {
-						if (_current_phase_scene != phase_scene) {
-							change_scene("rplace/end");
-						}
-
-						auto end_scene = get_current_scene_strict<End>();
-						if (_player_body->get_parent() != end_scene) {
-							orphan_node(_player_body);
-							end_scene->spawn_player(_player_body);
-						}
-						end_scene->run_phase_event(phase_event);
-					}
-					_current_phase_scene = phase_scene;
-					_current_phase_event = phase_event;
-					break;
-				}
 				case ServerPacket::GRAB: {
 					auto player_id = packet.u32();
 					if (!_players.has(player_id)) {
-						UtilityFunctions::print("Could not handle item grab: player ", player_id, " not found");
+						UtilityFunctions::printerr("Could not handle item grab: player ", player_id, " not found");
 					}
 					auto entity_id = packet.u32();
 					if (!_entities.has(entity_id)) {
-						UtilityFunctions::print("Could not handle item grab: entity ", entity_id, " not found");
+						UtilityFunctions::printerr("Could not handle item grab: entity ", entity_id, " not found");
 						break;
 					}
 
 					auto player = _players.get(player_id);
-					UtilityFunctions::print("DEBUG: Grab");
+					break;
+				}
+				case ServerPacket::DROP: {
+					break;
+				}
+				case ServerPacket::SWITCH: {
+					break;
+				}
+				case ServerPacket::USE: {
+					break;
+				}
+				case ServerPacket::TAKE_DAMAGE: {
+					break;
+				}
+				case ServerPacket::DIE: {
+					auto player_id = packet.u32();
+
+					if (!_players.has(player_id)) {
+						UtilityFunctions::printerr("Could not kill player ", player_id, ": player not found");
+						break;
+					}
+
+					auto death_reason_str = (string) packet.str();
+					auto death_reason = String(death_reason_str.c_str());
+					auto death_message_str = (string) packet.str();
+					auto death_message = String(death_message_str.c_str());
+					auto player = _players[player_id];
+					player->die("You died", death_message);
+					break;
+				}
+				case ServerPacket::RESPAWN: {
+					auto player_id = packet.u32();
+					if (!_players.has(player_id)) {
+						UtilityFunctions::printerr("Could not respawn player ", player_id, ": player not found");
+						break;
+					}
+
+					auto phase_scene_str = (string) packet.str();
+					auto phase_scene = String(phase_scene_str.c_str());
+					if (!_phase_scenes.has(phase_scene)) {
+						UtilityFunctions::printerr("Couldn't respawn player ",
+							player_id, ": phase scene not found");
+						break;
+					}
+
+					auto position = read_vector3(packet);
+					auto player = _players[player_id];
+					player->respawn(phase_scene, position);
 					break;
 				}
 				default: {
@@ -613,7 +651,7 @@ void Client::_on_alert_close_button_pressed()
 void Client::_on_player_entity_ready(int id, String chat_name, String model_variant)
 {
 	if (!_players.has(id)) {
-		UtilityFunctions::print("Failed to initialise player ", id, " player was not in _players at time of _ready");
+		UtilityFunctions::printerr("Failed to initialise player ", id, " player was not in _players at time of _ready");
 	}
 
 	auto player_entity = _players[id];
@@ -862,6 +900,30 @@ String Client::get_current_phase_scene()
 String Client::get_current_phase_event()
 {
 	return _current_phase_event;
+}
+
+bool Client::has_phase_scene(String name)
+{
+	return _phase_scenes.has(name);
+}
+
+Node* Client::get_phase_scene(String name)
+{
+	if (!_phase_scenes.has(name)) {
+		return nullptr;
+	}
+
+	return _phase_scenes.get(name)->scene;
+}
+
+bool Client::is_client()
+{
+	return true;
+}
+
+bool Client::is_server()
+{
+	return false;
 }
 
 PresetsPlatform Client::get_presets_platform()
