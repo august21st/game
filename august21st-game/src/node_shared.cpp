@@ -158,12 +158,13 @@ namespace NodeShared {
 			// Resources can't be serialised by encode_var, so we reference them by path
 			// https://docs.godotengine.org/en/stable/classes/class_packedbytearray.html#class-packedbytearray-method-encode-var
 			auto variant = node->get(name);
-			Resource* resource;
-			Node* node;
+			Resource* resource = nullptr;
+			Node* node = nullptr;
 			if ((int)type == Variant::OBJECT) {
 				resource = Object::cast_to<Resource>(variant);
 				node = Object::cast_to<Node>(variant);
 			}
+
 			if (resource != nullptr) {
 				buffer.u8(ObjectType::FILESYSTEM_RESOURCE); // prop_object_type
 				auto path = resource->get_path();

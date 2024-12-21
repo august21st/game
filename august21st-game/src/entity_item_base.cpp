@@ -107,7 +107,7 @@ void EntityItemBase::_ready()
 	}
 
 	// DEBUG: Serverside test entity spawning, TODO: Remove this!
-	auto info = _server->register_entity(this, "end");
+	auto info = _server->register_entity(this, _server->get_current_phase_scene());
 	if (info != nullptr) {
 		info->track_property("position");
 		info->track_property("rotation");

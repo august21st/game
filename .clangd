@@ -6,3 +6,6 @@ CompileFlags:
     - "-Iaugust21st-game/godot-cpp/include"
     - "-Iaugust21st-game/dataproto-cpp/include"
     - "-Iaugust21st-game/commandIO-cpp/src"
+    - "-Wall"
+    - "-Wextra"
+    - "-Wpedantic"

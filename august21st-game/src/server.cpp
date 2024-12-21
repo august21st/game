@@ -598,8 +598,18 @@ EntityInfo* Server::create_entity(String node_path, String parent_scene)
 	return info;
 }
 
+// TODO: Use entity& ref
 EntityInfo* Server::register_entity(Node* entity, String parent_scene)
 {
+	if (entity == nullptr) {
+		UtilityFunctions::printerr("Couldn't register entity: Entity was null");
+		return nullptr;
+	}
+	if (!_phase_scenes.has(parent_scene)) {
+		UtilityFunctions::printerr("Couldn't register entity: Specified parent scene not found");
+		return nullptr;
+	}
+
 	_entities_lock->lock();
 	auto new_id = next_entity_id();
 	auto info = memnew(EntityInfo(new_id, entity, parent_scene));
