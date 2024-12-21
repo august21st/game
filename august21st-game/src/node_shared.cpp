@@ -96,6 +96,7 @@ namespace NodeShared {
 		return variant;
 	}
 
+	// TODO: Replace godot variant writing methods with custom efficient variant write handlers for each variant type
 	void write_variant(const Variant& variant, BufWriter& buffer)
 	{
 		auto variant_buffer = PackedByteArray();
@@ -136,7 +137,6 @@ namespace NodeShared {
 		buffer.str(node_path_str);
 	}
 
-	// Usually called with server register_entity
 	void write_entity_data(Node* node, BufWriter& buffer)
 	{
 		// Write property list + custom properties
@@ -150,21 +150,27 @@ namespace NodeShared {
 		buffer.flint(infos.size()); // property_count
 		for (auto i = 0; i < infos.size(); i++) {
 			auto info = infos[i];
-			auto name = info.get("name"); // Should be string - prop name
-			auto type = info.get("type"); // Should be int - variant type
+			auto name = (StringName) info.get("name"); // Should be string - prop name
+			auto type = (int) info.get("type"); // Should be int - variant type
+
+			// Get variant value for property, only serialise if variant value has changed from default
+			auto variant = node->get(name);
+			if (node->property_can_revert(name) && node->property_get_revert(name) == variant) {
+				continue;
+			}
+
+			// Write property name
 			auto name_str = ((String)name).utf8().get_data();
 			buffer.str(name_str);
 
-			// Resources can't be serialised by encode_var, so we reference them by path
-			// https://docs.godotengine.org/en/stable/classes/class_packedbytearray.html#class-packedbytearray-method-encode-var
-			auto variant = node->get(name);
 			Resource* resource = nullptr;
 			Node* node = nullptr;
-			if ((int)type == Variant::OBJECT) {
+			if (type == Variant::OBJECT) {
 				resource = Object::cast_to<Resource>(variant);
 				node = Object::cast_to<Node>(variant);
 			}
-
+			// Resources can't be serialised by encode_var, so we reference them by path
+			// https://docs.godotengine.org/en/stable/classes/class_packedbytearray.html#class-packedbytearray-method-encode-var
 			if (resource != nullptr) {
 				buffer.u8(ObjectType::FILESYSTEM_RESOURCE); // prop_object_type
 				auto path = resource->get_path();
@@ -172,8 +178,9 @@ namespace NodeShared {
 				buffer.str(path_str); // resource_path_str
 			}
 			else if (node != nullptr) {
-				// Handle the unlikely event that the property is a node
-				write_entity_data(node, buffer);
+				// Node (reference)
+				// TODO: Reimplement after creating TSCN-like node reference system in serialised buffer  
+				//write_entity_data(node, buffer);
 			}
 			else {
 				// Variant

@@ -1,9 +1,10 @@
 {
     "recommendations": [
         "ms-vscode.cpptools-extension-pack",
+        "llvm-vs-code-extensions.vscode-clangd",
         "ms-python.python",
         "vadimcn.vscode-lldb",
         "cschlosser.doxdocgen",
-        "geequlim.godot-tools"       
+        "geequlim.godot-tools"
     ]
 }

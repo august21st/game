@@ -772,7 +772,6 @@ Error Client::change_scene(String identifier)
 
 void Client::_on_current_scene_ready()
 {
-	auto scene_instance = get_current_scene();
 	emit_signal("graphics_quality_changed", _current_graphics_level);
 	emit_signal("volume_changed", _current_volume_ratio);
 	emit_signal("current_scene_ready");

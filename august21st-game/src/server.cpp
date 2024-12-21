@@ -50,7 +50,11 @@ using namespace NodeShared;
 #define INTERVAL_SECONDS(count) (_tick_count % (count * TPS) == 0)
 
 Server::Server() :
+	_engine(nullptr),
 	_socket_server(nullptr),
+	_display_server(nullptr),
+	_resource_loader(nullptr),
+	_time(nullptr),
 	_server_camera(nullptr),
 	_server_scene(nullptr),
 	_incoming_packets_list(nullptr),
@@ -61,10 +65,6 @@ Server::Server() :
 	_outgoing_packets_filter(nullptr),
 	_outgoing_packets_filter_clear(nullptr),
 	_outgoing_packets_enabled(nullptr),
-	_engine(nullptr),
-	_display_server(nullptr),
-	_resource_loader(nullptr),
-	_time(nullptr),
 	_entities_lock(nullptr),
 	_bbcode_regex(nullptr)
 {
@@ -609,8 +609,18 @@ EntityInfo* Server::register_entity(Node* entity, String parent_scene)
 		UtilityFunctions::printerr("Couldn't register entity: Specified parent scene not found");
 		return nullptr;
 	}
-
 	_entities_lock->lock();
+	// TODO: Investigate optimisations
+	// Prevent double entity registrations
+	for (auto &[id, info] : _entities) {
+		if (entity == info->get_entity()) {
+			// Ignore double registration
+			UtilityFunctions::print("Ignoring double registration for entity", entity-> get_class());
+			_entities_lock->unlock();
+			return nullptr;
+		}
+	}
+
 	auto new_id = next_entity_id();
 	auto info = memnew(EntityInfo(new_id, entity, parent_scene));
 	_entities.insert(new_id, info);

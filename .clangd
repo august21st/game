@@ -9,3 +9,5 @@ CompileFlags:
     - "-Wall"
     - "-Wextra"
     - "-Wpedantic"
+    - "-Wno-sign-compare"
+    - "-Wno-unused-parameter"
