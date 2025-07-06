@@ -75,7 +75,7 @@ void LoadingScreen::_ready()
 	_server_list = get_node<ItemList>("%ServerList");
 	_server_list->connect("item_activated", Callable(this, "_on_server_list_item_activated"));
 	_servers = List<LoadingServer*>();
-	add_server("ws://localhost:8021");
+	add_server("ws://localhost:2108");
 
 	_song_player = get_node<AudioStreamPlayer>("%SongPlayer");
 	_song_player->connect("finished", Callable(this, "_on_song_player_finished"));

@@ -18,6 +18,9 @@
 #include <godot_cpp/classes/camera3d.hpp>
 #include <godot_cpp/classes/check_button.hpp>
 #include <godot_cpp/classes/button.hpp>
+#include <godot_cpp/classes/grid_container.hpp>
+#include <godot_cpp/classes/sub_viewport.hpp>
+#include <godot_cpp/classes/texture_rect.hpp>
 #include <dataproto_cpp/dataproto.hpp>
 
 #include "game_root.hpp"
@@ -28,10 +31,18 @@ class EntityItemBase;
 #include "entity_info.hpp"
 #include "packet_info.hpp"
 #include "network_shared.hpp"
+#include "server_camera.hpp"
 
 using namespace godot;
 using namespace dataproto;
 using namespace NetworkShared;
+
+struct ServerSceneInfo {
+	SubViewport* viewport;
+	TextureRect* viewport_texture_rect;
+	ServerCamera* camera;
+	Node* phase_scene;
+};
 
 class Server : public GameRoot {
 	GDCLASS(Server, GameRoot)
@@ -45,6 +56,10 @@ private:
 	Time* _time;
 
 	Node3D* _server_scenes_container;
+	Control* _server_gui;
+	GridContainer* _server_scenes_viewport_grid;
+	void recalc_server_scenes_viewport_grid_layout();
+	void _on_server_scenes_viewport_grid_resized();
 	List<PacketInfo*> _incoming_packets;
 	bool _incoming_packets_logging;
 	void set_incoming_packets_logging(bool value);
@@ -77,7 +92,7 @@ private:
 	int _tick_count;
 	String _current_phase_scene;
 	String _current_phase_event;
-	HashMap<String, Viewport*> _server_scenes;
+	HashMap<String, ServerSceneInfo> _server_scene_infos;
 	HashMap<String, Node*> _phase_scenes;
 	HashMap<int, ClientData*> _clients;
 	HashMap<int, ClientData*> _authenticated_clients;
@@ -103,8 +118,9 @@ private:
 	Vector3 generate_random_vector3();
 
 	// Constants
-	const int PLAYER_LIMIT = 512;
-	const int SERVER_PORT = 8021;
+	// TODO: Make configurable when initialising / starting server
+	const int PLAYER_LIMIT = 64;
+	const int SERVER_PORT = 2108;
 	const int TPS = 20;
 
 protected:

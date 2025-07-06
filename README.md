@@ -64,8 +64,7 @@ or see https://github.com/SCons/scons-contrib/tree/master for more information.
 ## License:
 The contents of the august21st-game folder are based off the public domain template
 project, [godot-cpp-template](https://github.com/godotengine/godot-cpp-template). All modified files,
-including everything under [august21st-game/project](./august21st-game/godot),
-[august21st-game/test-server](./august21st-game/server), and
+including everything under [august21st-game/project](./august21st-game/project), and
 [august21st-game/src](./august21st-game/src) are original works that are **NOT** public
 domain, and are licensed under [GNU GPL 3.0](https://www.gnu.org/licenses/gpl-3.0.en.html),
 unless stated otherwise. For the terms of this license, refer to the [license file](./LICENSE)

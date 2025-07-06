@@ -25,21 +25,24 @@
 #include <godot_cpp/variant/vector3.hpp>
 #include <godot_cpp/classes/expression.hpp>
 #include <godot_cpp/classes/v_scroll_bar.hpp>
+#include <godot_cpp/classes/grid_container.hpp>
+#include <godot_cpp/classes/texture_rect.hpp>
+#include <godot_cpp/classes/viewport_texture.hpp>
 #include <dataproto_cpp/dataproto.hpp>
 #include <commandIO.hpp>
 
 #include "server.hpp"
 #include "client_data.hpp"
 #include "entity_item_base.hpp"
+#include "godot_cpp/classes/viewport.hpp"
 #include "godot_cpp/variant/callable.hpp"
+#include "godot_cpp/variant/vector2.hpp"
 #include "network_shared.hpp"
 #include "node_shared.hpp"
 #include "entity_player.hpp"
 #include "entity_info.hpp"
 #include "packet_info.hpp"
 #include "server_camera.hpp"
-#include "roof.hpp"
-#include "end.hpp"
 
 using namespace commandIO;
 using namespace dataproto;
@@ -73,25 +76,12 @@ Server::Server() :
 Server::~Server()
 {
 	if (_socket_server.is_valid()) {
+		_socket_server->close();
 		_socket_server->disconnect("peer_connected", Callable(this, "_on_peer_connected"));
 		_socket_server->disconnect("peer_disconnected", Callable(this, "_on_peer_disconnected"));
-		_socket_server->close();
 	}
 
-	// Clean up dynamically allocated resources
-	if (_entities_lock) {
-		memdelete(_entities_lock);
-	}
-
-	// Clean up client data
-	for (auto &[id, client] : _clients) {
-		memdelete(client);
-	}
-
-	// Clean up entity info
-	for (auto &[id, entity_info] : _entities) {
-		memdelete(entity_info);
-	}
+	// TODO: Properly free resources and states
 }
 
 void Server::_bind_methods()
@@ -106,6 +96,8 @@ void Server::_bind_methods()
 	ClassDB::bind_method(D_METHOD("list_entities"), &Server::list_entities);
 
 	// GUI
+	ClassDB::bind_method(D_METHOD("_on_server_scenes_viewport_grid_resized"),
+		&Server::_on_server_scenes_viewport_grid_resized);
 	ClassDB::bind_method(D_METHOD("set_incoming_packets_logging"),
 		&Server::set_incoming_packets_logging);
 	ClassDB::bind_method(D_METHOD("get_incoming_packets_logging"),
@@ -158,7 +150,7 @@ void Server::_ready()
 	// Initialise scenes
 	UtilityFunctions::print("Loading phase scenes...");
 	_resource_loader = ResourceLoader::get_singleton();
-	_server_scenes = { };
+	_server_scene_infos = { };
 	_phase_scenes = { };
 	auto intro_err = register_phase_scene("rplace/intro", "res://scenes/rplace/intro.tscn");
 	if (intro_err != godot::Error::OK) {
@@ -182,7 +174,10 @@ void Server::_ready()
 	// Initialise GUI
 	// TODO: Only initialise in non-headless graphical mode
 	_display_server = DisplayServer::get_singleton();
+	_server_gui = get_node<Control>("%ServerGui");
 	_server_scenes_container = get_node<Node3D>("%ServerScenesContainer");
+	_server_scenes_viewport_grid = get_node<GridContainer>("%ServerScenesViewportGrid");
+	_server_scenes_viewport_grid->connect("resized", Callable(this, "_on_server_scenes_viewport_grid_resized"));
 	_incoming_packets_logging = false;
 	_incoming_packets = {};
 	_incoming_packets_list = get_node<ItemList>("%IncomingPacketsList");
@@ -696,6 +691,25 @@ void Server::repl_set_phase(string name, string unload_previous)
 	call_deferred("set_phase", String(name.c_str()), unload_previous_bool);
 }
 
+/**
+ * This method is responsible for switching the phase (level/scene) of a mapset
+ * to that of the specified name. Will trigger initial "intro" phase events and
+ * handle unloading of previous phases.
+ *
+ * Pushing new phases will result in the following layout:
+ * 	ServerScenesContainer (Node3D)
+ * 	├── Phase1_Viewport (Viewport)
+ * 	│   ├── ServerCamera
+ * 	│   └── [SceneInstance] (Loaded Phase Scene)
+ * 	├── Phase2_Viewport (Viewport)
+ * 	│   ├── ServerCamera
+ * 	│   └── [SceneInstance] (Loaded Phase Scene)
+ * 	└── ...
+ * 	ServerGui
+ * 	└── ServerScenesViewportGrid (GridContainer)
+ * 	    ├── Phase1_ViewportTexture (TextureRect)
+ * 	    └── Phase2_ViewportTexture (TextureRect)
+ */
 void Server::set_phase(String name, bool unload_previous)
 {
 	auto phase_parts = name.split(":");
@@ -706,18 +720,10 @@ void Server::set_phase(String name, bool unload_previous)
 		return;
 	}
 
-	// ServerScenesContainer (Node3D)
-	// ├── Phase1_Viewport (Viewport)
-	// │   ├── ServerCamera
-	// │   └── [SceneInstance] (Loaded Phase Scene)
-	// ├── Phase2_Viewport (Viewport)
-	// │   ├── ServerCamera
-	// │   └── [SceneInstance] (Loaded Phase Scene)
-	// └── ...
-
-
 	_current_phase_scene = phase_scene;
 	_current_phase_event = phase_event;
+
+	Node* current_phase_scene_node = nullptr;
 
 	for (auto &[identifier, scene_node] : _phase_scenes) {
 		auto identifier_parts = identifier.split(":");
@@ -725,53 +731,66 @@ void Server::set_phase(String name, bool unload_previous)
 
 		// If current scene
 		if (identifier_scene == phase_scene) {
+			current_phase_scene_node = scene_node;
 			if (!scene_node->is_inside_tree()) {
-				// Create isolated viewport for this scene
-				Viewport* viewport = memnew(Viewport);
+				// Create isolated viewport for this scene with phase scene
+				SubViewport* viewport = memnew(SubViewport);
+				viewport->set_vrs_update_mode(Viewport::VRS_UPDATE_ALWAYS);
+				viewport->set_use_own_world_3d(true); // important!
+				viewport->set_disable_3d(false);
+				viewport->set_disable_input(false);
+				viewport->add_child(scene_node);
 
-				// Create server camera for this scene
+				// Create server camera for viewport
 				ServerCamera* camera = memnew(ServerCamera);
 				camera->set_current(true);
 				camera->set_transform(Transform3D(Basis(), Vector3(0, 0, 0)));
 				viewport->add_child(camera);
 
-				// Add scene to viewport
-				viewport->add_child(scene_node);
+				// Add viewport render output to subviewports grid
+				TextureRect* viewport_texture_rect = memnew(TextureRect);
+				Ref<ViewportTexture> viewport_texture = viewport->get_texture();
+				viewport_texture_rect->set_texture(viewport_texture);
+				viewport_texture_rect->set_expand_mode(TextureRect::EXPAND_IGNORE_SIZE);
+				viewport_texture_rect->set_stretch_mode(TextureRect::STRETCH_KEEP);
+				viewport_texture_rect->set_h_size_flags(godot::Control::SizeFlags::SIZE_EXPAND_FILL);
+				viewport_texture_rect->set_v_size_flags(godot::Control::SizeFlags::SIZE_EXPAND_FILL);
+				_server_scenes_viewport_grid->add_child(viewport_texture_rect);
 
-				// Add viewport to server scenes & scene
+				// Add viewport to server scenes & create server scene info
 				_server_scenes_container->add_child(viewport);
-				_server_scenes.insert(phase_scene, viewport);
+				ServerSceneInfo scene_info = {
+					viewport, // viewport
+					viewport_texture_rect, // ui_viewport_texture
+					camera, // camera
+					scene_node // phase_scene
+				};
+				_server_scene_infos.insert(phase_scene, scene_info);
+				recalc_server_scenes_viewport_grid_layout();
 			}
 		}
 		else if (unload_previous) {
 			if (scene_node->is_inside_tree()) {
-				Viewport* viewport = _server_scenes.get(phase_scene);
-				if (viewport && viewport->is_inside_tree()) {
+				ServerSceneInfo info = _server_scene_infos.get(phase_scene);
+				if (info.viewport && info.viewport->is_inside_tree()) {
 					// Orphan scene
-					viewport->remove_child(scene_node);
+					info.viewport->remove_child(scene_node);
 
 					// Delete viewport
-					_server_scenes_container->remove_child(viewport);
-					_server_scenes.erase(phase_scene);
-					viewport->queue_free();
+					_server_scenes_container->remove_child(info.viewport);
+					_server_scene_infos.erase(phase_scene);
+					info.viewport->queue_free();
 				}
 			}
 		}
 	}
+	if (!current_phase_scene_node) {
+		UtilityFunctions::printerr("Error when setting phase scene to ", phase_scene, ": Current phase scene node was null");
+		return;
+	}
 
-	// Handle phase-specific logic
-	if (phase_scene == "rplace/roof") {
-		auto container = _phase_scenes["rplace/roof"];
-		auto viewport = Object::cast_to<Viewport>(container->get_child(0));
-		auto roof_scene = Object::cast_to<Roof>(viewport->get_child(0));
-		roof_scene->call_deferred("run_phase_event", phase_event);
-	}
-	else if (phase_scene == "rplace/end") {
-		auto container = _phase_scenes["rplace/end"];
-		auto viewport = Object::cast_to<Viewport>(container->get_child(0));
-		auto end_scene = Object::cast_to<End>(viewport->get_child(0));
-		end_scene->call_deferred("run_phase_event", phase_event);
-	}
+	// Tell scene node to run phase event
+	current_phase_scene_node->call_deferred("run_phase_event", phase_event);
 
 	// Notify clients
 	auto phase_packet = BufWriter();
@@ -784,6 +803,37 @@ void Server::set_phase(String name, bool unload_previous)
 	for (auto &[id, player_info] : _authenticated_clients) {
 		player_info->get_entity()->respawn(name, Vector3(0, 0, 0));
 	}
+}
+
+void Server::_on_server_scenes_viewport_grid_resized()
+{
+	recalc_server_scenes_viewport_grid_layout();
+}
+
+void Server::recalc_server_scenes_viewport_grid_layout()
+{
+	if (_server_scene_infos.is_empty()) {
+		return;
+	}
+
+	int column_count = _server_scene_infos.size() > 0
+		? MIN(2, _server_scene_infos.size())
+		: 1;
+	int row_count = _server_scene_infos.size() / column_count
+		+ (_server_scene_infos.size() % column_count > 0);
+	Vector2 grid_size = _server_scenes_viewport_grid->get_size();
+	auto viewport_size = Vector2(
+		grid_size.x / column_count,
+		grid_size.y / row_count);
+
+	// Apply to viewports
+	for (auto &[scene_name, info] : _server_scene_infos) {
+		info.viewport->set_size(viewport_size);
+		info.viewport_texture_rect->set_size(viewport_size);
+	}
+
+	// Apply to viewport grid container
+	_server_scenes_viewport_grid->set_columns(column_count);
 }
 
 void Server::delete_entity(int id)
