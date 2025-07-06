@@ -15,21 +15,36 @@
 
 using namespace godot;
 
-BoardMesh::BoardMesh() : _board_width(0), _board_height(0), _board_loaded(false),
-	_palette_loaded(false), _generating_texture(false), _board_request(nullptr),
-	_metadata_request(nullptr), _board(nullptr), _palette(nullptr)
+BoardMesh::BoardMesh() :
+	_board_width(0),
+	_board_height(0),
+	_board_loaded(false),
+	_palette_loaded(false),
+	_generating_texture(false),
+	_board_request(nullptr),
+	_metadata_request(nullptr),
+	_board(nullptr),
+	_palette(nullptr)
 {
 }
 
 BoardMesh::~BoardMesh()
 {
 	if (_board != nullptr) {
-		delete _board;
+		memdelete(_board);
 		_board = nullptr;
 	}
 	if (_palette != nullptr) {
-		delete _palette;
+		memdelete(_palette);
 		_palette = nullptr;
+	}
+	if (_board_request != nullptr) {
+		memdelete(_board_request);
+		_board_request = nullptr;
+	}
+	if (_metadata_request != nullptr) {
+		memdelete(_metadata_request);
+		_metadata_request = nullptr;
 	}
 }
 
@@ -90,7 +105,6 @@ void BoardMesh::generate_texture()
 		UtilityFunctions::printerr("Could not generate texture: texture generation already in progress");
 		return;
 	}
-	_generating_texture = true;
 
 	if (get_surface_override_material_count() == 0) {
 		UtilityFunctions::printerr("Could not generate texture: meshinstance surface override material count was 0");

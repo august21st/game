@@ -32,39 +32,10 @@ namespace NodeShared {
 	}
 	int node_children_count_recursive(Node* node, int count = 0);
 
-	// Min: top left corner, max: bottom left corner, object can move within a circular area within the rectangle
-	static Vector2 circular_clamp(const Vector2& vector, const Vector2& min, const Vector2& max)
-	{
-		Vector2 centre = (min + max) * 0.5f;
-		float radius = MIN((max.x - min.x) * 0.5f, (max.y - min.y) * 0.5f);
-		Vector2 to_vector = vector - centre;
-		float length = to_vector.length();
-
-		if (length > radius) {
-			return centre + to_vector.normalized() * radius;
-		}
-
-		return vector;
-	}
-
-	// Serialised properties / can either be defined as a pointer to the filesystem,
-	// or as an inlinne encoded variant. The same case for resource-type properties
-	// on an entity.
-	enum ObjectType {
-		INLINE_NODE,
-		FILESYSTEM_NODE,
-		INLINE_RESOURCE,
-		FILESYSTEM_RESOURCE,
-		COMPRESSED_VARIANT,
-		VARIANT
-	};
-	void write_compressed_variant(const Variant& variant, BufWriter& buffer);
-	Variant read_compressed_variant(BufReader& buffer);
-	void write_variant(const Variant& variant, BufWriter& buffer);
-	Variant read_variant(BufReader& buffer);
-	void write_entity_data(Node* node, BufWriter& buffer);
-	void write_entity_data(String node_path, BufWriter& buffer);
-	Node* read_entity_data(BufReader& buffer);
+	/**
+	 * @brief Min: top left corner, max: bottom left corner, object can move within a circular area within the rectangle
+	 */
+	Vector2 circular_clamp(const Vector2& vector, const Vector2& min, const Vector2& max);
 	void set_environment(WorldEnvironment* environment_node, String path);
 
 	// TODO: Consider consolidating into GameRoot

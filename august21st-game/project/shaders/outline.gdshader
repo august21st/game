@@ -1,4 +1,4 @@
-/*
+/**
  * The contents of this file are based off the original work [The simplest outline shader (via material)]
  * (https://godotshaders.com/shader/the-simplest-outline-shader-via-material/),
  * by [rpaciorek](https://godotshaders.com/author/rpaciorek/), released freely into the public domain under the

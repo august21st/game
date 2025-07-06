@@ -6,7 +6,7 @@ using namespace godot;
 
 // TODO: THis should be an object - something is wrong here..
 class PacketInfo : public Object {
-	GDCLASS(PacketInfo, Object);
+	GDCLASS(PacketInfo, Object)
 
 protected:
 	static void _bind_methods();

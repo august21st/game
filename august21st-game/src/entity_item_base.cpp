@@ -12,7 +12,7 @@ using namespace NodeShared;
 
 EntityItemBase::EntityItemBase() : _can_grab_override(-1), _grab_area(nullptr), _grab_area_path(NodePath()),
 	_item_node(nullptr), _item_node_path(NodePath()), /* _handle(nullptr), _handle_path(NodePath()), */
-	_previous_parent(nullptr), _grabbed(false)
+	_grabbed(false), _previous_parent(nullptr)
 {
 }
 
@@ -98,23 +98,6 @@ void EntityItemBase::_ready()
 	else if (_handle != nullptr) {
 		_handle_path = _handle->get_path();
 	}*/
-
-	// Register ourselves as an entity automatically
-	_server = get_global_server(this);
-	if (_server == nullptr) {
-		UtilityFunctions::printerr("Couldn't run serverside phase event: server autoload was null");
-		return;
-	}
-
-	// DEBUG: Serverside test entity spawning, TODO: Remove this!
-	auto info = _server->register_entity(this, _server->get_current_phase_scene());
-	if (info != nullptr) {
-		info->track_property("position");
-		info->track_property("rotation");
-	}
-	auto entity = Object::cast_to<Node3D>(info->get_entity());
-	add_child(entity);
-	entity->set_position(Vector3(0, 100, 0));
 }
 
 void EntityItemBase::set_can_grab_override(int value)

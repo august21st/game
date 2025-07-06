@@ -9,7 +9,7 @@ using namespace godot;
  * initialise the game and GTFO as fast as possible.
  */
 class Loader : public Node {
-	GDCLASS(Loader, Node);
+	GDCLASS(Loader, Node)
 
 protected:
 	static void _bind_methods();

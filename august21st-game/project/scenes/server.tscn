@@ -4,10 +4,7 @@
 
 [node name="Server" type="Server"]
 
-[node name="ServerScene" type="Node3D" parent="."]
-unique_name_in_owner = true
-
-[node name="ServerCamera" type="ServerCamera" parent="."]
+[node name="ServerScenesContainer" type="Node3D" parent="."]
 unique_name_in_owner = true
 
 [node name="ServerGui" type="Control" parent="."]
@@ -34,7 +31,7 @@ split_offset = 250
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 0
-split_offset = -50
+split_offset = -45
 
 [node name="Control" type="Control" parent="ServerGui/HSplitContainer/VSplitContainer"]
 layout_mode = 2
@@ -49,12 +46,23 @@ theme_override_constants/margin_bottom = 9
 
 [node name="ServerConsoleEdit" type="CodeEdit" parent="ServerGui/HSplitContainer/VSplitContainer/MarginContainer"]
 unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 36)
 layout_mode = 2
 placeholder_text = "# Enter gdscript server console source"
 scroll_smooth = true
 draw_tabs = true
 line_folding = true
 gutters_draw_line_numbers = true
+
+[node name="Button" type="Button" parent="ServerGui/HSplitContainer/VSplitContainer/MarginContainer/ServerConsoleEdit"]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -70.0
+offset_bottom = 36.0
+grow_horizontal = 0
+text = "Execute"
 
 [node name="TabContainer" type="TabContainer" parent="ServerGui/HSplitContainer"]
 layout_mode = 2
@@ -81,7 +89,7 @@ vertical_alignment = 1
 metadata/_edit_use_anchors_ = true
 
 [node name="MarginContainer" type="MarginContainer" parent="ServerGui/HSplitContainer/TabContainer/Packets"]
-layout_mode = 2
+layout_mode = 0
 anchor_top = 0.105348
 anchor_right = 1.0
 anchor_bottom = 1.0

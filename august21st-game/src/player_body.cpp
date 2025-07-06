@@ -508,7 +508,7 @@ void PlayerBody::_process(double delta)
 	_health_label->set_text(health_label);
 	// 3D
 	for (auto i = 0; i < _inventory.size(); i++) {
-		auto inventory_item = _inventory[i];
+		auto inventory_item = _inventory.get(i);
 		if (i == _inventory_current) {
 			inventory_item->set_visible(true);
 			_animation_player->play(inventory_item->get_hold_animation(), 0.5f);
@@ -623,7 +623,7 @@ void PlayerBody::_on_packet_received(PackedByteArray packed_packet)
 				}
 
 				chat_name = player->get_chat_name();
-				if (chat_name == "") {
+				if (chat_name.is_empty()) {
 					chat_name = "anon";
 				}
 			}

@@ -6,7 +6,7 @@
  *
  * ### Attribution:
  * - Original source by [Donitzo](https://github.com/Donitzo).
- * - Source port to C++ & adaptations by Zekiah-A & contributors.
+ * - Adaptations by Zekiah-A & contributors.
  *
  * ### Disclaimer:
  * This adaptation is not endorsed by the original licensor and is provided without warranties,

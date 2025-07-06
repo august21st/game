@@ -7,9 +7,6 @@
 #include <godot_cpp/variant/utility_functions.hpp>
 
 #include "loader.hpp"
-#include "node_shared.hpp"
-
-using namespace NodeShared;
 
 Loader::Loader()
 {
@@ -26,7 +23,6 @@ void Loader::_bind_methods()
 void Loader::_ready()
 {
 	auto os = OS::get_singleton();
-	auto resource_loader = ResourceLoader::get_singleton();
 	auto display_server = DisplayServer::get_singleton();
 	auto is_server = os->has_feature("dedicated_server") || display_server->get_name() == "headless"
 		|| os->get_cmdline_args().has("--server");

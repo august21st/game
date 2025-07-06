@@ -44,8 +44,7 @@ private:
 	ResourceLoader* _resource_loader;
 	Time* _time;
 
-	Camera3D* _server_camera;
-	Node3D* _server_scene;
+	Node3D* _server_scenes_container;
 	List<PacketInfo*> _incoming_packets;
 	bool _incoming_packets_logging;
 	void set_incoming_packets_logging(bool value);
@@ -78,6 +77,7 @@ private:
 	int _tick_count;
 	String _current_phase_scene;
 	String _current_phase_event;
+	HashMap<String, Viewport*> _server_scenes;
 	HashMap<String, Node*> _phase_scenes;
 	HashMap<int, ClientData*> _clients;
 	HashMap<int, ClientData*> _authenticated_clients;
@@ -124,8 +124,8 @@ public:
 	// thread safe
 	EntityInfo* create_entity(String node_path, String parent_scene);
 	EntityInfo* get_entity(int id);
-	void repl_set_phase(string name);
-	void set_phase(String name);
+	void repl_set_phase(string name, bool unload_previous);
+	void set_phase(String name, bool unload_previous = false);
 	void repl_update_entity(int id, string property, string value);
 	void delete_entity(int id);
 	void repl_list_players();

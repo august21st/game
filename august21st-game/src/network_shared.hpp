@@ -1,6 +1,7 @@
 #pragma once
 #include <godot_cpp/templates/hash_map.hpp>
 #include <godot_cpp/variant/vector3.hpp>
+#include <godot_cpp/classes/node.hpp>
 #include <dataproto_cpp/dataproto.hpp>
 #include <map>
 
@@ -117,6 +118,46 @@ namespace NetworkShared {
 		return static_cast<uint8_t>(packet_enum);
 	}
 
-	void write_vector3(BufWriter& packet, Vector3 vector);
-	Vector3 read_vector3(BufReader& packet);
+	/**
+	 * @brief Serialised properties / can either be defined as a pointer to the filesystem,
+	 * or as an inlinne encoded variant. The same case for resource-type properties
+	 * on a node.
+	 */
+	enum ObjectType {
+		PACKED_SCENE,
+		FILESYSTEM_SCENE,
+		INLINE_RESOURCE,
+		FILESYSTEM_RESOURCE,
+		COMPRESSED_VARIANT,
+		VARIANT
+	};
+	void write_compressed_variant(const Variant& variant, BufWriter& buffer);
+	Variant read_compressed_variant(BufReader& buffer);
+	/**
+	 * @brief Will attempt to write variant using handwritten dataproto handlers, or uncompressed
+	 * godot encode_var if no handler is found.
+	 * 
+	 * @param variant Variant value to be written to buffer
+	 * @param buffer Dataproto buffer that variant is to be written to
+	 */
+	void write_variant(const Variant& variant, BufWriter& buffer);
+	/**
+	 * @brief Reads a Variant from the provided buffer encoded by write_variant.
+	 *
+	 * @param buffer The BufReader object from which to read the data.
+	 * @return Variant The Variant object constructed from the buffer data.
+	 */
+	Variant read_variant(BufReader& buffer);
+	void write_godot_variant(const Variant& variant, BufWriter& buffer);
+	Variant read_godot_variant(BufReader& buffer);
+	void write_scene_data(Node* node, BufWriter& buffer);
+	void write_scene_data(String node_path, BufWriter& buffer);
+	Node* read_scene_data(BufReader& buffer);
+
+    void write_vector2(BufWriter& buffer, Vector2 vector);
+    Vector2 read_vector2(BufReader& buffer);
+    void write_color(BufWriter& buffer, Color color);
+    Color read_color(BufReader& buffer);
+	void write_vector3(BufWriter& buffer, Vector3 vector);
+	Vector3 read_vector3(BufReader& buffer);
 }

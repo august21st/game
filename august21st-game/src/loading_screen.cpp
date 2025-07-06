@@ -19,6 +19,7 @@
 #include <godot_cpp/templates/list.hpp>
 #include <dataproto_cpp/dataproto.hpp>
 #include <godot_cpp/core/math.hpp>
+#include <godot_cpp/core/math_defs.hpp>
 
 #include "client.hpp"
 #include "loading_screen.hpp"
@@ -89,6 +90,9 @@ void LoadingScreen::_ready()
 	_tube = get_node<Node3D>("%Tube");
 }
 
+// HACK: Temporary redefinition workaround for changing API between godot 4.4-4.5
+inline constexpr double Math_INF = std::numeric_limits<double>::infinity();
+
 double LoadingScreen::get_next_retry_delay(LoadingServer* server)
 {
 	// Exponential backoff
@@ -104,7 +108,7 @@ double LoadingScreen::get_next_retry_delay(LoadingServer* server)
 
 void LoadingScreen::_on_retry_timer_timeout(int server_idx)
 {
-	auto server = _servers[server_idx];
+	auto server = _servers.get(server_idx);
 	try_connect_server_with_retry(server);
 }
 
@@ -184,7 +188,7 @@ void LoadingScreen::_on_server_list_item_activated(int index)
 void LoadingScreen::_process(double delta)
 {
 	for (auto i = 0; i < _servers.size(); i++) {
-		auto server = _servers[i];
+		auto server = _servers.get(i);
 		// If we poll from the current server the client is using, we will
 		// steal its packets
 		if (server->current == true) {

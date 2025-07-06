@@ -2,7 +2,7 @@
 
 [ext_resource type="Theme" uid="uid://dbwgna8gjqom8" path="res://assets/default_theme.tres" id="1_ieq0l"]
 [ext_resource type="Texture2D" uid="uid://bpcp8t666sgwn" path="res://assets/rplace_gold.png" id="2_bqd13"]
-[ext_resource type="Shader" path="res://shaders/ripple_warp.gdshader" id="2_kc0ms"]
+[ext_resource type="Shader" uid="uid://60gnac34vu25" path="res://shaders/ripple_warp.gdshader" id="2_kc0ms"]
 [ext_resource type="FontFile" uid="uid://vo3twycs6ve7" path="res://assets/reddit/reddit_sans_bold.woff2" id="3_bi7p0"]
 [ext_resource type="Texture2D" uid="uid://cmh7xdvmp2o16" path="res://assets/title/title.png" id="3_v3ctt"]
 [ext_resource type="PackedScene" uid="uid://cdn343nsbxvqi" path="res://assets/tube.glb" id="5_uxkte"]
@@ -91,7 +91,7 @@ tracks/5/keys = PackedFloat32Array(1.5, 1, 0, 0, 0, 1, 2.5, 1, -0.101737, -0.350
 
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_vlpi3"]
 _data = {
-"flying_objects": SubResource("Animation_fx23w")
+&"flying_objects": SubResource("Animation_fx23w")
 }
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_f4ula"]

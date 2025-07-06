@@ -9,7 +9,7 @@ using namespace std;
 using namespace godot;
 
 class End : public PhaseScene {
-	GDCLASS(End, PhaseScene);
+	GDCLASS(End, PhaseScene)
 
 private:
 	DirectionalLight3D* _sun_light;

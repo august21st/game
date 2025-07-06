@@ -12,7 +12,7 @@
 [ext_resource type="PackedScene" uid="uid://cqs3omeen5ext" path="res://assets/clouds_cone.glb" id="7_k73ar"]
 [ext_resource type="Texture2D" uid="uid://cmt1bh1b0hrie" path="res://assets/signpost/leap_of_faith.png" id="7_rss4r"]
 [ext_resource type="Material" uid="uid://bfjx4pf6sb5q0" path="res://assets/circular_vortex/circular_vortex.tres" id="7_td0np"]
-[ext_resource type="Shader" path="res://shaders/floor_lava.gdshader" id="8_5yos5"]
+[ext_resource type="Shader" uid="uid://f2tovp6b26g0" path="res://shaders/floor_lava.gdshader" id="8_5yos5"]
 [ext_resource type="PackedScene" uid="uid://xr8d7au3y4um" path="res://assets/distant_buildings/distant_buildings.glb" id="8_vgi18"]
 [ext_resource type="Texture2D" uid="uid://drt1pwrtbfnm4" path="res://assets/skybox/floor_lava.png" id="9_6v2eb"]
 [ext_resource type="PackedScene" uid="uid://b6u2gq168cs2c" path="res://assets/aeroplane/united_airlines_boeing_777.glb" id="10_6ytol"]
@@ -126,12 +126,14 @@ noise_type = 5
 
 [sub_resource type="NoiseTexture2D" id="NoiseTexture2D_ggyga"]
 generate_mipmaps = false
-seamless = true
 noise = SubResource("FastNoiseLite_uy34s")
+seamless = true
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_3sv73"]
 render_priority = 0
 shader = ExtResource("8_5yos5")
+shader_parameter/image_texture = ExtResource("9_6v2eb")
+shader_parameter/noise_texture = SubResource("NoiseTexture2D_ggyga")
 shader_parameter/speed = 0.01
 shader_parameter/disp = Vector2(0.89, 0.7)
 shader_parameter/uv_scale = Vector2(20, 20)
@@ -139,8 +141,6 @@ shader_parameter/noise_weight = 0.02
 shader_parameter/fade_radius = 0.5
 shader_parameter/fade_softness = 0.2
 shader_parameter/add_colour = Color(0.114749, 0.0809426, 0.0541049, 1)
-shader_parameter/image_texture = ExtResource("9_6v2eb")
-shader_parameter/noise_texture = SubResource("NoiseTexture2D_ggyga")
 
 [sub_resource type="PlaneMesh" id="PlaneMesh_db1we"]
 material = SubResource("ShaderMaterial_3sv73")
@@ -192,7 +192,7 @@ size = Vector2(8, 8)
 
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_f3ydx"]
 _data = {
-"roof_sky_animation": ExtResource("12_4kdpp")
+&"roof_sky_animation": ExtResource("12_4kdpp")
 }
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_m5eaq"]
@@ -1168,7 +1168,7 @@ draw_pass_1 = SubResource("QuadMesh_jspc6")
 [node name="SkyAnimationPlayer" type="AnimationPlayer" parent="."]
 unique_name_in_owner = true
 libraries = {
-"": SubResource("AnimationLibrary_f3ydx")
+&"": SubResource("AnimationLibrary_f3ydx")
 }
 
 [node name="AtaturkHead" parent="." instance=ExtResource("15_uuxt7")]

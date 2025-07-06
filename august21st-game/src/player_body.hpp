@@ -31,7 +31,7 @@ class Client;
 using namespace godot;
 
 class PlayerBody : public EntityPlayerBase {
-	GDCLASS(PlayerBody, CharacterBody3D);
+	GDCLASS(PlayerBody, CharacterBody3D)
 
 private:
 	ResourceLoader* _resource_loader;

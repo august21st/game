@@ -428,7 +428,7 @@ void Client::_process(double delta)
 						auto parent_scene_str = (string) packet.str();
 						auto parent_scene = String(parent_scene_str.c_str());
 
-						auto entity_node = read_entity_data(packet);
+						auto entity_node = read_scene_data(packet);
 						if (entity_node == nullptr) {
 							UtilityFunctions::printerr("Failed to create entity ", id, ": failed to decode entity data");
 							UtilityFunctions::printerr("Dumping entity info packet after reading ", i, " entities: BufReader state is corrupted");
@@ -560,7 +560,7 @@ void Client::_process(double delta)
 					for (auto i = 0; i < property_count; i++) {
 						auto property_str = (string) packet.str();
 						auto property = String(property_str.c_str());
-						auto value = read_compressed_variant(packet);
+						auto value = read_variant(packet);
 						entity->set(property, value);
 					}
 					break;

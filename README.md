@@ -32,8 +32,8 @@ This should automatically output the compiled library to `august21st-game/projec
    scons debug_symbols=yes
    ```
 
-5. **Run with Godot 4.3:**
-The project requires and must be run with the Godot 4.3 editor (non-mono edition).
+5. **Run with Godot 4.5:**
+The project requires and must be run with the Godot 4.5 editor (mono edition not required).
 This version will dynamically link and make use of the compiled C++ module when the project is run.
 
 6. **Building for Web:**
@@ -52,7 +52,7 @@ installed. To install the scons-contrib package, run `python -m pip install --us
 or see https://github.com/SCons/scons-contrib/tree/master for more information.
 
 ### Additional notes:
-- Ensure you have the Godot 4.3 editor installed and available in your PATH.
+- Ensure you have the Godot 4.5 editor installed and available in your PATH.
 - For building web without threads, make sure to compile extensions using the
  threads=no parameter, reference https://github.com/godotengine/godot/issues/94537.
 

@@ -37,6 +37,7 @@
 #include "entity_player.hpp"
 #include "entity_info.hpp"
 #include "packet_info.hpp"
+#include "server_camera.hpp"
 #include "roof.hpp"
 #include "end.hpp"
 
@@ -55,8 +56,7 @@ Server::Server() :
 	_display_server(nullptr),
 	_resource_loader(nullptr),
 	_time(nullptr),
-	_server_camera(nullptr),
-	_server_scene(nullptr),
+	_server_scenes_container(nullptr),
 	_incoming_packets_list(nullptr),
 	_incoming_packets_filter(nullptr),
 	_incoming_packets_filter_clear(nullptr),
@@ -158,6 +158,7 @@ void Server::_ready()
 	// Initialise scenes
 	UtilityFunctions::print("Loading phase scenes...");
 	_resource_loader = ResourceLoader::get_singleton();
+	_server_scenes = { };
 	_phase_scenes = { };
 	auto intro_err = register_phase_scene("rplace/intro", "res://scenes/rplace/intro.tscn");
 	if (intro_err != godot::Error::OK) {
@@ -181,8 +182,7 @@ void Server::_ready()
 	// Initialise GUI
 	// TODO: Only initialise in non-headless graphical mode
 	_display_server = DisplayServer::get_singleton();
-	_server_camera = get_node<Camera3D>("%ServerCamera");
-	_server_scene = get_node<Node3D>("%ServerScene");
+	_server_scenes_container = get_node<Node3D>("%ServerScenesContainer");
 	_incoming_packets_logging = false;
 	_incoming_packets = {};
 	_incoming_packets_list = get_node<ItemList>("%IncomingPacketsList");
@@ -431,6 +431,9 @@ void Server::_physics_process(double delta)
 
 	// Query new world state & run game loop
 	_entities_lock->lock();
+	// TODO: A node similar to godot's MultiplayerSynchroniser could be used to
+	// track changes in entities and send updates only when necessary such that not
+	// all objects have to derive from Entity
 	for (auto &[id, entity_info] : _entities) {
 		auto update_packet = BufWriter();
 		update_packet.u8(to_uint8(ServerPacket::UPDATE_ENTITY));
@@ -442,7 +445,7 @@ void Server::_physics_process(double delta)
 				auto property_utf8 = property.utf8().get_data();
 				update_packet.str(property_utf8);
 				auto value = entity_info->get_property_value(property);
-				write_compressed_variant(value, update_packet);
+				write_variant(value, update_packet);
 			}
 		}
 		send_to_players(update_packet);
@@ -592,7 +595,7 @@ EntityInfo* Server::create_entity(String node_path, String parent_scene)
 	auto parent_scene_str = parent_scene.utf8().get_data();
 	entity_info_packet.str(parent_scene_str); // parent_scene
 	// Write node data (node scene) - ObjectType::FILESYSTEM_NODE
-	write_entity_data(node_path, entity_info_packet); // entity data
+	write_scene_data(node_path, entity_info_packet); // entity data
 
 	send_to_players(entity_info_packet);
 	return info;
@@ -634,7 +637,7 @@ EntityInfo* Server::register_entity(Node* entity, String parent_scene)
 	auto parent_scene_str = parent_scene.utf8().get_data();
 	entity_info_packet.str(parent_scene_str); // parent_scene
 	// Write node data (properties, children) - ObjectType::INLINE_NODE
-	write_entity_data(entity, entity_info_packet); // entity data
+	write_scene_data(entity, entity_info_packet); // entity data
 
 	send_to_players(entity_info_packet);
 	return info;
@@ -657,7 +660,8 @@ void Server::run_console_loop()
 	ReplIO repl;
 	while (interface(repl,
 		func(pack(this, &Server::repl_set_phase), "set_phase", "Set the game phase to the specified stage",
-			param("name", "String name of phase")),
+			param("name", "String name of phase"),
+			param("unload_previous", "Unload previous phase"), false),
 		func(pack(this, &Server::repl_create_entity), "create_entity", "Create a new entity of specified type",
 			param("node_path", "Path to scene containing entity node"),
 			param("parent_scene", "Identifier name of phase scene containing entity")),
@@ -686,57 +690,89 @@ void Server::run_console_loop()
 	get_tree()->quit(0);
 }
 
-void Server::repl_set_phase(string name)
+void Server::repl_set_phase(string name, bool unload_previous)
 {
-	call_deferred("set_phase", String(name.c_str()));
+	call_deferred("set_phase", String(name.c_str()), unload_previous);
 }
 
-void Server::set_phase(String name)
+void Server::set_phase(String name, bool unload_previous)
 {
 	auto phase_parts = name.split(":");
 	auto phase_scene = phase_parts.size() > 0 ? phase_parts[0] : "";
 	auto phase_event = phase_parts.size() > 1 ? phase_parts[1] : "";
-	if (phase_scene == "" || !_phase_scenes.has(phase_scene)) {
+	if (phase_scene.is_empty() || !_phase_scenes.has(phase_scene)) {
 		UtilityFunctions::printerr("Couldn't set phase to ", name, ": Phase scene not found");
 		return;
 	}
 
-	// Update current phase scene and event
+	// ServerScenesContainer (Node3D)
+	// ├── Phase1_Viewport (Viewport)
+	// │   ├── ServerCamera
+	// │   └── [SceneInstance] (Loaded Phase Scene)
+	// ├── Phase2_Viewport (Viewport)
+	// │   ├── ServerCamera
+	// │   └── [SceneInstance] (Loaded Phase Scene)
+	// └── ...
+
+
 	_current_phase_scene = phase_scene;
 	_current_phase_event = phase_event;
 
-	// If multiple scenes are present, they will overlap physics and cause chaos -
-	// only one scene can be in tree at a time to prevent interference
 	for (auto &[identifier, scene_node] : _phase_scenes) {
 		auto identifier_parts = identifier.split(":");
 		auto identifier_scene = identifier_parts.size() > 0 ? identifier_parts[0] : "";
+
+		// If current scene
 		if (identifier_scene == phase_scene) {
-			if (scene_node->get_parent() != _server_scene) {
-				// current scene
-				_server_scene->add_child(scene_node);
-			}
-			if (_server_camera != nullptr) {
-				_server_camera->set_position(Vector3(0, 0, 0));
-				_server_camera->set_current(true);
+			if (!scene_node->is_inside_tree()) {
+				// Create isolated viewport for this scene
+				Viewport* viewport = memnew(Viewport);
+
+				// Create server camera for this scene
+				ServerCamera* camera = memnew(ServerCamera);
+				camera->set_current(true);
+				camera->set_transform(Transform3D(Basis(), Vector3(0, 0, 0)));
+				viewport->add_child(camera);
+
+				// Add scene to viewport
+				viewport->add_child(scene_node);
+
+				// Add viewport to server scenes & scene
+				_server_scenes_container->add_child(viewport);
+				_server_scenes.insert(phase_scene, viewport);
 			}
 		}
-		else {
-			// Other scene
-			_server_scene->remove_child(scene_node);
+		else if (unload_others) {
+			if (scene_node->is_inside_tree()) {
+				Viewport* viewport = _server_scenes.get(phase_scene);
+				if (viewport && viewport->is_inside_tree()) {
+					// Orphan scene
+					viewport->remove_child(scene_node);
+
+					// Delete viewport
+					_server_scenes_container->remove_child(viewport);
+					_server_scenes.erase(phase_scene);
+					viewport->queue_free();
+				}
+			}
 		}
 	}
 
-	// Run phase event on server replication scenes
+	// Handle phase-specific logic
 	if (phase_scene == "rplace/roof") {
-		auto roof_scene = (Roof*) _phase_scenes["rplace/roof"];
+		auto container = _phase_scenes["rplace/roof"];
+		auto viewport = Object::cast_to<Viewport>(container->get_child(0));
+		auto roof_scene = Object::cast_to<Roof>(viewport->get_child(0));
 		roof_scene->call_deferred("run_phase_event", phase_event);
 	}
 	else if (phase_scene == "rplace/end") {
-		auto end_scene = (End*) _phase_scenes["rplace/end"];
+		auto container = _phase_scenes["rplace/end"];
+		auto viewport = Object::cast_to<Viewport>(container->get_child(0));
+		auto end_scene = Object::cast_to<End>(viewport->get_child(0));
 		end_scene->call_deferred("run_phase_event", phase_event);
 	}
 
-	// Start phase event on clients
+	// Notify clients
 	auto phase_packet = BufWriter();
 	phase_packet.u8(to_uint8(ServerPacket::SET_PHASE));
 	auto name_str = name.utf8().get_data();
@@ -745,7 +781,6 @@ void Server::set_phase(String name)
 
 	// Move all players to new scene
 	for (auto &[id, player_info] : _authenticated_clients) {
-		// TODO: Determine phase scene spawn point
 		player_info->get_entity()->respawn(name, Vector3(0, 0, 0));
 	}
 }

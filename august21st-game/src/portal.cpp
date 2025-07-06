@@ -37,6 +37,7 @@
 
 #include "portal.hpp"
 #include "client.hpp"
+#include "godot_cpp/core/math_defs.hpp"
 #include "node_shared.hpp"
 
 using namespace NodeShared;
@@ -397,6 +398,9 @@ void Portal::create_viewport()
 	_seconds_until_resize = 0;
 }
 
+// HACK: Temporary redefinition workaround for changing API between godot 4.4-4.5
+inline constexpr double Math_NaN = std::numeric_limits<double>::quiet_NaN();
+
 void Portal::_process(double delta)
 {
 	// Try catch changes to the main camera if it is still null / was unset
@@ -431,11 +435,13 @@ void Portal::_process(double delta)
 		create_viewport();
 	}
 
+
+
 	// Throttle the viewport resizing for better performance
 	if (!Math::is_nan(_seconds_until_resize)) {
 		_seconds_until_resize -= delta;
 		if (_seconds_until_resize <= 0) {
-			_seconds_until_resize = Math_NAN;
+			_seconds_until_resize = Math_NaN;
 
 			auto viewport_size = get_viewport()->get_visible_rect().size;
 			if (_viewport_vertical_resolution == -1) {

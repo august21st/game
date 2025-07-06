@@ -12,6 +12,7 @@
 #include <godot_cpp/classes/world_environment.hpp>
 
 #include "end.hpp"
+#include "entity_item_base.hpp"
 #include "entity_player_base.hpp"
 #include "node_shared.hpp"
 
@@ -71,11 +72,32 @@ void End::spawn_player(EntityPlayerBase* player)
 
 void End::run_phase_event(String phase_event)
 {
+	// Register ourselves as an entity automatically
+	auto game_root = get_game_root(this);
+	if (game_root == nullptr) {
+		UtilityFunctions::printerr("Couldn't run phase event: game root was null");
+		return;
+	}
+
 	if (phase_event == "intro") {
 		return;
 	}
 
 	if (phase_event == "sandbox") {
+		if (game_root->is_server()) {
+			auto server = (Server*) game_root;
+			// DEBUG: Serverside test entity spawning, TODO: Remove this!
+			Node* chair_gun = nullptr;
+			load_scene("res://scenes/item_chair_gun.tscn", &chair_gun);
+			auto info = server->register_entity(chair_gun, server->get_current_phase_scene());
+			if (info != nullptr) {
+				info->track_property("position");
+				info->track_property("rotation");
+			}
+			auto entity = Object::cast_to<Node3D>(info->get_entity());
+			add_child(entity);
+			entity->set_position(Vector3(0, 100, 0));
+		}
 		return;
 	}
 }
