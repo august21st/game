@@ -661,7 +661,7 @@ void Server::run_console_loop()
 	while (interface(repl,
 		func(pack(this, &Server::repl_set_phase), "set_phase", "Set the game phase to the specified stage",
 			param("name", "String name of phase"),
-			param("unload_previous", "Unload previous phase"), false),
+			param("unload_previous", "Unload previous phase")),
 		func(pack(this, &Server::repl_create_entity), "create_entity", "Create a new entity of specified type",
 			param("node_path", "Path to scene containing entity node"),
 			param("parent_scene", "Identifier name of phase scene containing entity")),
@@ -690,9 +690,10 @@ void Server::run_console_loop()
 	get_tree()->quit(0);
 }
 
-void Server::repl_set_phase(string name, bool unload_previous)
+void Server::repl_set_phase(string name, string unload_previous)
 {
-	call_deferred("set_phase", String(name.c_str()), unload_previous);
+	bool unload_previous_bool = unload_previous == "true";
+	call_deferred("set_phase", String(name.c_str()), unload_previous_bool);
 }
 
 void Server::set_phase(String name, bool unload_previous)
@@ -742,7 +743,7 @@ void Server::set_phase(String name, bool unload_previous)
 				_server_scenes.insert(phase_scene, viewport);
 			}
 		}
-		else if (unload_others) {
+		else if (unload_previous) {
 			if (scene_node->is_inside_tree()) {
 				Viewport* viewport = _server_scenes.get(phase_scene);
 				if (viewport && viewport->is_inside_tree()) {

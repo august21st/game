@@ -34,10 +34,10 @@
 #include <godot_cpp/classes/scene_tree.hpp>
 #include <godot_cpp/classes/window.hpp>
 #include <godot_cpp/classes/area3d.hpp>
+#include <godot_cpp/core/math_defs.hpp>
 
 #include "portal.hpp"
 #include "client.hpp"
-#include "godot_cpp/core/math_defs.hpp"
 #include "node_shared.hpp"
 
 using namespace NodeShared;

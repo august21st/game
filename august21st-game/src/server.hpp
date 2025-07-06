@@ -124,7 +124,7 @@ public:
 	// thread safe
 	EntityInfo* create_entity(String node_path, String parent_scene);
 	EntityInfo* get_entity(int id);
-	void repl_set_phase(string name, bool unload_previous);
+	void repl_set_phase(string name, string unload_previous);
 	void set_phase(String name, bool unload_previous = false);
 	void repl_update_entity(int id, string property, string value);
 	void delete_entity(int id);

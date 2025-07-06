@@ -6,7 +6,7 @@ Sources for rplace.live 'august 21st' event game.
 1. **Clone the Project:**
 Make sure to clone this project with the --recursive flag to include the godot-cpp submodule:
    ```bash
-   git clone --recursive https://github.com/august21st/game
+   git clone --recursive https://github.com/august21st/game august21st-game
    ```
 
 2. **Install SCons:**
